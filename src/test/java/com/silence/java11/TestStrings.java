@@ -1,5 +1,6 @@
 package com.silence.java11;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -24,4 +25,8 @@ public class TestStrings {
 		assertEquals("testtest", "test".repeat(2));
 	}
 	
+	@Test
+	public void testLines(){
+		assertArrayEquals(new String[]{"1","2","3"}, "1\n2\n3\n".lines().toArray());
+	}
 }
