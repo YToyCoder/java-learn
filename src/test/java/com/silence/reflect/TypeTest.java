@@ -2,6 +2,7 @@ package com.silence.reflect;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -119,5 +120,12 @@ public class TypeTest {
 			class Inclass{}
 			val = new Inclass();
 		}
+	}
+
+	@Test
+	public void getDeclaringClass(){
+		Class<?> cls = new EnclosingConstructor().getClass();
+		Class<?> declare = cls.getDeclaringClass();
+		assertNotNull(declare);
 	}
 }

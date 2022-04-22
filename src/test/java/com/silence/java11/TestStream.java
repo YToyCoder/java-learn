@@ -21,6 +21,7 @@ public class TestStream {
 		List<Integer> list = Stream.of(1, 2, 3)
 				.dropWhile(n -> n > 2)
 				.collect(Collectors.toList());
-		System.out.println(list);
+		// [1, 2, 3]
+		// System.out.println(list);
 	}
 }

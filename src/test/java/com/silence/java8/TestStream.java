@@ -5,14 +5,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,9 +106,13 @@ public class TestStream {
 				new Person("fly", 1), new Person("rich", 1));
 		Supplier<Stream<Person>> supplier = () -> people.stream();
 		Map<Integer, List<Person>> ageGroup = supplier.get().collect(Collectors.groupingBy(each -> each.age));
-		ageGroup.entrySet().stream().map(entry -> {
-			return String.format("age %d : %s", entry.getKey(), entry.getValue());
-		}).forEach(each -> System.out.println(each));
+		// ageGroup.entrySet().stream().map(entry -> {
+		// 	return String.format("age %d : %s", entry.getKey(), entry.getValue());
+		// }).forEach(each -> System.out.println(each);
+
+		// age 1 : [fly, rich]
+		// age 10 : [tom, tony]
+		// age 11 : [cat, lono]
 	}
 
 	@Test
@@ -134,7 +135,8 @@ public class TestStream {
 		String str = people.stream()
 				.map(person -> person.name)
 				.collect(Collectors.joining(",", "prefix -> ", " <- tail"));
-		System.out.println(str);
+		// System.out.println(str);
+		//prefix -> tom,tony,cat,lono,fly,rich <- tail
 	}
 
 }

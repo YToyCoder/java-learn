@@ -28,7 +28,8 @@ public class TestCollections {
 	@Test
 	public void testMapOf(){
 		Map<Integer, String> map = Map.of(1,"hello", 2, "name");
-		System.out.println(map.toString());
+		//{2=name, 1=hello}
+		// System.out.println(map.toString());
 	}
 
 }
