@@ -127,5 +127,8 @@ public class TypeTest {
 		Class<?> cls = new EnclosingConstructor().getClass();
 		Class<?> declare = cls.getDeclaringClass();
 		assertNotNull(declare);
+		assertEquals(this.getClass(), declare);
+		Class<?> thcls = this.getClass();
+		assertNull(thcls.getDeclaringClass());
 	}
 }
