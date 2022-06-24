@@ -1,4 +1,4 @@
-package com.silence.ObserverPattern;
+package com.silence.DesignPattern.ObserverPattern;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

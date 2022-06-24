@@ -1,7 +1,10 @@
-package com.silence.ObserverPattern;
+package com.silence.DesignPattern.ObserverPattern;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.silence.ObserverPattern.Observer;
+import com.silence.ObserverPattern.Subject;
 
 public class Person implements Observer{
 	private int status = 0;
