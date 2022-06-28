@@ -25,6 +25,22 @@
       <version>4.13</version>
       <scope>test</scope>
     </dependency>
+    <!-- <dependency> -->
+    <!--   <groupId>org.apache.commons</groupId> -->
+    <!--   <artifactId>commons-collections4</artifactId> -->
+    <!--   <version>4.4</version> -->
+    <!-- </dependency> -->
+    <dependency>
+      <groupId>org.eclipse.collections</groupId>
+      <artifactId>eclipse-collections-api</artifactId>
+      <version>11.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.collections</groupId>
+      <artifactId>eclipse-collections</artifactId>
+      <version>11.0.0</version>
+    </dependency>
   </dependencies>
 
   <build>
