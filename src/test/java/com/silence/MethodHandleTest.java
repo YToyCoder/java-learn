@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +53,33 @@ public class MethodHandleTest {
 
   public static void func(){
     System.out.println(String.format("call %s#%s", MethodHandleTest.class.getName(), "func()V"));
+  }
+
+
+  /**
+   * hack the jdk.internal.reflect.Reflection#getCallerClass()
+   */
+  @Test
+  public void getReflection(){
+    final String reflection = "jdk.internal.reflect.Reflection";
+    try {
+      final Class<?> cls = Class.forName(reflection);
+      // final MethodHandles.Lookup lookup = MethodHandles.lookup();
+      // final MethodHandle methodHandle = lookup.findStatic(cls, "getCallerClass", MethodType.methodType(Class.class));
+      // final Object calledClass = methodHandle.invoke();
+      // assertEquals(this.getClass(), calledClass);
+      final Method method = cls.getMethod("getCallerClass");
+      method.setAccessible(true);
+      assertEquals(this.getClass(), method.invoke(null));
+    } catch (ClassNotFoundException e) {
+      log.error(String.format("could't get %s", reflection), e);
+    } catch (NoSuchMethodException e) {
+      log.error("不存在该方法", e);
+    } catch (IllegalAccessException e) {
+      log.error("没有访问权限", e);
+    } catch (Throwable e) {
+      log.error("方法抛出错误", e);
+    }
   }
 
   public static class InnerClass {
