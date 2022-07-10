@@ -5,6 +5,22 @@ java语言测试
 使用junit测试
 
 
+### 1 設計模式(design pattern)
+
+三類設計模式:
+
+- 创建型模式: 工厂模式、单例模式、抽象工厂模式、建造者模式、原型模式
+
+- 结果型模式: 装饰器模式、适配器模式、代理模式、桥接模式、组合模式、外观模式、享元模式
+
+- 行为型模式: 责任链模式、观察者模式、访问者模式、模板方法模式、命令模式、迭代器模式、中介者模式、备忘录模式、解释器模式、状态模式、策略模式
+
+> reference: 
+
+> https://refactoringguru.cn/design-patterns
+
+> https://github.com/youlookwhat/DesignPattern
+
 ### MethodHandle
 
 java.lang.invoke 包提供一种动态调用的方法, 称为方法句柄(MethodHandle)。可以通过`java.lang.invoke.MethodHandles`的`lookup`创建一个`MethodHandles.Lookup`, 该类可以获取对应类的方法句柄。
