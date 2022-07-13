@@ -150,7 +150,7 @@ public class Singletons {
 
 > https://github.com/youlookwhat/DesignPattern
 
-> [菜鸟模式](https://www.runoob.com/design-pattern/design-pattern-tutorial.html)
+> [菜鸟教程](https://www.runoob.com/design-pattern/design-pattern-tutorial.html)
 
 ### 2 MethodHandle
 
