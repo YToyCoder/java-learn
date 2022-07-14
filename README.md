@@ -144,6 +144,14 @@ public class Singletons {
 }
 ```
 
+*装饰器模式*
+
+对于面向对象语言来说，当你想更改一个类型的对象的行为时可以通过继承来覆盖原有的方法。
+
+但是继承可能引发几个严重的问题。
+
+1. 
+
 > reference: 
 
 > https://refactoringguru.cn/design-patterns
@@ -213,3 +221,37 @@ Java将引用分为`强引用`、`软引用`、`弱引用`、`虚引用`.
 > reference :
 
 > 《深入理解java虚拟机》周志明
+
+### 5 AutoCloseable
+
+java 1.7 之后实现了AutoCloseable的对象可以通过try - with - resources 语法实现自动关闭资源
+
+例如:
+
+```java
+// AutoCloseableObj.java
+public class AutoCloseableObj implements AutoCloseable{
+
+  @Override
+  public void close() throws Exception {
+    System.out.println("auto closing ....");
+  }
+  
+}
+
+// AutoCloseTest
+public class AutoCloseTest {
+
+  @Test
+  public void test() {
+    try (var obj = new AutoCloseableObj()){
+    }catch(Exception e){
+    }
+  }
+}
+
+/**
+ * 最后会打印: auto closing ....
+ */
+
+```
