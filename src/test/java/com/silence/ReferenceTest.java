@@ -1,57 +1,34 @@
 package com.silence;
 
 import java.lang.ref.WeakReference;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.Test;
+
 public class ReferenceTest {
-  private Integer strong;
-  private WeakReference<Integer> weak;
-  private static ReferenceTest selfSave;
 
-  public ReferenceTest(){
-  }
+  static Logger log = LogManager.getLogger(ReferenceTest.class);
 
-  public ReferenceTest(Integer strong, WeakReference<Integer> weak){
-    this.strong = strong;
-    this.weak = weak;
-  }
-
+  @Test
   public void test(){
-    System.out.println("before exit code block");
-    System.out.println("before gc");
-    if(Objects.nonNull(weak)) 
-      System.out.println(
-        weak.get()
-      );
-    System.out.println(strong);
+    System.out.println("start creating reference ...");
+    WeakReference<Object> weakReference = new WeakReference<Object>(new Object());
+    Object strongReference = new Object();
+    System.out.println("ending creating reference");
+    System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+    System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
+    System.out.println("starting call gc");
     System.gc();
-    System.out.println("after gc");
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+      log.error("sleep error", e);
+    }
+    System.out.println("gc finish");
+    System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+    System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
   }
 
-  public static void main(String[] args) {
-    var ref = new ReferenceTest();
-    {
-      Integer b = 10;
-      Integer c = 20;
-      WeakReference<Integer> a = new WeakReference<Integer>(c);
-      c = null;
-      ref.strong = b;
-      ref.weak = a;
-    }
-    ref.test();
-    System.out.println("before exit code block");
-    System.out.println("before gc");
-    System.gc();
-    System.out.println("after gc");
-    ref.test();
-  }
-
-  public static void run(int time,ReferenceTest run){
-    var start = LocalDateTime.now();
-    var end = start.plusMinutes(time);
-    while(LocalDateTime.now().isBefore(end)){
-      run.test();
-    }
-  }
 }

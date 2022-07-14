@@ -216,7 +216,51 @@ Java将引用分为`强引用`、`软引用`、`弱引用`、`虚引用`.
 
 - 弱引用是用来描述那些非必要的对象，它的强度比软引用更弱一些。如果垃圾收集器在某个时间点上确定一个对象是若可达(只存在弱引用)，垃圾回收器就会回收该对象。
 
+```java
+
+@Test
+public void test(){
+  System.out.println("start creating reference ...");
+  WeakReference<Object> weakReference = new WeakReference<Object>(new Object());
+  Object strongReference = new Object();
+  System.out.println("ending creating reference");
+  System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+  System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
+  System.out.println("starting call gc");
+  System.gc();
+  try {
+    Thread.sleep(100);
+  } catch (InterruptedException e) {
+    log.error("sleep error", e);
+  }
+  System.out.println("gc finish");
+  System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+  System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
+}
+
+```
+
+*运行打印结果*:
+
+> start creating reference ...
+
+> ending creating reference
+
+> weak-reference is null ? false
+
+> strong-reference is null ? false
+
+> starting call gc
+
+> gc finish
+
+> weak-reference is null ? true
+
+> strong-reference is null ? false
+
+
 - 虚引用也称为"幽灵引用"或者"幻影引用"，它是一个最弱的一种引用关系。一个对象是否存在虚引用完全不会对其生存时间构成影响，也无法通过虚引用来获取一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被回收到时收到一个系统通知。
+
 
 > reference :
 
