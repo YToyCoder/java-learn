@@ -258,6 +258,77 @@ public void test(){
 
 > strong-reference is null ? false
 
+**WeakHashMap**
+
+基于哈希表的Map接口的实现，具有弱键 。 WeakHashMap的条目在其密钥不再正常使用时将自动删除。 更确切地说，给定密钥的映射的存在不会阻止密钥被垃圾收集器丢弃，即，可以最终化，最终化，然后回收。 当一个键被丢弃时，它的条目将被有效地从地图中删除，因此该类的行为与其他Map实现略有不同。
+
+WeakHashMap的弱键特性利用了`WeakReference`的特性，`WeakHashMap`的`Entry`的实现是继承了`WeakReference`的。WeakHashMap的Entry的弱引用是`K`，也就是HashMap里面键值对的键。因此如果WeakHashMap里面的某一个`K`不存在任何强引用时对应的K就会被回收.
+
+*那么WeakHashMap是如何实现除了key以外整个Entry对象从HashMap删除的呢?*
+
+在WeakHashMap里有一个函数叫`expungeStaleEntries`
+
+```java
+// WeakHashMap#expungeStaleEntries
+/**
+ * Expunges stale entries from the table.
+ */
+private void expungeStaleEntries() {
+  for (Object x; (x = queue.poll()) != null; ) {
+    synchronized (queue) {
+      @SuppressWarnings("unchecked")
+        Entry<K,V> e = (Entry<K,V>) x;
+      int i = indexFor(e.hash, table.length);
+
+      Entry<K,V> prev = table[i];
+      Entry<K,V> p = prev;
+      while (p != null) {
+        Entry<K,V> next = p.next;
+        if (p == e) {
+          if (prev == e)
+            table[i] = next;
+          else
+            prev.next = next;
+          // Must not null out e.next;
+          // stale entries may be in use by a HashIterator
+          e.value = null; // Help GC
+          size--;
+          break;
+        }
+        prev = p;
+        p = next;
+      }
+    }
+  }
+}
+```
+
+该函数会去遍历一个`ReferenceQueue`检查所有被回收的`WeakReferece`也就是被回收Key对应的Entry，然后将该Entry回收。
+而该函数会在调用`WeakHashMap`的总体信息的函数时被调用，如: `size`,`getTable`。
+
+```java
+/**
+ * Returns the table after first expunging stale entries.
+ */
+private Entry<K,V>[] getTable() {
+  expungeStaleEntries();
+  return table;
+}
+
+/**
+  * Returns the number of key-value mappings in this map.
+  * This result is a snapshot, and may not reflect unprocessed
+  * entries that will be removed before next attempted access
+  * because they are no longer referenced.
+  */
+public int size() {
+  if (size == 0)
+      return 0;
+  expungeStaleEntries();
+  return size;
+}
+```
+
 
 - 虚引用也称为"幽灵引用"或者"幻影引用"，它是一个最弱的一种引用关系。一个对象是否存在虚引用完全不会对其生存时间构成影响，也无法通过虚引用来获取一个对象实例。为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被回收到时收到一个系统通知。
 
