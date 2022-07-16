@@ -485,3 +485,46 @@ System.out.println();
 局部类(local class):
 定义在函数内部的类，局部类的函数只能引用final修饰的或功能类似于final的变量。
 匿名类(anonymous class):
+
+### 11 Java可变参数(Varargs)
+
+### 5 Java可变参数(Varargs)
+
+java可变参数是指那些定义在函数参数中，类型确定但是长度可变的参数，对于这样的参数可以传值也可以不传值，参考如下：
+
+```java
+
+public class VarargsTest {
+  public void testVarargs(String ...args) {
+    if(args.length == 0) {
+      System.out.println("args is empty");
+    }else {
+      System.out.printf("args length is %d\n", args.length);
+    }
+  }
+  
+  public void test() {
+    testVarargs();
+    testVarargs("1", "2");
+  }
+}
+
+```
+
+Java 最后将可变长度的参数封装成为一个数组。数组元素的类型就是可变长度参数的类型（即…之前的类型，在上面的例子中就是 int），数组的名称是参数名称（在上面的例子中是 nums）。
+
+*使用限制*
+
+1. 变长参数必须是方法中的最后一个参数，避免无法区分变长参数和普通参数；
+
+2. 一个方法不能定义多个变长参数，避免参数错位
+
+3. 变长参数位置如果被同等类型数组替代，不能构成重载，因为本质上是一个方法。
+
+```java
+public static void fun(int ...nums){}
+
+public static void fun(int[] nums){}
+```
+
+上面的两个方法实际是一个方法，在同一个类中不能通过编译。
