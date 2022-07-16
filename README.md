@@ -597,3 +597,13 @@ Class intCls = int.class;
 | Method[] getMethods() | 返回 `Method` 数组，包含所有 `public` 方法，**继承**、**声明**皆可 |
 | Method getDeclaredMethod(String name, `Class[]` parameterTypes) | 返回表示 **自身声明** 的方法的 `Method` 对象 |
 | Method[] getDeclaredMethods() | 返回 Method 数组，表示该类 **声明** 的所有方法，包括 `public`/`private`/`protected`/`package` 方法 |
+
+对于原始类型、数组、接口，Java 通过引入 `Class` 对象（`Class` 对象就是普通类）来表示，这些 `Class` 对象与普通 `Class` 对象相比有很多 **局限性***，比如无法创建原始类型、接口的实例，但它们对于自省而言非常重要，`Class` 中支持 **类型表示** 的方法如下表所示：
+
+| 方法  | 说明  |
+| --- | --- |
+| String getName() | 返回 `Class` 对象的 **全限定名** |
+| Class getComponentType() | 若调用方法的 `Class` 对象代表数组，则返回 **数组元素** 的类型 |
+| boolean isArray() | 如果调用方法的 `Class` 对象代表数组，则为 `true` |
+| boolean isInterface() | 如果调用方法的 `Class` 对象代表接口，则为 `true` |
+| boolean isPrimitive() | 如果调用方法的 `Class` 对象代表原始类型，则为 `true` |
