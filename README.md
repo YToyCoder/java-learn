@@ -441,3 +441,28 @@ for-in 循环语句是Java 1.5的新特征之一，在遍历数组、集合方�
 for-in适用于数组和任何**Collection**对象。(`for-in`语句适用于数组或者其它任何**Iterable**)
 
 *参考: onJava*
+
+### 9 Collections.shuffle
+
+打乱列表元素
+
+```java
+
+List<Integer> list = Stream.generate(new Supplier<Integer>() {
+  Random random = new Random();
+  @Override
+  public Integer get() {
+    return random.nextInt();
+  }
+})
+.limit(10)
+.collect(Collectors.toList());
+list.forEach(el -> System.out.printf("%d ", el));
+System.out.println();
+Collections.shuffle(list);
+list.forEach(el -> System.out.printf("%d ", el));
+System.out.println();
+// 944377481 -720786430 702573091 1299273027 885662345 1287353883 382365354 -1409717507 -1455871407 -1702050819
+// 702573091 1299273027 -720786430 -1409717507 382365354 885662345 1287353883 944377481 -1702050819 -1455871407
+
+```
