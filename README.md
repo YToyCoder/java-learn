@@ -488,8 +488,6 @@ System.out.println();
 
 ### 11 Java可变参数(Varargs)
 
-### 5 Java可变参数(Varargs)
-
 java可变参数是指那些定义在函数参数中，类型确定但是长度可变的参数，对于这样的参数可以传值也可以不传值，参考如下：
 
 ```java
@@ -528,3 +526,74 @@ public static void fun(int[] nums){}
 ```
 
 上面的两个方法实际是一个方法，在同一个类中不能通过编译。
+
+
+### Reflection(反射)
+
+**java-in-action**
+
+> 反射是运行时程序能够检测自身及其运行环境，并根据检测结果改变其行为的能力。
+>
+> 要实施这种自检，程序需要一种表示自身的形式。我们称这种信息为元数据。在面向对象的世界里，元数据被组织为对象，成为元对象，元对象的运行时自检被称为内省。
+>
+> 正如前面例子所示，内省之后，紧跟着是行为的改变。通常反射 API 可以使用 3 种技术改变程序的行为：
+>
+> 直接修改原对象
+> 通过元对象做一些操作（比如动态方法调用）
+> 调解，在程序运行的许多阶段，代码被禁止调解。
+> Java 提供了丰富的对于元数据的操作，仅提供有限的重要调解能力。并且，Java 通过完全禁止直接修改元数据避免了很多复杂性。
+>
+> 这些反射特性可以让程序非常灵活。使用反射的应用对于变化的需求更容易适应。反射组件在其他应用中更容易复用，这些好处在现代 Java 中触手可及。
+> 
+> <p align="right"> ——《 java in action 》</p>
+
+*自省*
+
+> 自省是指一种可以让程序检查自身的反射特性.
+
+*元对象*
+> 我们称可以作为程序自我表示的对象为**元对象***（metaobjects），`meta` 是一个英文前缀，通常表示关于或超越，在这里，`metaobjects` 是持有关于程序的信息的对象。
+
+**开始使用反射**
+
+java对象可以通过`getClass`方法获取`java.lang.Class`对象.
+
+```java
+Class cls = obj.getClass();
+```
+
+`getClass` 方法可以在运行时查询对象的类型，该方法经常用在反射程序的最开始，因为很多反射任务都需要查询对象的类型，`getClass` 方法定义在 `java.lang.Object` 对象中，所以任何 Java 对象都可以调用 `getClass` 方法。
+
+`getClass` 方法返回 `java.lang.Class` 对象的一个实例，`Class` 对象的实例是 Java 中的**元对象**，我们使用 **类对象**（`class object`）来称呼 `java.lang.Class` 对象的实例。类对象是 Java 中最重要的元对象，因为所有 Java 程序都是由类组成的。
+
+类对象提供关于类的域、方法、构造器、嵌套类等的元数据，还提供了关于继承层次的信息。
+
+
+**获取通过反射获取类的方法**
+
+```java
+Method method = cls.getMethod("methodName", /** 方法参数类型 */new Class[]{void.class})
+```
+
+`Class.getMethod`可以根据方法名称和方法的参数类型获取类里的对应的方法。第一个参数是要查询的方法名字，第二个参数是**类对象数组**（`an array of class objects`）。第二个参数所代表的列表的第一个实例是该方法的返回值，后面的元素是该方法的入参类型。
+
+**获取`java.lang.Class`**
+
+- `getClass` 方法：适用已知对象，获取对象的类对象。
+- `.class` 类型字面值：适用于 **仅知道类型名**，获取该类型名的类对象。
+
+任何 **类名** 后加 `.class` 都会得到一个类对象
+
+```java
+Class strCls = String.class;
+Class intCls = int.class;
+```
+
+**获取对象方法**
+
+| 方法  | 描述  |
+| --- | --- |
+| `Method` getMethod(String name, `Class[]` parameterTypes) | 返回表示 `public` 方法的 `Method` 对象，**继承**、**自身声明** 皆可 |
+| Method[] getMethods() | 返回 `Method` 数组，包含所有 `public` 方法，**继承**、**声明**皆可 |
+| Method getDeclaredMethod(String name, `Class[]` parameterTypes) | 返回表示 **自身声明** 的方法的 `Method` 对象 |
+| Method[] getDeclaredMethods() | 返回 Method 数组，表示该类 **声明** 的所有方法，包括 `public`/`private`/`protected`/`package` 方法 |
