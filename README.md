@@ -385,3 +385,42 @@ ThreadLocal.ThreadLocalMap实际上是通过hash表来存储局部线程局部�
 该hash值是一个`AtomicInteger`类型的不断递增的值，因此对于每一个ThreadLocal提供的hash值对于所有线程是唯一的。该特性保证了每当创建一个ThreadLocal当前线程只会有唯一的hash值与之对应。
 
 ThreadLocal#get方法最终都会去查找当前线程的threadLocals的数据，因此，每个线程创建的Threadlocal的值都只会属于当前线程。
+
+### 7 enum (枚举)
+
+[reference](https://blog.csdn.net/jisuanji12306/article/details/79356558)
+
+```java
+
+public class EnumTest {
+
+  @Test
+  public void test() {
+    final int a = 100,b = 13;
+    for(IntOp op : IntOp.values()){
+      System.out.println(String.format("op-%s-(%d,%d)-%d", op, a, b, op.apply(a, b)));
+    }
+    // op-ADD-(100,13)-113
+    // op-DEVIDE-(100,13)-7
+  }
+
+
+
+  static enum IntOp {
+    ADD {
+      @Override
+      public int apply(int a, int b) {
+        return a + b;
+      }
+    },
+    DEVIDE {
+
+      @Override
+      public int apply(int a, int b) {
+        return a / b;
+      }
+    };
+    public abstract int apply(int a, int b);
+  }
+}
+```
