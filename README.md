@@ -424,3 +424,20 @@ public class EnumTest {
   }
 }
 ```
+
+### 8 for-in
+
+
+for-in 循环语句是Java 1.5的新特征之一，在遍历数组、集合方面，for-in为开发者提供了极大的方便。for-in 循环语句是 for 语句的特殊简化版本，主要用于执行遍历功能的循环。
+
+语法格式:
+
+`for (type var : collection) {`
+
+`  block;`
+
+`}`
+
+for-in适用于数组和任何**Collection**对象。(`for-in`语句适用于数组或者其它任何**Iterable**)
+
+*参考: onJava*
