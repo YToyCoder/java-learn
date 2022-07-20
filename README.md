@@ -682,3 +682,24 @@ public class ThreadTest {
 
 }
 ```
+
+*线程统一异常处理*
+
+```java
+
+  @Test
+  public void testThreadGroupExceptionHandle(){
+    ThreadGroup threadGroup = new ThreadGroup("thread-group-test"){
+      @Override
+      public void uncaughtException(Thread t, Throwable e){
+        System.out.println(String.format("thread %s , exception %s", t.getName(), e.getMessage()));
+      }
+    };
+
+    new Thread( threadGroup, () -> {
+      throw new RuntimeException("thread group handle error");
+    }).start();
+  }
+  // thread Thread-0 , exception thread group handle error
+
+```

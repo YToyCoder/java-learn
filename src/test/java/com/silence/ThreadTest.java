@@ -30,4 +30,18 @@ public class ThreadTest {
     }
   }
 
+  @Test
+  public void testThreadGroupExceptionHandle(){
+    ThreadGroup threadGroup = new ThreadGroup("thread-group-test"){
+      @Override
+      public void uncaughtException(Thread t, Throwable e){
+        System.out.println(String.format("thread %s , exception %s", t.getName(), e.getMessage()));
+      }
+    };
+
+    new Thread( threadGroup, () -> {
+      throw new RuntimeException("thread group handle error");
+    }).start();
+  }
+
 }
