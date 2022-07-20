@@ -703,3 +703,140 @@ public class ThreadTest {
   // thread Thread-0 , exception thread group handle error
 
 ```
+
+**线程状态**
+
+操作系统状态切换
+
+```mermaid
+flowchart LR
+  new ---> | admitted | ready
+  ready ---> | scheduler patch | running 
+  running ---> | interrupt | ready
+  running ---> | I/O event waiting | waiting
+  waiting ---> | I/O event completion | ready
+  running ---> | exit | terminated
+```
+
+操作系统线程主要有一下三个状态：
+- 就绪状态(ready) : 线程正在等待CPU，经调度程序调用之后可以进入`running`状态。
+- 执行状态(running) : 线程正在使用CPU
+- 等待状态(waiting) : 线程经过等待事件调用或正在等待其他资源（如I/O）
+
+Java线程的六个状态: `New`,`RUNNABLE`,`BLOCKED`,`WAITING`,`TIMED_WAITING`,`TERMINATED`
+
+```java
+
+public enum State {
+  /**
+   * Thread state for a thread which has not yet started.
+   */
+  NEW,
+
+  /**
+   * Thread state for a runnable thread.  A thread in the runnable
+   * state is executing in the Java virtual machine but it may
+   * be waiting for other resources from the operating system
+   * such as processor.
+   */
+  RUNNABLE,
+
+  /**
+   * Thread state for a thread blocked waiting for a monitor lock.
+   * A thread in the blocked state is waiting for a monitor lock
+   * to enter a synchronized block/method or
+   * reenter a synchronized block/method after calling
+   * {@link Object#wait() Object.wait}.
+   */
+  BLOCKED,
+
+  /**
+   * Thread state for a waiting thread.
+   * A thread is in the waiting state due to calling one of the
+   * following methods:
+   * <ul>
+   *   <li>{@link Object#wait() Object.wait} with no timeout</li>
+   *   <li>{@link #join() Thread.join} with no timeout</li>
+   *   <li>{@link LockSupport#park() LockSupport.park}</li>
+   * </ul>
+   *
+   * <p>A thread in the waiting state is waiting for another thread to
+   * perform a particular action.
+   *
+   * For example, a thread that has called {@code Object.wait()}
+   * on an object is waiting for another thread to call
+   * {@code Object.notify()} or {@code Object.notifyAll()} on
+   * that object. A thread that has called {@code Thread.join()}
+   * is waiting for a specified thread to terminate.
+   */
+  WAITING,
+
+  /**
+   * Thread state for a waiting thread with a specified waiting time.
+   * A thread is in the timed waiting state due to calling one of
+   * the following methods with a specified positive waiting time:
+   * <ul>
+   *   <li>{@link #sleep Thread.sleep}</li>
+   *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
+   *   <li>{@link #join(long) Thread.join} with timeout</li>
+   *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
+   *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
+   * </ul>
+   */
+  TIMED_WAITING,
+
+  /**
+   * Thread state for a terminated thread.
+   * The thread has completed execution.
+   */
+  TERMINATED;
+}
+```
+
+- `NEW`
+
+线程还没有启动
+从Java程序上表达就是创建了`Thread`实例但还没有调用`start`函数。
+```java
+
+  @Test
+  public void testThreadState(){
+    Thread t = new Thread(() -> {});
+    assertEquals(Thread.State.NEW, t.getState());
+  }
+
+```
+
+*`start`方法*
+
+1. 不能多次调用`Thread.start`方法，第二次调用会抛出`IllegalThreadStateException`
+
+原因: *参考-深入浅出Java多线程*
+
+`Thread`内部存在一个变量叫`threadStatus`，在调用`start`函数的时候会判断该变量是否是0，如果不是就会抛出`IllegalThreadStateException`错误，同时在调用`start`函数后会改变`threadStatus`变量，因此第二次调用`start`函数时`threadStatus`已经改变，会抛出错误。
+
+示例:
+
+```java
+
+  @Test
+  public void testThreadStart() {
+    assertThrows(IllegalThreadStateException.class, () -> {
+      Thread t = new Thread(() -> {});
+      t.start();
+      t.start();
+    });
+  }
+
+```
+
+2. 在`Thread`执行结束以后再调用`start`函数是不可以的，原因参考`问题1`的回答。
+
+- `RUNNABLE`
+
+表示当前线程正在运行中。处于RUNNABLE状态的线程在Java虚拟机中运行,也有可能在等待其他系统资源(比如I/O)。
+
+> Java线程的RUNNABLE状态其实是包括了传统操作系统线程的ready和running两个状态的。
+
+- `BLOCKED`
+
