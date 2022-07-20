@@ -867,3 +867,18 @@ public enum State {
 
 终止状态。此时线程已执行完毕。
 
+**线程之间的状态转换** @todo
+
+
+### 14 初始化array
+
+```java
+int[] a = new int[]{1,2};
+int[] a = {1,2};
+
+class A {}
+
+A[] as = { new A(), new A()};
+A[] as2 = new A[]{ new A()};
+
+```

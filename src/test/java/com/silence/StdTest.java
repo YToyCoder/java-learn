@@ -1,5 +1,6 @@
 package com.silence;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -30,5 +31,13 @@ public class StdTest {
     tailOf5.forEach((value, key) -> {
       assertTrue(String.format("value is %d", value), value >= 5);
     });
+  }
+
+  @Test
+  public void arrInit(){
+    int[] a = {1, 2};
+    assertArrayEquals(new int[]{1,2}, a);
+    StdTest[] ss = { new StdTest(), new StdTest() };
+    StdTest[] ss2 = new StdTest[]{new StdTest()};
   }
 }
