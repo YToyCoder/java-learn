@@ -1,9 +1,8 @@
 # java-lang-test
 
 #### 介绍
-java语言测试
-使用junit测试
 
+java语言学习 和 设计模式
 
 ### 1 設計模式(design pattern)
 
@@ -528,7 +527,7 @@ public static void fun(int[] nums){}
 上面的两个方法实际是一个方法，在同一个类中不能通过编译。
 
 
-### Reflection(反射)
+### 12 Reflection(反射)
 
 **java-in-action**
 
@@ -607,3 +606,79 @@ Class intCls = int.class;
 | boolean isArray() | 如果调用方法的 `Class` 对象代表数组，则为 `true` |
 | boolean isInterface() | 如果调用方法的 `Class` 对象代表接口，则为 `true` |
 | boolean isPrimitive() | 如果调用方法的 `Class` 对象代表原始类型，则为 `true` |
+
+### 13 多线程
+
+*进程和线程*
+
+在批处理操作系统时，对于计算机指令是串行执行的。由于在计算机进行I/O、网络等操作时会进行阻塞，这样效率会比较低。
+为了提升批处理系统的效率，提出进程的概念让计算机能够在内存中存在多个程序。
+
+这时提出进程的概念；
+
+> 进程就是应用程序在内存中分配的空间，也就是正在运行的程序，各进程之间互不干扰。同时进程保存着程序每个时刻运行的状态。
+
+这时计算机采用时间片轮转的方式运行进程：CPU为每个进程分配一段时间段，称作它的时间片。如果时间片结束进程还在运行，则暂停这个进程，并且将CPU分配给另一个进程（这个过程叫做上下文切换）。
+
+> 当进程暂停时，它会保存当前进程的状态（进程标识，进程使用的资源等），下一次切换回来时根据之前保存的状态恢复，接着继续执行.
+
+线程的提出
+
+因为进程是资源的拥有者，所以在进程进行切换的时必须切换进程所拥有的资源，因而必须花费不少的处理时间。为了解决这个问题，引入了线程。
+
+在引入了线程的操作系统中，通常一个进程可能会存在多个线程，并且至少会有一个线程，线程成为了处理器调度的基本单元。
+
+线程的引入使得进程是一个资源的拥有者，不再是作为调度和分派的基本单元。
+
+*参考：*
+
+> 1. https://blog.csdn.net/qq_34039868/article/details/104977470
+
+
+*上下文切换*
+
+上下文切换（有时也称做进程或任务切换）是指CPU从一个进程（或线程）切换到另一个进程（或线程）。上下文是指某一时间点CPU寄存器和程序计数器的内容。
+
+CPU为每个进程分配一段时间段来实现多线程机制。CPU通过时间片分配算法来循环执行任务，当前时间片执行结束后会切换到下一个任务。
+
+上下文切换通常是计算密集型的,意味着此操作会消耗大量的 CPU 时间,故线程也不是越多越好。如何减少系统中上下文切换次数,是提升多线程性能的一个重点课题。
+
+*参考：*
+
+> 1. 深入浅出Java多线程
+
+*线程组*
+
+Java中用ThreadGroup来表示线程组,我们可以使用线程组对线程进行批量控制。
+
+ThreadGroup和Thread的关系就如同他们的字面意思一样简单粗暴,每个Thread必然存在于一个ThreadGroup中,Thread不能独立于ThreadGroup存在。执行main()方法线程的名字是main,如果在new Thread时没有显式指定,那么默认将父线程(当前执行new Thread的线程)线程组设置为自己的线程组。
+
+```java
+
+public class ThreadTest {
+
+  @Test
+  public void testThreadGroup() {
+    new Thread(new ThreadGroupNameCompare(Thread.currentThread().getThreadGroup().getName())).start();
+    new Thread(() -> {
+      assertNotEquals("rangeName", Thread.currentThread().getThreadGroup().getName());
+    }).start();
+    new Thread(() -> {
+      assertEquals("main", Thread.currentThread().getThreadGroup().getName());
+    }).start();
+  }
+
+  static class ThreadGroupNameCompare implements Runnable{
+    private final String tgName;
+    public ThreadGroupNameCompare(String tgName){
+      this.tgName = tgName;
+    }
+
+    @Override
+    public void run() {
+      assertEquals(tgName, Thread.currentThread().getThreadGroup().getName());
+    }
+  }
+
+}
+```
