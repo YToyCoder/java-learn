@@ -703,3 +703,15 @@ public class ThreadTest {
   // thread Thread-0 , exception thread group handle error
 
 ```
+
+*线程状态与转换*
+
+操作系统中的线程状态转换
+
+```mermaid
+
+flowchart LR
+  A --> B
+
+
+```
