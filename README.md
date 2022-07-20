@@ -840,3 +840,30 @@ public enum State {
 
 - `BLOCKED`
 
+阻塞状态，等待获取同步锁从而进入同步块或同步方法，或是通过调用`Object#wait`重新进入同步块。
+
+- `WAITING`
+
+由于调用`Object#wait`、`Thread#join`或`LockSupport#park`方法进入等待状态，需要其他线程唤醒.
+
+> Object.wait():使当前线程处于等待状态直到另一个线程唤醒它;
+>
+> Thread.join():等待线程执行完毕,底层调用的是Object实例的wait方法;
+>
+> LockSupport.park():除非获得调用许可,否则禁用当前线程进行线程调度。
+
+- `TIMED_WAITING`
+
+超时等待状态。线程等待一个具体的时间,时间到后会被自动唤醒。
+
+调用如下方法会使线程进入超时等待状态:
+1. Thread.sleep(long millis):使当前线程睡眠指定时间;
+2. Object.wait(long timeout):线程休眠指定时间,等待期间可以通过notify()/notifyAll()唤醒;
+3. Thread.join(long millis):等待当前线程最多执行millis毫秒,如果millis为0,则会一直执行;
+4. LockSupport.parkNanos(long nanos): 除非获得调用许可,否则禁用当前线程进行线程调度指定时间;
+5. LockSupport.parkUntil(long deadline):同上,也是禁止线程进行调度指定时间;
+
+- `TERMINATED`
+
+终止状态。此时线程已执行完毕。
+
