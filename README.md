@@ -872,7 +872,7 @@ public enum State {
 ```mermaid
 
 flowchart RL
-  NEW ---> | Thread.start() | RUNNABLE
+  NEW ---> | Thread.start | RUNNABLE
   BLOCKED ---> | 获取锁成功 | RUNNABLE[ready && running]
   RUNNABLE ---> | 等待锁 | BLOCKED
   WAITING ---> | Object.notify Object.notifyAll LockSupport.unpark(Thread) | RUNNABLE
