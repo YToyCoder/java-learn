@@ -884,7 +884,13 @@ flowchart RL
 
 1. BLOCKED --> RUNNABLE
 
-示例代码
+线程转化为`waiting state`可以通过如下方法:
+
+- Object.wait
+- Thread.join
+- LockSupport.park
+
+示例代码(wait)
 
 ```java
 
@@ -921,7 +927,7 @@ flowchart RL
     System.out.printf("finish run at %d\n", LocalTime.now().getSecond());
   }
 
-  // prints
+  // prints 打印结果
 // start run at 31
 // main thread state is RUNNABLE
 // wait lock at 31

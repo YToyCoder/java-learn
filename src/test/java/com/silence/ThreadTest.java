@@ -52,6 +52,9 @@ public class ThreadTest {
 
   @Test(timeout = 2000)
   public void testThreadWait(){
+    /**
+     * 线程状态转换 RUNNABLE -> WAITING
+     */
     System.out.printf("start run at %d\n", LocalTime.now().getSecond());
     Thread mainthread = Thread.currentThread();
     System.out.printf("main thread state is %s\n", mainthread.getState());
