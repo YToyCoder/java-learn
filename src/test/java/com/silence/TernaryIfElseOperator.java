@@ -1,6 +1,5 @@
 package com.silence;
 
-import static org.junit.Assert.assertThrows;
 
 import java.util.Objects;
 
