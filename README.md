@@ -875,10 +875,10 @@ flowchart RL
   NEW ---> | Thread.start | RUNNABLE
   BLOCKED ---> | 获取锁成功 | RUNNABLE[ready && running]
   RUNNABLE ---> | 等待锁 | BLOCKED
-  WAITING ---> | Object.notify Object.notifyAll LockSupport.unpark(Thread) | RUNNABLE
+  WAITING ---> | Object.notify Object.notifyAll LockSupport.unpark | RUNNABLE
   RUNNABLE ---> | Object.wait Thread.join LockSupport.park | WAITING
-  TIMED_WAITING ---> | Object.notify Object.notifyAll LockSupport.unpark(Thread) | RUNNABLE
-  RUNNABLE ---> | Thread.sleep(long) Object.wait(long) Thread.join(long) LockSupport.parkNanos LockSupport.parkUnit | TIMED_WAITING
+  TIMED_WAITING ---> | Object.notify Object.notifyAll LockSupport.unpark | RUNNABLE
+  RUNNABLE ---> | Thread.sleep Object.wait Thread.join LockSupport.parkNanos LockSupport.parkUnit | TIMED_WAITING
 
 ```
 
