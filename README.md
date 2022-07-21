@@ -882,6 +882,56 @@ flowchart RL
 
 ```
 
+1. BLOCKED --> RUNNABLE
+
+示例代码
+
+```java
+
+  Object lock = new Object();
+
+  @Test(timeout = 2000)
+  public void testThreadWait(){
+    System.out.printf("start run at %d\n", LocalTime.now().getSecond());
+    Thread mainthread = Thread.currentThread();
+    System.out.printf("main thread state is %s\n", mainthread.getState());
+    new Thread(() -> {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }finally{
+        synchronized(lock){
+          System.out.printf("main thread state is %s(sub thread before notifyAll)\n", mainthread.getState());
+          lock.notifyAll();
+          System.out.printf("main thread state is %s(sub thread)\n", mainthread.getState());
+          System.out.printf("stop wait at %d\n", LocalTime.now().getSecond());
+        }
+      }
+    }).start();
+    try {
+      synchronized(lock){
+        System.out.printf("wait lock at %d\n", LocalTime.now().getSecond());
+        lock.wait();
+        System.out.printf("main thread state is %s(in main after wait finish)\n", mainthread.getState());
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    System.out.printf("finish run at %d\n", LocalTime.now().getSecond());
+  }
+
+  // prints
+// start run at 31
+// main thread state is RUNNABLE
+// wait lock at 31
+// main thread state is WAITING(sub thread before notifyAll)
+// main thread state is BLOCKED(sub thread)
+// stop wait at 32
+// main thread state is RUNNABLE(in main after wait finish)
+// finish run at 32
+
+```
 
 ### 14 初始化array
 

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
+import java.time.LocalTime;
+
 import org.junit.Test;
 
 public class ThreadTest {
@@ -44,6 +46,39 @@ public class ThreadTest {
       t.start();
       t.start();
     });
+  }
+
+  Object lock = new Object();
+
+  @Test(timeout = 2000)
+  public void testThreadWait(){
+    System.out.printf("start run at %d\n", LocalTime.now().getSecond());
+    Thread mainthread = Thread.currentThread();
+    System.out.printf("main thread state is %s\n", mainthread.getState());
+    new Thread(() -> {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }finally{
+        synchronized(lock){
+          System.out.printf("main thread state is %s(sub thread before notifyAll)\n", mainthread.getState());
+          lock.notifyAll();
+          System.out.printf("main thread state is %s(sub thread)\n", mainthread.getState());
+          System.out.printf("stop wait at %d\n", LocalTime.now().getSecond());
+        }
+      }
+    }).start();
+    try {
+      synchronized(lock){
+        System.out.printf("wait lock at %d\n", LocalTime.now().getSecond());
+        lock.wait();
+        System.out.printf("main thread state is %s(in main after wait finish)\n", mainthread.getState());
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    System.out.printf("finish run at %d\n", LocalTime.now().getSecond());
   }
 
 }
