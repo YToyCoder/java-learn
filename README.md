@@ -951,3 +951,109 @@ A[] as = { new A(), new A()};
 A[] as2 = new A[]{ new A()};
 
 ```
+
+### 15 LockSupport
+
+api 英文翻译
+
+> Basic thread blocking primitives for creating locks and other synchronization classes.
+>
+> 用于创建锁和其他同步类的基本线程阻塞基元。
+> 
+> This class associates, with each thread that uses it, a permit (in the sense of the Semaphore class). A call to park will return immediately if the permit is available, consuming it in the process; otherwise it may block. A call to unpark makes the permit available, if it was not already available. (Unlike with Semaphores though, permits do not accumulate. There is at most one.) Reliable usage requires the use of volatile (or atomic) variables to control when to park or unpark. Orderings of calls to these methods are maintained with respect to volatile variable accesses, but not necessarily non-volatile variable accesses.
+>
+> 此类与使用它的每个线程关联一个许可（在 Semaphore 类的意义上）。 如果许可证可用，调用`park`将立即返回，并在此过程中消耗它； 否则可能会阻塞。 如果许可证尚不可用，则调用 unpark 可使许可证可用。 （尽管与信号量不同，许可证不会累积。最多只有一个。）可靠的使用需要使用易失性（或原子）变量来控制何时停放或取消停放。 对这些方法的调用顺序根据易失性变量访问进行维护，但不一定非易失性变量访问。
+>
+> Methods park and unpark provide efficient means of blocking and unblocking threads that do not encounter the problems that cause the deprecated methods Thread.suspend and Thread.resume to be unusable for such purposes: Races between one thread invoking park and another thread trying to unpark it will preserve liveness, due to the permit. Additionally, park will return if the caller's thread was interrupted, and timeout versions are supported. The park method may also return at any other time, for "no reason", so in general must be invoked within a loop that rechecks conditions upon return. In this sense park serves as an optimization of a "busy wait" that does not waste as much time spinning, but must be paired with an unpark to be effective.
+>
+> 方法 park 和 unpark 提供了阻塞和解除阻塞线程的有效方法，这些线程不会遇到导致不推荐使用的方法 Thread.suspend 和 Thread.resume 无法用于此类目的的问题：一个调用 park 的线程和另一个试图解除它的线程之间的争用 由于许可，将保持活力。 此外，如果调用者的线程被中断，park 将返回，并且支持超时版本。 park 方法也可以在任何其他时间“无缘无故”地返回，因此通常必须在循环中调用，该循环在返回时重新检查条件。 从这个意义上说，停车是“忙等待”的优化，不会浪费太多时间，但必须与取消停车配对才能有效。
+> 
+> The three forms of park each also support a blocker object parameter. This object is recorded while the thread is blocked to permit monitoring and diagnostic tools to identify the reasons that threads are blocked. (Such tools may access blockers using method getBlocker(Thread).) The use of these forms rather than the original forms without this parameter is strongly encouraged. The normal argument to supply as a blocker within a lock implementation is this.
+>
+> 三种形式的 park 都支持一个 blocker 对象参数。 该对象在线程被阻塞时被记录，以允许监视和诊断工具识别线程被阻塞的原因。 （此类工具可以使用 getBlocker(Thread) 方法访问阻止程序。）强烈建议使用这些表单而不是没有此参数的原始表单。 在锁实现中作为阻塞器提供的正常参数是 this。
+
+
+### Integer equals
+
+查看如下示例
+
+```java
+
+10 == Integer.valueOf(10) // true
+Integer.valueOf(10) == Integer.valueOf(10) // true
+new Integer(10) == new Integer(10) // false
+130 == Integer.valueOf(130) // true
+Integer.valueOf(130) == Integer.valueOf(130) // false
+
+```
+
+byte char short int long double float boolean
+
+ 1    2     2     4   8    8     4      1
+
+Java包含8种基本类型(如果不算void)，每种类型都有对应的包装类。因为包装类是引用类型，所以在比较的时候应该通过equal。
+
+但是在上面的例子中却出现了`Integer.valueOf(10) == Integer.valueOf(10)`，这样意外的结果。实在让人很费解！！
+
+通过查阅资料，原因如下:
+
+Integer对于[-128,127]的值存在缓存
+
+Integer.valueOf 源码
+
+```java
+
+  public static Integer valueOf(int i) {
+      if (i >= IntegerCache.low && i <= IntegerCache.high)
+          return IntegerCache.cache[i + (-IntegerCache.low)];
+      return new Integer(i);
+  }
+```
+
+IntegerCache 源码
+
+```java
+
+private static class IntegerCache {
+    static final int low = -128;
+    static final int high;
+    static final Integer[] cache;
+    static Integer[] archivedCache;
+
+    static {
+        // high value may be configured by property
+        int h = 127;
+        String integerCacheHighPropValue =
+            VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+        if (integerCacheHighPropValue != null) {
+            try {
+                h = Math.max(parseInt(integerCacheHighPropValue), 127);
+                // Maximum array size is Integer.MAX_VALUE
+                h = Math.min(h, Integer.MAX_VALUE - (-low) -1);
+            } catch( NumberFormatException nfe) {
+                // If the property cannot be parsed into an int, ignore it.
+            }
+        }
+        high = h;
+
+        // Load IntegerCache.archivedCache from archive, if possible
+        VM.initializeFromArchive(IntegerCache.class);
+        int size = (high - low) + 1;
+
+        // Use the archived cache if it exists and is large enough
+        if (archivedCache == null || size > archivedCache.length) {
+            Integer[] c = new Integer[size];
+            int j = low;
+            for(int i = 0; i < c.length; i++) {
+                c[i] = new Integer(j++);
+            }
+            archivedCache = c;
+        }
+        cache = archivedCache;
+        // range [-128, 127] must be interned (JLS7 5.1.7)
+        assert IntegerCache.high >= 127;
+    }
+
+    private IntegerCache() {}
+}
+```

@@ -2,6 +2,7 @@ package com.silence;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.TreeMap;
@@ -39,5 +40,14 @@ public class StdTest {
     assertArrayEquals(new int[]{1,2}, a);
     StdTest[] ss = { new StdTest(), new StdTest() };
     StdTest[] ss2 = new StdTest[]{new StdTest()};
+  }
+
+  @Test
+  public void wrappedObjectAndPrimitive(){
+    assertTrue(10 == Integer.valueOf(10));
+    assertTrue(Integer.valueOf(10) == Integer.valueOf(10));
+    assertFalse(new Integer(10) == new Integer(10));
+    assertFalse(Integer.valueOf(130) == Integer.valueOf(130));
+    assertTrue(130 == Integer.valueOf(130));
   }
 }
