@@ -1032,9 +1032,11 @@ flowchart RL
 ```
 
 
-**Thread.join**
+**Thread.join & Thread.join(long)**
 
 调用`join()`方法不会释放锁，会一直等待当前线程执行完毕（转换为`TERMINATED`状态）。
+
+Thread.join(long) 使得线程执行指定时间，并使线程进入`TIMED_WAITING`状态。
 
 ```java
 
