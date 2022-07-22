@@ -84,4 +84,8 @@ public class ThreadTest {
     System.out.printf("finish run at %d\n", LocalTime.now().getSecond());
   }
 
+  @Test
+  public void testThreadWaiting(){
+  }
+
 }

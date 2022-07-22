@@ -867,7 +867,7 @@ public enum State {
 
 终止状态。此时线程已执行完毕。
 
-**线程之间的状态转换** @todo
+**线程之间的状态转换**
 
 ```mermaid
 
@@ -882,7 +882,9 @@ flowchart RL
 
 ```
 
-1. BLOCKED --> RUNNABLE
+1. BLOCKED <--> RUNNABLE
+
+线程处于`BLOCKED`状态是在等待锁
 
 线程转化为`waiting state`可以通过如下方法:
 
@@ -938,6 +940,25 @@ flowchart RL
 // finish run at 32
 
 ```
+
+在上面的示例中主线程通过`lock.wait()`进入`WAITTING`状态，子线程通过`lock.notifyAll()`唤醒主线程，主线程开始进入`BLOCKED`状态等待锁，当子线程执行完之后主线程获得锁进入`RUNNABLE`开始执行。
+
+2. WAITING <--> RUNNABLE
+
+有三种方法从`RUNNABLE`转化为`WAITING`： Object.wait Thread.join
+
+> 调用wait方法前线程必须持有对象的锁。
+>
+> 线程调用wait()方法时，会释放当前的锁，直到有其他线程调用`notify()/notifyAll()`方法唤醒等待锁的线程。
+> 
+> `notify`方法只会唤醒单个等待的线程，如有多个线程都在等待这个锁的话不一定会唤醒到之前调用`wait`方法的线程 
+> 
+> 同样，调用`notifyAll`方法唤醒所有等待锁的线程之后，也不一定马上把时间片分给刚才放弃的那个线程，具体要看系统的调度。
+>
+
+**Thread.join**
+
+调用`join()`方法不会释放锁，会一直等待当前线程执行完毕（转换为`TERMINATED`状态）。
 
 ### 14 初始化array
 
