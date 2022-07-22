@@ -88,4 +88,22 @@ public class ThreadTest {
   public void testThreadWaiting(){
   }
 
+  @Test
+  public void testThreadSleep() {
+    Thread main = Thread.currentThread();
+    new Thread(() -> {
+      try {
+        Thread.sleep(10L);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      System.out.printf("main thread state is %s\n", main.getState());
+    }).start();;
+    try {
+      Thread.sleep(1000L);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
 }

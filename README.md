@@ -956,6 +956,39 @@ flowchart RL
 > 同样，调用`notifyAll`方法唤醒所有等待锁的线程之后，也不一定马上把时间片分给刚才放弃的那个线程，具体要看系统的调度。
 >
 
+3. TIMED_WAITING <--> RUNNABLE
+
+从`RUNNABLE`转换到`TIMED_WAITING`状态的方法:
+
+- Thread.sleep(long) 使当前线程睡眠指定时间。这里的随眠只是暂时使线程停止，并不会释放锁。时间到后，线程会重新进入`RUNNABLE`状态。
+- Object.wait(long) 如果经过指定时间long之后它会自动唤醒，拥有去争夺锁的资格。
+- Object.join(long) 使得线程执行指定时间，并使线程进入`TIMED_WAITING`状态。
+
+```java
+
+  @Test
+  public void testThreadSleep() {
+    Thread main = Thread.currentThread();
+    new Thread(() -> {
+      try {
+        Thread.sleep(10L);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      System.out.printf("main thread state is %s\n", main.getState());
+    }).start();;
+    try {
+      Thread.sleep(1000L);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+// print
+// main thread state is TIMED_WAITING
+
+```
+
 **Thread.join**
 
 调用`join()`方法不会释放锁，会一直等待当前线程执行完毕（转换为`TERMINATED`状态）。
