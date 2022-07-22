@@ -161,4 +161,41 @@ public class ThreadTest {
     new ThreadTest().testJoinLong();
   }
 
+  static volatile int signal = 0;
+
+  @Test
+  public void implementsSemaphoreByVolatile(){
+    final int MAX = 20;
+    new Thread(() -> {
+      while(signal < MAX){
+        if(signal % 2 == 0){
+          System.out.printf("%s - %d\n", Thread.currentThread().getName(), signal);
+          synchronized(this){
+            signal++;
+          }
+        }
+      }
+    }).start();
+    try{
+      Thread.sleep(100L);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+    new Thread(() -> {
+      while(signal < MAX){
+        if(signal % 2 == 1){
+          System.out.printf("%s - %d\n", Thread.currentThread().getName(), signal);
+          synchronized(this){
+            signal++;
+          }
+        }
+      }
+    }).start();
+    try{
+      Thread.sleep(1000l);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+  }
+
 }
