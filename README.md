@@ -962,7 +962,9 @@ flowchart RL
 
 - Thread.sleep(long) 使当前线程睡眠指定时间。这里的随眠只是暂时使线程停止，并不会释放锁。时间到后，线程会重新进入`RUNNABLE`状态。
 - Object.wait(long) 如果经过指定时间long之后它会自动唤醒，拥有去争夺锁的资格。
-- Object.join(long) 使得线程执行指定时间，并使线程进入`TIMED_WAITING`状态。
+- Thread.join(long) 使得线程执行指定时间，并使线程进入`TIMED_WAITING`状态。
+
+**Thread.sleep(long)**
 
 ```java
 
@@ -989,9 +991,90 @@ flowchart RL
 
 ```
 
+**Object.wait(long)**
+
+```java
+
+  Object timedLock = new Object();
+
+  @Test
+  public void testWaitLong(){
+    System.out.printf("start time %d\n", LocalTime.now().getSecond());
+    Thread main = Thread.currentThread();
+
+    new Thread(() -> {
+      System.out.printf("main state is %s (in sub thread %s before notifyAll) \n", main.getState(), Thread.currentThread().getState());
+      System.out.println("finished sub thread");
+    }).start();
+
+    synchronized(timedLock){
+      try {
+        System.out.printf("before main wait\n");
+        timedLock.wait(1000L);
+        System.out.printf("after main wait\n");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+    System.out.printf("finish main %d \n", LocalTime.now().getSecond());
+  }
+
+  // print
+
+// start time 23
+// before main wait
+// main state is TIMED_WAITING (in sub thread RUNNABLE before notifyAll)
+// finished sub thread
+// after main wait
+// finish main 24
+
+```
+
+
 **Thread.join**
 
 调用`join()`方法不会释放锁，会一直等待当前线程执行完毕（转换为`TERMINATED`状态）。
+
+```java
+
+  public static void testJoinLong(){
+    System.out.printf("%d start time \n", System.currentTimeMillis());
+    Thread main = Thread.currentThread();
+
+    Thread sub = new Thread(() -> {
+      long startT = System.currentTimeMillis();
+      System.out.printf("%d start time - main thread state %s (sub before sleep) \n", System.currentTimeMillis(), main.getState());
+      while(System.currentTimeMillis() - startT < 1000){
+      }
+      System.out.printf("%d time - main thread state %s (sub before sleep) \n", System.currentTimeMillis(), main.getState());
+      System.out.printf("%d finish sub thread time (sub before sleep) \n", System.currentTimeMillis());
+    });
+    sub.start();
+
+    try {
+      sub.join(500L);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    System.out.printf("%d finish main \n", System.currentTimeMillis());
+  }
+
+  public static void main(String[] args) {
+    testJoinLong();
+  }
+
+  // print
+
+// 1658466006413 start time
+// 1658466006433 start time - main thread state TIMED_WAITING (sub before sleep) 
+// 1658466006944 sub thread join finish 
+// 1658466006944 finish main
+// 1658466007433 time - main thread state TERMINATED (sub before sleep)
+// 1658466007433 finish sub thread time (sub before sleep)
+
+```
 
 ### 14 初始化array
 

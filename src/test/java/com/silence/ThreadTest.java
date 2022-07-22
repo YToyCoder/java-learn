@@ -55,7 +55,7 @@ public class ThreadTest {
     /**
      * 线程状态转换 RUNNABLE -> WAITING
      */
-    System.out.printf("start run at %d\n", LocalTime.now().getSecond());
+    System.out.printf("start run at %d\n", System.currentTimeMillis());
     Thread mainthread = Thread.currentThread();
     System.out.printf("main thread state is %s\n", mainthread.getState());
     new Thread(() -> {
@@ -68,20 +68,20 @@ public class ThreadTest {
           System.out.printf("main thread state is %s(sub thread before notifyAll)\n", mainthread.getState());
           lock.notifyAll();
           System.out.printf("main thread state is %s(sub thread)\n", mainthread.getState());
-          System.out.printf("stop wait at %d\n", LocalTime.now().getSecond());
+          System.out.printf("stop wait at %d\n", System.currentTimeMillis());
         }
       }
     }).start();
     try {
       synchronized(lock){
-        System.out.printf("wait lock at %d\n", LocalTime.now().getSecond());
+        System.out.printf("wait lock at %d\n", System.currentTimeMillis());
         lock.wait();
         System.out.printf("main thread state is %s(in main after wait finish)\n", mainthread.getState());
       }
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    System.out.printf("finish run at %d\n", LocalTime.now().getSecond());
+    System.out.printf("finish run at %d\n", System.currentTimeMillis());
   }
 
   @Test
@@ -104,6 +104,61 @@ public class ThreadTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+  }
+
+  Object timedLock = new Object();
+
+  @Test
+  public void testWaitLong(){
+    System.out.printf("start time %d\n", System.currentTimeMillis());
+    Thread main = Thread.currentThread();
+
+    new Thread(() -> {
+      System.out.printf("main state is %s (in sub thread %s before notifyAll) \n", main.getState(), Thread.currentThread().getState());
+      System.out.println("finished sub thread");
+    }).start();
+
+    synchronized(timedLock){
+      try {
+        System.out.printf("before main wait\n");
+        timedLock.wait(1000L);
+        System.out.printf("after main wait\n");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+    System.out.printf("finish main %d \n", System.currentTimeMillis());
+  }
+
+
+  @Test
+  public void testJoinLong(){
+    System.out.printf("%d start time \n", System.currentTimeMillis());
+    Thread main = Thread.currentThread();
+
+    Thread sub = new Thread(() -> {
+      long startT = System.currentTimeMillis();
+      System.out.printf("%d start time - main thread state %s (sub before sleep) \n", System.currentTimeMillis(), main.getState());
+      while(System.currentTimeMillis() - startT < 1000){
+      }
+      System.out.printf("%d time - main thread state %s (sub before sleep) \n", System.currentTimeMillis(), main.getState());
+      System.out.printf("%d finish sub thread time (sub before sleep) \n", System.currentTimeMillis());
+    });
+    sub.start();
+
+    try {
+      sub.join(500L);
+      System.out.printf("%d sub thread join finish \n", System.currentTimeMillis());
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    System.out.printf("%d finish main \n", System.currentTimeMillis());
+  }
+
+  public static void main(String[] args) {
+    new ThreadTest().testJoinLong();
   }
 
 }
