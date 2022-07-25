@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
-import java.time.LocalTime;
-
 import org.junit.Test;
 
 public class ThreadTest {
@@ -196,6 +194,27 @@ public class ThreadTest {
     }catch(InterruptedException e){
       e.printStackTrace();
     }
+  }
+
+  @Test
+  public void interruptTest(){
+    Thread thread = new Thread(() -> {
+      System.out.printf("%d sub thread run\n", System.currentTimeMillis());
+      while(true){
+      }
+    });
+    try{
+      Thread.sleep(1000L);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+    System.out.printf("%d before call interrupt\n", System.currentTimeMillis());
+    thread.interrupt();
+    System.out.printf("%d after call interrupt\n", System.currentTimeMillis());
+    System.out.printf("%d sub thread is interrupted %b\n", System.currentTimeMillis(), thread.isInterrupted());
+    while(!thread.isInterrupted()){
+    }
+    System.out.printf("%d sub thread is interrupted \n", System.currentTimeMillis());
   }
 
 }

@@ -1094,6 +1094,32 @@ Thread.join(long) 使得线程执行指定时间，并使线程进入`TIMED_WAIT
 > 在线程中断机制里,当其他线程通知需要被中断的线程后,线程中断的状态被设置为true,但是具体被要求中断的线程要怎么处理,完全由被中断线程自己而定,可以在合适的实际处理中断请求,也可以完全不处理继续执行下去。
 
 
+```java
+
+  @Test
+  public void interruptTest(){
+    Thread thread = new Thread(() -> {
+      System.out.printf("%d sub thread run\n", System.currentTimeMillis());
+      while(true){
+      }
+    });
+    try{
+      Thread.sleep(1000L);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+    System.out.printf("%d before call interrupt\n", System.currentTimeMillis());
+    thread.interrupt();
+    System.out.printf("%d after call interrupt\n", System.currentTimeMillis());
+    System.out.printf("%d sub thread is interrupted %b\n", System.currentTimeMillis(), thread.isInterrupted());
+    while(!thread.isInterrupted()){
+    }
+    System.out.printf("%d sub thread is interrupted \n", System.currentTimeMillis());
+  }
+
+```
+
+
 ### 14 初始化array
 
 ```java
