@@ -597,6 +597,55 @@ Class intCls = int.class;
 | Method getDeclaredMethod(String name, `Class[]` parameterTypes) | 返回表示 **自身声明** 的方法的 `Method` 对象 |
 | Method[] getDeclaredMethods() | 返回 Method 数组，表示该类 **声明** 的所有方法，包括 `public`/`private`/`protected`/`package` 方法 |
 
+**test code**
+
+```java
+  static class AC {
+    public void fn1(){}
+
+    private void fn2(){}
+
+    public String fn3(String n){
+      return null;
+    }
+
+  }
+
+  static class ACS extends AC{
+    public void ACSFn(){}
+  }
+
+  @Test
+  public void getMethods(){
+    Class<?> cls = ACS.class;
+    Method[] all =  cls.getMethods();
+    Method[] selfDefined = cls.getDeclaredMethods();
+    System.out.println("all methods");
+    for(Method method : all) System.out.println(method.getName());
+    System.out.println("self defined methods");
+    for(Method method : selfDefined) System.out.println(method.getName());
+  }
+
+// all methods
+
+// ACSFn
+// fn1
+// fn3
+// wait
+// wait
+// wait
+// equals
+// toString
+// hashCode
+// getClass
+// notify
+// notifyAll
+
+// self defined methods
+
+// ACSFn
+```
+
 对于原始类型、数组、接口，Java 通过引入 `Class` 对象（`Class` 对象就是普通类）来表示，这些 `Class` 对象与普通 `Class` 对象相比有很多 **局限性***，比如无法创建原始类型、接口的实例，但它们对于自省而言非常重要，`Class` 中支持 **类型表示** 的方法如下表所示：
 
 | 方法  | 说明  |
@@ -606,6 +655,21 @@ Class intCls = int.class;
 | boolean isArray() | 如果调用方法的 `Class` 对象代表数组，则为 `true` |
 | boolean isInterface() | 如果调用方法的 `Class` 对象代表接口，则为 `true` |
 | boolean isPrimitive() | 如果调用方法的 `Class` 对象代表原始类型，则为 `true` |
+
+**Test Code**
+```java
+
+  @Test
+  public void typeCheck(){
+    assertTrue("int is primitive", int.class.isPrimitive());
+    assertFalse("Integer is not primitive", Integer.class.isPrimitive());
+    assertFalse("int is not Array ", int.class.isArray());
+    assertTrue("int[] is array ", int[].class.isArray());
+    assertEquals("int[] ComponentType is ", int.class, int[].class.getComponentType());
+    assertTrue("Function is interface", Function.class.isInterface());
+  }
+
+```
 
 ### 13 多线程
 
