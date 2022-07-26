@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.TreeMap;
 
 import org.junit.Test;
@@ -50,4 +51,12 @@ public class StdTest {
     assertFalse(Integer.valueOf(130) == Integer.valueOf(130));
     assertTrue(130 == Integer.valueOf(130));
   }
+
+  @Test
+  public void genericTest(){
+    List<Integer> ls = List.of();
+    ls.forEach((Number a) -> {});
+    ls.forEach((Comparable<Integer> a) -> {});
+  }
+
 }

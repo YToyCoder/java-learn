@@ -1218,7 +1218,7 @@ api 英文翻译
 > 三种形式的 park 都支持一个 blocker 对象参数。 该对象在线程被阻塞时被记录，以允许监视和诊断工具识别线程被阻塞的原因。 （此类工具可以使用 getBlocker(Thread) 方法访问阻止程序。）强烈建议使用这些表单而不是没有此参数的原始表单。 在锁实现中作为阻塞器提供的正常参数是 this。
 
 
-### Integer equals
+### 16 Integer equals
 
 查看如下示例
 
@@ -1301,4 +1301,34 @@ private static class IntegerCache {
 
     private IntegerCache() {}
 }
+```
+
+### 17 generic (泛型)
+
+在一些代码中可能会看到这样的表达式`<? super A>`，这样的类型。这样的表达式代表的是`A`的父类型，参考如下代码。
+
+
+在`List`中存在一个函数
+
+```java
+
+  default void forEach(Consumer<? super T> action) {
+      Objects.requireNonNull(action);
+      for (T t : this) {
+          action.accept(t);
+      }
+  }
+
+```
+对于这样的函数我们可以这样使用.
+
+```java
+
+  @Test
+  public void genericTest(){
+    List<Integer> ls = List.of();
+    ls.forEach((Number a) -> {});
+    ls.forEach((Comparable<Integer> a) -> {});
+  }
+
 ```
