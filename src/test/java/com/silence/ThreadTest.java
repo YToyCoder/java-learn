@@ -217,7 +217,12 @@ public class ThreadTest {
     System.out.printf("%d sub thread is interrupted \n", System.currentTimeMillis());
   }
 
+  static int count = 0;
   public static void noLockMethod(){
+    System.out.printf("count1 %d \n", count);
+    System.out.printf("count2 %d \n", count);
+    System.out.printf("count3 %d \n", count);
+    count++;
   }
 
   public static synchronized void syncMethod(){
@@ -227,6 +232,21 @@ public class ThreadTest {
   public void method(){
     synchronized(this.getClass()){
       noLockMethod();
+    }
+  }
+
+  @Test
+  public void syncMethodDiver(){
+    new Thread(() -> {
+      syncMethod();
+    }).start();
+    new Thread(() -> {
+      this.method();
+    }).start();
+    try{
+      Thread.sleep(1000L);
+    }catch(InterruptedException e){
+      e.printStackTrace();
     }
   }
 
