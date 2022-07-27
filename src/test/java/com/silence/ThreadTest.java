@@ -217,4 +217,17 @@ public class ThreadTest {
     System.out.printf("%d sub thread is interrupted \n", System.currentTimeMillis());
   }
 
+  public static void noLockMethod(){
+  }
+
+  public static synchronized void syncMethod(){
+    noLockMethod();
+  }
+
+  public void method(){
+    synchronized(this.getClass()){
+      noLockMethod();
+    }
+  }
+
 }
