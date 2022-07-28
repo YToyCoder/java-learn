@@ -1422,3 +1422,111 @@ private static class IntegerCache {
   }
 
 ```
+
+### 18 Unsafe
+
+*线程相关*
+
+```java
+
+//取消阻塞线程
+public native void unpark(Object thread);
+//阻塞线程
+public native void park(boolean isAbsolute, long time);
+//获得对象锁（可重入锁）
+@Deprecated
+public native void monitorEnter(Object o);
+//释放对象锁
+@Deprecated
+public native void monitorExit(Object o);
+//尝试获取对象锁
+@Deprecated
+public native boolean tryMonitorEnter(Object o);
+
+```
+
+如上源码说明中，方法park、unpark即可实现线程的挂起与恢复，将一个线程进行挂起是通过park方法实现的，调用park方法后，线程将一直阻塞直到超时或者中断等条件出现；unpark可以终止一个挂起的线程，使其恢复正常。
+
+### 19 Lock
+
+**AbstractOwnableSynchronizer**
+
+A synchronizer is that may be exclusively owned by a thread. This class provides a basis for creating locks and related synchronizers that may entail a notion of ownership. The AbstractOwnableSynchronizer class itself does not manage or use this information. However, subclasses and tools may use appropriately maintained values to help control and monitor access and provide diagnostics.
+
+同步器可能是由线程独占拥有的。此类为创建锁和相关同步器提供了基础，这些同步器可能需要所有权的概念。抽象可命名同步器类本身不管理或使用此信息。但是，子类和工具可以使用适当维护的值来帮助控制和监视访问并提供诊断。
+
+**Lock使用示例**
+
+```java
+
+  @Test
+  public void lockUsingTest(){
+    ReentrantLock lock = new ReentrantLock();
+    new Thread(() -> {
+      lock.lock();
+      
+      Stream.generate(new Supplier<Integer>() {
+        int seed = 0;
+
+        @Override
+        public Integer get() {
+          return ++seed;
+        }
+      })
+      .limit(5)
+      .forEach(el -> {
+        try{
+          System.out.printf("%s %d\n", Thread.currentThread().getName(), el);
+          Thread.sleep(100L);
+        }catch(InterruptedException e){
+          e.printStackTrace();
+        }
+      });
+
+      lock.unlock();
+    }).start();
+    new Thread(() -> {
+      lock.lock();
+      
+      Stream.generate(new Supplier<Integer>() {
+        int seed = 0;
+
+        @Override
+        public Integer get() {
+          return ++seed;
+        }
+      })
+      .limit(5)
+      .forEach(el -> {
+        try{
+          System.out.printf("%s %d\n", Thread.currentThread().getName(), el);
+          Thread.sleep(100L);
+        }catch(InterruptedException e){
+          e.printStackTrace();
+        }
+      });
+
+      lock.unlock();
+    }).start();
+    try{
+      Thread.sleep(1500);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+  }
+
+  // print result
+
+// Thread-0 1
+// Thread-0 2
+// Thread-0 3
+// Thread-0 4
+// Thread-0 5
+// Thread-1 1
+// Thread-1 2
+// Thread-1 3
+// Thread-1 4
+// Thread-1 5
+
+
+```

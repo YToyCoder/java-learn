@@ -4,6 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import org.junit.Test;
 
 public class ThreadTest {
@@ -245,6 +252,62 @@ public class ThreadTest {
     }).start();
     try{
       Thread.sleep(1000L);
+    }catch(InterruptedException e){
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void lockUsingTest(){
+    ReentrantLock lock = new ReentrantLock();
+    new Thread(() -> {
+      lock.lock();
+      
+      Stream.generate(new Supplier<Integer>() {
+        int seed = 0;
+
+        @Override
+        public Integer get() {
+          return ++seed;
+        }
+      })
+      .limit(5)
+      .forEach(el -> {
+        try{
+          System.out.printf("%s %d\n", Thread.currentThread().getName(), el);
+          Thread.sleep(100L);
+        }catch(InterruptedException e){
+          e.printStackTrace();
+        }
+      });
+
+      lock.unlock();
+    }).start();
+    new Thread(() -> {
+      lock.lock();
+      
+      Stream.generate(new Supplier<Integer>() {
+        int seed = 0;
+
+        @Override
+        public Integer get() {
+          return ++seed;
+        }
+      })
+      .limit(5)
+      .forEach(el -> {
+        try{
+          System.out.printf("%s %d\n", Thread.currentThread().getName(), el);
+          Thread.sleep(100L);
+        }catch(InterruptedException e){
+          e.printStackTrace();
+        }
+      });
+
+      lock.unlock();
+    }).start();
+    try{
+      Thread.sleep(1500);
     }catch(InterruptedException e){
       e.printStackTrace();
     }
