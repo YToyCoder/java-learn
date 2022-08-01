@@ -1,6 +1,7 @@
 package com.silence;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.TreeMap;
 
@@ -45,4 +46,13 @@ public class Java17Test {
     };
     System.out.println(ans);
   }
+
+  @Test
+  public void instanceofPattern(){
+    Number one = Integer.valueOf(1);
+    if(one instanceof Integer intv){
+      assertEquals(Integer.valueOf(1), intv);
+    }else assertTrue("should not reach here", false);
+  }
+
 }

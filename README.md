@@ -1553,3 +1553,14 @@ Java14 之后switch表达式可以有返回值，如果想显示的返回值需�
   System.out.println(ans);
 
 ```
+
+### 21 instanceof
+
+```java
+
+  Number one = Integer.valueOf(1);
+  if(one instanceof Integer intv){
+    assertEquals(Integer.valueOf(1), intv);
+  }else assertTrue("should not reach here", false);
+
+```
