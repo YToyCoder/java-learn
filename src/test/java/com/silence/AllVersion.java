@@ -36,4 +36,9 @@ public class AllVersion {
     System.out.println();
   }
 
+  @Test
+  public void intTest(){
+    System.out.println(Integer.toBinaryString(0));
+  }
+
 }
