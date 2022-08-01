@@ -1530,3 +1530,26 @@ A synchronizer is that may be exclusively owned by a thread. This class provides
 
 
 ```
+
+### 20 new feature of switch
+
+Java14 之后switch表达式可以有返回值，如果想显示的返回值需要用`yield`。
+
+```java
+
+  var str = switch (0) {
+    case 0 -> "e";
+    default -> "";
+  };
+  System.out.println(str);
+  final var ans = switch (1) {
+    case 1 -> {
+      System.out.println("before return");
+      yield "1";
+    }
+      
+    default -> "-".repeat(10);
+  };
+  System.out.println(ans);
+
+```

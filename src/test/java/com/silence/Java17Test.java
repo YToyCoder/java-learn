@@ -18,4 +18,31 @@ public class Java17Test {
     var value = map.computeIfAbsent("key", (key) -> "null");
     assertEquals("null", value);
   }
+
+  @Test
+  public void textBlock(){
+    var block = """ 
+        zero
+        one
+        """;
+    System.out.println(block);
+  }
+
+  @Test
+  public void switchReturn (){
+    var str = switch (0) {
+      case 0 -> "e";
+      default -> "";
+    };
+    System.out.println(str);
+    final var ans = switch (1) {
+      case 1 -> {
+        System.out.println("before return");
+        yield "1";
+      }
+        
+      default -> "-".repeat(10);
+    };
+    System.out.println(ans);
+  }
 }
