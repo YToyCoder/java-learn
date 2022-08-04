@@ -1,5 +1,6 @@
 package com.silence.vmy;
 
-public interface AST {
+public class AST {
+  private AST(){}
   
 }
