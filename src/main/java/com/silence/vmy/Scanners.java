@@ -110,7 +110,7 @@ public class Scanners {
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
-      throw new RuntimeException("not support source");
+      throw new LexcicalException("not support source");
     }
   }
 
