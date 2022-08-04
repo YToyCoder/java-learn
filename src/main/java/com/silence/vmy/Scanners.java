@@ -60,7 +60,7 @@ public class Scanners {
 
     @Override
     protected boolean canHandle(List<Token> tokens, String source, int start) {
-      return Operators.buildinIdentifiers.contains(source.charAt(start));
+      return Operators.buildinIdentifiers.contains(Character.toString( source.charAt(start)));
     }
 
     @Override

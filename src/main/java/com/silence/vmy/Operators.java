@@ -5,14 +5,14 @@ import java.util.Set;
 
 final public class Operators {
   private Operators(){}
-  public static final Set<Character> buildinIdentifiers = new HashSet<>();
+  public static final Set<String> buildinIdentifiers = new HashSet<>();
 
-  public static final Character ADD = '+';
-  public static final Character SUB = '-';
-  public static final Character MULTI = '*';
-  public static final Character DIVIDE = '/';
-  public static final Character OpenParenthesis = '(';
-  public static final Character ClosingParenthesis   = ')';
+  public static final String ADD = "+";
+  public static final String SUB = "-";
+  public static final String MULTI = "*";
+  public static final String DIVIDE = "/";
+  public static final String OpenParenthesis = "(";
+  public static final String ClosingParenthesis   = ")";
   
   static{
     // set buildinOperators
