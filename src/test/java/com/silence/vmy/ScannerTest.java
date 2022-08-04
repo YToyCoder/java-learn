@@ -61,4 +61,31 @@ public class ScannerTest {
     assertEquals(source + " should be 1", tokens2.get(2).value, "2");
   }
 
+  @Test
+  public void testHandler3(){
+    final String source = "1*2 + ( 3 - 1 ) ";
+    List<Token> tokens = Scanners.scan(source);
+    assertEqualTo(
+      new Token[]{ 
+        new Token(Token.INT_V, "1"), 
+        new Token(Token.OP, "*"),
+        new Token(Token.INT_V, "2"),
+        new Token(Token.OP, "+"),
+        new Token(Token.OP, "("),
+        new Token(Token.INT_V, "3"),
+        new Token(Token.OP, "-"),
+        new Token(Token.INT_V, "1"),
+        new Token(Token.OP, ")")
+      }, 
+      tokens.toArray(new Token[0]));
+  }
+
+  void assertEqualTo(Token[] expects, Token[] real){
+    assertTrue("length should equal", expects.length == real.length);
+    for(int i=0; i<expects.length; i++){
+      assertTrue("token " + expects[i].value, expects[i].tag == real[i].tag);
+      assertEquals("token " + expects[i].value, expects[i].value , real[i].value);
+    }
+  }
+
 }
