@@ -39,6 +39,12 @@ public class AllVersion {
   @Test
   public void intTest(){
     System.out.println(Integer.toBinaryString(0));
+    int b = 1 +add();
   }
+
+  static int add(){
+    return 4;
+  }
+
 
 }
