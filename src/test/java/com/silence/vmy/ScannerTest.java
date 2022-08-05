@@ -15,10 +15,10 @@ public class ScannerTest {
   static Map<Integer, String> oneCharSource = new HashMap<>();
 
   static {
-    oneCharSource.put(Token.OP, "*");
-    oneCharSource.put(Token.OP, "/");
-    oneCharSource.put(Token.OP, "-");
-    oneCharSource.put(Token.OP, "+");
+    oneCharSource.put(Token.Identifier, "*");
+    oneCharSource.put(Token.Identifier, "/");
+    oneCharSource.put(Token.Identifier, "-");
+    oneCharSource.put(Token.Identifier, "+");
     oneCharSource.put(Token.INT_V, "12");
     oneCharSource.put(Token.INT_V, " 12 ");
     oneCharSource.put(Token.INT_V, "140");
@@ -27,6 +27,7 @@ public class ScannerTest {
 
   @Test
   public void testHandler(){
+    var identifiers = Identifiers.operatorCharacters;
     oneCharSource.forEach((k, v) -> {
       List<Token> tokens = Scanners.scan(v);
       assertTrue(v + "length should be 1", tokens.size() == 1);
@@ -35,7 +36,7 @@ public class ScannerTest {
     });
 
     assertThrows("? should not be handled" ,RuntimeException.class, () -> {
-      Scanners.scan("?");
+      Scanners.scan(",");
     });
 
     List<Token> tokens = Scanners.scan("1 2");
@@ -54,7 +55,7 @@ public class ScannerTest {
     assertTrue(source + " should be 1", tokens2.get(0).tag == Token.INT_V);
     assertEquals(source + " should be 1", tokens2.get(0).value, "1");
 
-    assertTrue(source + " should be *", tokens2.get(1).tag == Token.OP);
+    assertTrue(source + " should be *", tokens2.get(1).tag == Token.Identifier);
     assertEquals(source + " should be *", tokens2.get(1).value, "*");
 
     assertTrue(source + " should be 1", tokens2.get(2).tag == Token.INT_V);
@@ -68,14 +69,14 @@ public class ScannerTest {
     assertEqualTo(
       new Token[]{ 
         new Token(Token.INT_V, "1"), 
-        new Token(Token.OP, "*"),
+        new Token(Token.Identifier, "*"),
         new Token(Token.INT_V, "2"),
-        new Token(Token.OP, "+"),
-        new Token(Token.OP, "("),
+        new Token(Token.Identifier, "+"),
+        new Token(Token.Identifier, "("),
         new Token(Token.INT_V, "3"),
-        new Token(Token.OP, "-"),
+        new Token(Token.Identifier, "-"),
         new Token(Token.INT_V, "1"),
-        new Token(Token.OP, ")")
+        new Token(Token.Identifier, ")")
       }, 
       tokens.toArray(new Token[0]));
   }

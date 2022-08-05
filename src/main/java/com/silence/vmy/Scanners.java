@@ -60,13 +60,17 @@ public class Scanners {
 
     @Override
     protected boolean canHandle(List<Token> tokens, String source, int start) {
-      return Operators.buildinIdentifiers.contains(Character.toString( source.charAt(start)));
+//      return Identifiers.builtinIdentifiers.contains(Character.toString( source.charAt(start)));
+      return Identifiers.operatorCharacters.contains(source.charAt(start)) || Identifiers.commonIdentifiers.contains(source.charAt(start));
     }
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
-      tokens.add(new Token(Token.OP, String.valueOf(source.charAt(start))));
-      return start + 1;
+      final StringBuilder identifierBuilder = new StringBuilder().append(source.charAt(start++));
+      while(start < source.length() && Identifiers.operatorCharacters.contains(source.charAt(start)))
+        identifierBuilder.append(source.charAt(start++));
+      tokens.add(new Token(Token.Identifier, identifierBuilder.toString()));
+      return start;
     }
   }
 
@@ -93,7 +97,7 @@ public class Scanners {
       }
       tokens.add(
         new Token(
-          isfloat ? Token.DOUBLE_V : Token.INT_V, 
+          isfloat ? Token.DOUBLE_V : Token.INT_V,
           builder.toString()
         )
       );
