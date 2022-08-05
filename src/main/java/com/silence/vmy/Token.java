@@ -10,5 +10,5 @@ public class Token {
 
   static final int INT_V = 0;
   static final int DOUBLE_V = 1;
-  static final int OP = 2;
+  static final int Identifier = 2;
 }
