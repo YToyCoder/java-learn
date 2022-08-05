@@ -10,6 +10,10 @@ public class AST {
   private AST(){}
 
   static interface ASTNode{}
+  static interface Tree{}
+  static interface Evaluator{
+    Object eval(Tree tree);
+  }
 
   static class ValNode implements ASTNode {
     final Number value;
@@ -29,7 +33,7 @@ public class AST {
     }
   }
 
-  static class VmyAST{
+  static class VmyAST implements Tree{
     private ASTNode root;
   }
 
@@ -64,11 +68,24 @@ public class AST {
     void handle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
   }
 
-  private static abstract class BaseHandler implements TokenHandler{
+
+  private static abstract class BaseHandler implements TokenHandler, Utils.Recursive{
     private BaseHandler next;
+
+    private BaseHandler head;
 
     public void setNext(final BaseHandler _next){
       next = _next;
+    }
+
+    public void setHead(BaseHandler _head){
+      head = _head;
+    }
+
+    final protected void recall(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
+      if(Objects.isNull(head))
+        throw new Utils.RecursiveException("can't do recall head is not exists!");
+      head.handle(token, remains, operatorStack, nodesStack);
     }
 
     @Override
@@ -107,7 +124,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.DIVIDE, token)){
+      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)){
         operatorStack.add(token.value);
       }else if(operatorEquals(Identifiers.MULTI, token)){
         if(!remains.hasNext()) 
@@ -115,11 +132,16 @@ public class AST {
         if(nodesStack.isEmpty())
           throw new ASTProcessingException("*(multiply) left side not exists");
         ASTNode left = nodesStack.pop();
-        getTokenHandler().handle(remains.next(), remains, operatorStack, nodesStack);
+        // getTokenHandler().handle(remains.next(), remains, operatorStack, nodesStack);
+        recall(remains.next(), remains, operatorStack, nodesStack);
         nodesStack.add(new CommonNode(Identifiers.MULTI, left, nodesStack.pop()));
       }else if(operatorEquals(Identifiers.OpenParenthesis, token)){
         operatorStack.add(token.value);
-      }else if(operatorEquals(Identifiers.ClosingParenthesis, token)){
+        Token nextToken;
+        while(remains.hasNext() && !operatorEquals(Identifiers.ClosingParenthesis, nextToken = remains.next())){
+          recall(nextToken, remains, operatorStack, nodesStack);
+        }
+      // }else if(operatorEquals(Identifiers.ClosingParenthesis, token)){
         if(nodesStack.isEmpty()) 
           throw new ASTProcessingException(") (closing parenthesis) has no content");
         ASTNode mergeNode = nodesStack.pop();
@@ -133,7 +155,7 @@ public class AST {
           mergeNode = new CommonNode(operator, asLeft, mergeNode);
         }
         if(operatorStack.isEmpty() || !operatorStack.peek().equals(Identifiers.OpenParenthesis))
-          throw new ASTProcessingException("error at processing parentthesise");
+          throw new ASTProcessingException("error at processing parenthesise");
         operatorStack.pop();
         nodesStack.add(mergeNode);
       }else
@@ -176,14 +198,45 @@ public class AST {
     TokenHandler build(){
       if(handlers.isEmpty()) return null;
       BaseHandler head = handlers.get(0);
+      head.setHead(head);
       BaseHandler walk = head;
       for(int i=1; i<handlers.size(); i++){
         BaseHandler current = handlers.get(i);
+        current.setHead(head);
         walk.setNext(current);
         walk = current;
       }
       return head;
     }
+  }
+
+  static class VmyTreeEvaluator implements Evaluator{
+
+    @Override
+    public Object eval(Tree tree) {
+      if(tree instanceof VmyAST ast){
+        return evalsub(ast.root);
+      }else
+        throw new EvaluatException("unrecongnized AST");
+    }
+
+    Object evalsub(ASTNode node){
+      if(node instanceof ValNode val){
+        return val.value;
+      }else if(node instanceof CommonNode common){
+        Object left = evalsub(common.left);
+        Object right  = evalsub(common.right);
+        if(Objects.isNull(right) || Objects.isNull(left))
+          throw new EvaluatException(common.OP + " can't handle null object");
+        Ops op = Ops.OpsMapper.get(common.OP);
+        if(Objects.isNull(op))
+          throw new EvaluatException("op(" + common.OP + ") not support!");
+        return Objects.nonNull(op) ? op.apply(left, right) : null;
+      }else 
+        throw new EvaluatException("unrecognizable AST node");
+    }
+
+    
   }
   
 }
