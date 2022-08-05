@@ -27,6 +27,14 @@ public enum Ops {
     public Object apply(Object obj1, Object obj2) {
       return shortStrategeApply(obj1, obj2, "multi");
     }
+  },
+  DIVIDE {
+
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      return shortStrategeApply(obj1, obj2, "divide");
+    }
+
   }
   ;
 
@@ -37,16 +45,17 @@ public enum Ops {
       Map.of(
         Identifiers.ADD, Ops.ADD,
         Identifiers.SUB, Ops.SUB,
-        Identifiers.MULTI, Ops.MULTI
+        Identifiers.MULTI, Ops.MULTI,
+        Identifiers.DIVIDE, Ops.DIVIDE
       )
     );
   }
 
   static Object shortStrategeApply(Object p1, Object p2, String name){
     if(p1 instanceof Number n1 && p2 instanceof Number n2){
-      if(n1 instanceof Integer i1 && n2 instanceof Integer i2){
+      if(n1 instanceof Integer && n2 instanceof Integer ){
         return invoke(p1, p2, name, int.class);
-      }else if(n1 instanceof Double i1 && n2 instanceof Double i2){
+      }else if(n1 instanceof Double  && n2 instanceof Double ){
         return invoke(p1, p2, name, double.class);
       }else{
         return invoke(asDouble(p1),asDouble(p2), name, double.class);
@@ -75,6 +84,14 @@ public enum Ops {
   }
   
   public abstract Object apply(Object obj1, Object obj2);
+
+  static int divide(int a, int b){
+    return a / b;
+  }
+
+  static double divide(double a, double b){
+    return a / b;
+  }
 
   static  int multi(int a, int b) {
     return a * b;
