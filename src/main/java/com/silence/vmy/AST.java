@@ -17,7 +17,7 @@ public class AST {
 
   static class ValNode implements ASTNode {
     final Number value;
-    public ValNode(final Number _val){
+    public ValNode(Number _val){
       value = _val;
     }
   }
@@ -110,7 +110,8 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      nodesStack.add(new ValNode(token.tag == Token.DOUBLE_V ? Double.valueOf(token.value) : Integer.valueOf(token.value)));
+//      nodesStack.add(new ValNode(token.tag == Token.DOUBLE_V ? Double.parseDouble(token.value) : Integer.parseInt(token.value)));
+      nodesStack.add(token.tag == Token.DOUBLE_V ? new ValNode( Double.parseDouble(token.value) ) : new ValNode(Integer.parseInt(token.value)));
     }
 
   }
@@ -126,7 +127,7 @@ public class AST {
     public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)){
         operatorStack.add(token.value);
-      }else if(operatorEquals(Identifiers.MULTI, token)){
+      }else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token)){
         if(!remains.hasNext()) 
           throw new ASTProcessingException("*(multiply) doesn't have right side");
         if(nodesStack.isEmpty())
@@ -134,7 +135,7 @@ public class AST {
         ASTNode left = nodesStack.pop();
         // getTokenHandler().handle(remains.next(), remains, operatorStack, nodesStack);
         recall(remains.next(), remains, operatorStack, nodesStack);
-        nodesStack.add(new CommonNode(Identifiers.MULTI, left, nodesStack.pop()));
+        nodesStack.add(new CommonNode(token.value, left, nodesStack.pop()));
       }else if(operatorEquals(Identifiers.OpenParenthesis, token)){
         operatorStack.add(token.value);
         Token nextToken;
