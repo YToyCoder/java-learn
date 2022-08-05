@@ -33,7 +33,7 @@ public class AST {
     private ASTNode root;
   }
 
-  static VmyAST build(List<Token> tokens){
+  public static VmyAST build(List<Token> tokens){
     Stack<String> operatorStack = new Stack<>();
     Stack<ASTNode> nodesStack = new Stack<>();
     Iterator<Token> tokenIterator = tokens.iterator();
@@ -53,6 +53,8 @@ public class AST {
           final ASTNode asLeft = nodesStack.pop();
           merge = new CommonNode(operator, asLeft, merge);
       }
+      if(!nodesStack.isEmpty() || !operatorStack.isEmpty())
+        throw new ASTProcessingException("expression wrong");
       ast.root = merge;
     }
     return ast;
@@ -78,7 +80,7 @@ public class AST {
     }
     
     public abstract boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack); 
-    public abstract void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack); 
+    public abstract void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
 
   }
 
@@ -100,39 +102,37 @@ public class AST {
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      return token.tag == Token.OP;
+      return token.tag == Token.Identifier;
     }
 
     @Override
     public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      if(operatorEquals(Operators.ADD, token) || operatorEquals(Operators.DIVIDE, token)){
+      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.DIVIDE, token)){
         operatorStack.add(token.value);
-      }else if(operatorEquals(Operators.MULTI, token)){
+      }else if(operatorEquals(Identifiers.MULTI, token)){
         if(!remains.hasNext()) 
           throw new ASTProcessingException("*(multiply) doesn't have right side");
-        Token right = remains.next();
-        if(right.tag == Token.OP)
-          throw new ASTProcessingException("*(multiply) right side should be a value type, not operator");
         if(nodesStack.isEmpty())
           throw new ASTProcessingException("*(multiply) left side not exists");
         ASTNode left = nodesStack.pop();
-        nodesStack.add(new CommonNode(Operators.MULTI, left, token2ValNode(token)));
-      }else if(operatorEquals(Operators.OpenParenthesis, token)){
+        getTokenHandler().handle(remains.next(), remains, operatorStack, nodesStack);
+        nodesStack.add(new CommonNode(Identifiers.MULTI, left, nodesStack.pop()));
+      }else if(operatorEquals(Identifiers.OpenParenthesis, token)){
         operatorStack.add(token.value);
-      }else if(operatorEquals(Operators.ClosingParenthesis, token)){
+      }else if(operatorEquals(Identifiers.ClosingParenthesis, token)){
         if(nodesStack.isEmpty()) 
           throw new ASTProcessingException(") (closing parenthesis) has no content");
         ASTNode mergeNode = nodesStack.pop();
         while(
           !operatorStack.isEmpty() && 
           !nodesStack.isEmpty() && 
-          !operatorStack.peek().equals(Operators.OpenParenthesis)
+          !operatorStack.peek().equals(Identifiers.OpenParenthesis)
         ){
           final String operator = operatorStack.pop();
           final ASTNode asLeft = nodesStack.pop();
           mergeNode = new CommonNode(operator, asLeft, mergeNode);
         }
-        if(!operatorStack.peek().equals(Operators.OpenParenthesis))
+        if(operatorStack.isEmpty() || !operatorStack.peek().equals(Identifiers.OpenParenthesis))
           throw new ASTProcessingException("error at processing parentthesise");
         operatorStack.pop();
         nodesStack.add(mergeNode);
@@ -169,6 +169,7 @@ public class AST {
   static class HandlerBuilder {
     private List<BaseHandler> handlers = new LinkedList<>();
     HandlerBuilder next(final BaseHandler next){
+      handlers.add(next);
       return this;
     }
 
