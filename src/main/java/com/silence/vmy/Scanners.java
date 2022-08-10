@@ -14,22 +14,29 @@ public class Scanners {
     }
 
     public VmyScanner(String _source, SourceStringHandler _handler){
-      this.handler = _handler;
-      this.source = _source;
-      this.tokens = new LinkedList<>();
+      this(_source, _handler, new LinkedList<>());
     } 
+
+    public VmyScanner(String _source, SourceStringHandler _handler, List<Token> _Tokens){
+      source = _source;
+      handler = _handler;
+      tokens = _Tokens;
+    }
+
+    public VmyScanner(List<Token> _Tokens){
+      this("", null, _Tokens);
+    }
 
     @Override
     public List<Token> scan(final String source) {
       int walk = 0;
-      List<Token> tokens = new LinkedList<>();
       while(walk < source.length()){
         walk = handler.handle(tokens, source, walk);
       }
       return tokens;
     }
 
-    private final LinkedList<Token> tokens;
+    private final List<Token> tokens;
     private final String source;
     private int pos;
 
@@ -37,12 +44,14 @@ public class Scanners {
     public Token peek() {
       if(tokens.isEmpty())
         doScan();
-      return tokens.getFirst();
+      return tokens.get(0);
     }
 
     @Override
     public Token next() {
-      return tokens.removeFirst();
+      if(tokens.isEmpty())
+        doScan();
+      return tokens.remove(0);
     }
 
     @Override
@@ -57,13 +66,13 @@ public class Scanners {
   }
 
   static Scanner scanner(String source){
-    return null;
+    return new VmyScanner(source, getHandler());
   }
 
   static final VmyScanner SCANNER = new VmyScanner(getHandler());
 
   public static List<Token> scan(final String source){
-    return SCANNER.scan(source);
+    return scanner(source).scan(source);
   }
 
   static SourceStringHandler HANDLER;
