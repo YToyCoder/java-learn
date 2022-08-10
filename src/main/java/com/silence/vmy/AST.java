@@ -47,7 +47,7 @@ public class AST {
     }
   }
 
-  // node for Indentifier , like variable-name/function-name ... 
+  // node for Identifier , like variable-name/function-name ...
   static class IdentifierNode implements ASTNode {
     final String value;
     public IdentifierNode(String _val){
@@ -58,10 +58,16 @@ public class AST {
   // node for Declaration, like let a : Type , val a : Type
   static class DeclareNode implements ASTNode {
     final String declare;
+    final String type;
     final IdentifierNode identifier;
-    public DeclareNode(String _declare, IdentifierNode _identifier){
+    public DeclareNode(String _declare, IdentifierNode _identifier, String _type){
       declare = _declare;
       identifier = _identifier;
+      type =_type;
+    }
+
+    public DeclareNode(String _declare, IdentifierNode _identifier){
+      this(_declare, _identifier, null);
     }
   }
 
@@ -185,7 +191,7 @@ public class AST {
         ){
           final String operator = operatorStack.pop();
           final ASTNode asLeft = nodesStack.pop();
-          mergeNode = new CommonNode(operator, asLeft, mergeNode);
+          mergeNode = mergeTwoNodes(asLeft, mergeNode, operator);
         }
         if(operatorStack.isEmpty() || !operatorStack.peek().equals(Identifiers.OpenParenthesis))
           throw new ASTProcessingException("error at processing parenthesise");
@@ -195,6 +201,66 @@ public class AST {
         throw new ASTProcessingException("not support operator " + token.value);
     }
 
+  }
+
+  // handle the expression like
+  //    let a : Int = 2 or
+  //    b = 1
+  static class AssignmentHandler extends BaseHandler {
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return token.tag == Token.Assignment;
+    }
+
+    @Override
+    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      // =
+      // 1 get the variable name or a declaration
+      ASTNode variable;
+      if(
+          nodesStack.isEmpty() ||
+          !((variable = nodesStack.pop()) instanceof DeclareNode) ||
+          !(variable instanceof IdentifierNode)
+      )
+        throw new ASTProcessingException("assignment has no variable or declare expression");
+      operatorStack.add(token.value);
+      Token nextToken;
+      while(remains.hasNext() && (nextToken = remains.next()).tag != Token.NewLine){
+        recall(nextToken, remains, operatorStack, nodesStack);
+      }
+      // build it
+      if(nodesStack.isEmpty())
+        throw  new ASTProcessingException("assignment has no value expression");
+      ASTNode the_value = nodesStack.pop();
+      while(!operatorStack.isEmpty() && !Objects.equals( operatorStack.peek(), Identifiers.Assignment)){
+        the_value = mergeTwoNodes(nodesStack.pop(), the_value, operatorStack.pop());
+      }
+      nodesStack.add(new AssignNode(variable, the_value));
+      operatorStack.pop();
+    }
+  }
+
+  // handle declaration expression, like
+  //      let a , or
+  //      let a : Int , or
+  //      val a , or
+  //      val a : Int
+  static class DeclarationHandle extends BaseHandler {
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return token.tag == Token.Declaration;
+    }
+
+    @Override
+    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      Token identifier;
+      if((identifier = remains.next()).tag != Token.Identifier)
+        throw new ASTProcessingException("declaration has no right identifier " + identifier.value);
+    }
+  }
+
+  static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
+    return new CommonNode(_op, left, right);
   }
 
   static ValNode token2ValNode(final Token token){
@@ -218,6 +284,7 @@ public class AST {
     HANDLER = new HandlerBuilder()
     .next(new NumberHandler())
     .next(new OperatorHandler())
+    .next(new AssignmentHandler())
     .build();
   }
 
@@ -250,7 +317,7 @@ public class AST {
       if(tree instanceof VmyAST ast){
         return evalsub(ast.root);
       }else
-        throw new EvaluatException("unrecongnized AST");
+        throw new EvaluatException("unrecognized AST");
     }
 
     Object evalsub(ASTNode node){
