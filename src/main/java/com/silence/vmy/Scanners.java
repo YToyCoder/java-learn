@@ -10,8 +10,14 @@ public class Scanners {
     private final SourceStringHandler handler;
 
     public VmyScanner(final SourceStringHandler handler){
-      this.handler = handler;
+      this("", handler);
     }
+
+    public VmyScanner(String _source, SourceStringHandler _handler){
+      this.handler = _handler;
+      this.source = _source;
+      this.tokens = new LinkedList<>();
+    } 
 
     @Override
     public List<Token> scan(final String source) {
@@ -23,6 +29,35 @@ public class Scanners {
       return tokens;
     }
 
+    private final LinkedList<Token> tokens;
+    private final String source;
+    private int pos;
+
+    @Override
+    public Token peek() {
+      if(tokens.isEmpty())
+        doScan();
+      return tokens.getFirst();
+    }
+
+    @Override
+    public Token next() {
+      return tokens.removeFirst();
+    }
+
+    @Override
+    public boolean hasNext() {
+      return !tokens.isEmpty() || pos < source.length();
+    }
+
+    void doScan(){
+      pos = handler.handle(tokens, source, pos);
+    }
+
+  }
+
+  static Scanner scanner(String source){
+    return null;
   }
 
   static final VmyScanner SCANNER = new VmyScanner(getHandler());
