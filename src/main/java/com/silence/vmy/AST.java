@@ -308,11 +308,26 @@ public class AST {
     return HANDLER;
   }
 
+  // when all the other handler can't handle this token throw out an ASTProcessingException
+  static class DefaultHandler extends BaseHandler {
+
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return true;
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      throw new ASTProcessingException("not support token for " + String.format("tag %d token %s", token.tag, token.value));
+    }
+  }
+
   static void buildHandler(){
     HANDLER = new HandlerBuilder()
     .next(new NumberHandler())
     .next(new OperatorHandler())
     .next(new AssignmentHandler())
+    .next(new DefaultHandler())
     .build();
   }
 
