@@ -16,6 +16,11 @@ final public class Identifiers {
   public static final String DIVIDE = "/";
   public static final String OpenParenthesis = "(";
   public static final String ClosingParenthesis   = ")";
+  public static final String NewLine = "\r\n";
+  public static final String Assignment = "=";
+  public static final String Equals = "==";
+  public static final String ConstDeclaration = "val";
+  public static final String VarDeclaration = "let";
   
   static{
     // set builtinOperators
