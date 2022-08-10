@@ -30,7 +30,7 @@ public class ScannerTest {
     var identifiers = Identifiers.operatorCharacters;
     oneCharSource.forEach((k, v) -> {
       List<Token> tokens = Scanners.scan(v);
-      assertTrue(v + "length should be 1", tokens.size() == 1);
+      assertTrue(v + "length should be 1, but is " + tokens.size(), tokens.size() == 1);
       assertEquals(v, (long)tokens.get(0).tag, (long)k);
       assertEquals(v, tokens.get(0).value, v.trim());
     });
