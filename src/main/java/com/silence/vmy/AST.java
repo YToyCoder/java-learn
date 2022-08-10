@@ -75,13 +75,41 @@ public class AST {
     private ASTNode root;
   }
 
+  // main for support old version test
   public static VmyAST build(List<Token> tokens){
     Stack<String> operatorStack = new Stack<>();
     Stack<ASTNode> nodesStack = new Stack<>();
     Iterator<Token> tokenIterator = tokens.iterator();
+    Scanner scanner = new Scanners.VmyScanner(tokens);
     TokenHandler handler = getTokenHandler();
     while(tokenIterator.hasNext()){
-      handler.handle(tokenIterator.next(), tokenIterator, operatorStack, nodesStack);
+      handler.handle(scanner.next(), scanner, operatorStack, nodesStack);
+    }
+    VmyAST ast = new VmyAST();
+    // todo
+    if(!nodesStack.isEmpty()){
+      ASTNode merge = nodesStack.pop();
+      while(
+        !operatorStack.isEmpty() && 
+        !nodesStack.isEmpty()
+      ){
+          final String operator = operatorStack.pop();
+          final ASTNode asLeft = nodesStack.pop();
+          merge = new CommonNode(operator, asLeft, merge);
+      }
+      if(!nodesStack.isEmpty() || !operatorStack.isEmpty())
+        throw new ASTProcessingException("expression wrong");
+      ast.root = merge;
+    }
+    return ast;
+  }
+
+  public static VmyAST build(Scanner scanner){
+    Stack<String> operatorStack = new Stack<>();
+    Stack<ASTNode> nodesStack = new Stack<>();
+    TokenHandler handler = getTokenHandler();
+    while(scanner.hasNext()){
+      handler.handle(scanner.next(), scanner, operatorStack, nodesStack);
     }
     VmyAST ast = new VmyAST();
     // todo
@@ -103,7 +131,7 @@ public class AST {
   }
 
   static interface TokenHandler{
-    void handle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
+    void handle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
   }
 
 
@@ -120,14 +148,14 @@ public class AST {
       head = _head;
     }
 
-    final protected void recall(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
+    final protected void recall(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
       if(Objects.isNull(head))
         throw new Utils.RecursiveException("can't do recall head is not exists!");
       head.handle(token, remains, operatorStack, nodesStack);
     }
 
     @Override
-    final public void handle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
+    final public void handle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
       if(canHandle(token, operatorStack, nodesStack))
         doHandle(token, remains, operatorStack, nodesStack);
       else if(Objects.nonNull(next))
@@ -135,7 +163,7 @@ public class AST {
     }
     
     public abstract boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack); 
-    public abstract void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
+    public abstract void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
 
   }
 
@@ -147,7 +175,7 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
 //      nodesStack.add(new ValNode(token.tag == Token.DOUBLE_V ? Double.parseDouble(token.value) : Integer.parseInt(token.value)));
       nodesStack.add(token.tag == Token.DOUBLE_V ? new ValNode( Double.parseDouble(token.value) ) : new ValNode(Integer.parseInt(token.value)));
     }
@@ -162,7 +190,7 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)){
         operatorStack.add(token.value);
       }else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token)){
@@ -213,7 +241,7 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       // =
       // 1 get the variable name or a declaration
       ASTNode variable;
@@ -252,7 +280,7 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Iterator<Token> remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       Token identifier;
       if((identifier = remains.next()).tag != Token.Identifier)
         throw new ASTProcessingException("declaration has no right identifier " + identifier.value);
