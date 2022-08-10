@@ -33,6 +33,38 @@ public class AST {
     }
   }
 
+  // node for assignment
+  // like : 
+  //      let a : Type = 1
+  //      a = 2
+  static class AssignNode implements ASTNode {
+    ASTNode variable;
+    ASTNode expression;
+
+    public AssignNode(ASTNode _variable, ASTNode expr){
+      variable = _variable;
+      expression = expr;
+    }
+  }
+
+  // node for Indentifier , like variable-name/function-name ... 
+  static class IdentifierNode implements ASTNode {
+    final String value;
+    public IdentifierNode(String _val){
+      value = _val;
+    }
+  }
+
+  // node for Declaration, like let a : Type , val a : Type
+  static class DeclareNode implements ASTNode {
+    final String declare;
+    final IdentifierNode identifier;
+    public DeclareNode(String _declare, IdentifierNode _identifier){
+      declare = _declare;
+      identifier = _identifier;
+    }
+  }
+
   static class VmyAST implements Tree{
     private ASTNode root;
   }
