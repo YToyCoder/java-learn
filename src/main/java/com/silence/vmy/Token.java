@@ -11,4 +11,7 @@ public class Token {
   static final int INT_V = 0;
   static final int DOUBLE_V = 1;
   static final int Identifier = 2;
+  static final int Assignment = 3;
+  static final int NewLine = 4;
+  static final int Declaration = 5;
 }
