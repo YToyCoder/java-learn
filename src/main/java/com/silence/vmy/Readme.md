@@ -1,10 +1,16 @@
 ### vmy language
 
-**buildin feature**
+**builtin feature**
 
-1. buildin type
+1. builtin type
 
-`Int`, `Double`, `Bool`, `Char`
+**primitive type**
+
+`Int`, `Double`, `Bool`, `Char`, `String`
+
+**hierarchy structure**
+
+`Table` 
 
 ### todo
 
