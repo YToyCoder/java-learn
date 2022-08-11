@@ -15,14 +15,14 @@ public class AST {
     Object eval(Tree tree);
   }
 
-  static class ValNode implements ASTNode {
+  private static class ValNode implements ASTNode {
     final Number value;
     public ValNode(Number _val){
       value = _val;
     }
   }
 
-  static class CommonNode implements ASTNode{
+  private static class CommonNode implements ASTNode{
     final String OP;
     ASTNode left;
     ASTNode right;
@@ -37,7 +37,7 @@ public class AST {
   // like : 
   //      let a : Type = 1
   //      a = 2
-  static class AssignNode implements ASTNode {
+  private static class AssignNode implements ASTNode {
     ASTNode variable;
     ASTNode expression;
 
@@ -48,7 +48,7 @@ public class AST {
   }
 
   // node for Identifier , like variable-name/function-name ...
-  static class IdentifierNode implements ASTNode {
+  private static class IdentifierNode implements ASTNode {
     final String value;
     public IdentifierNode(String _val){
       value = _val;
@@ -56,7 +56,7 @@ public class AST {
   }
 
   // node for Declaration, like let a : Type , val a : Type
-  static class DeclareNode implements ASTNode {
+  private static class DeclareNode implements ASTNode {
     final String declare;
     final String type;
     final IdentifierNode identifier;
@@ -168,7 +168,7 @@ public class AST {
 
   }
 
-  static class NumberHandler extends BaseHandler{
+  private static class NumberHandler extends BaseHandler{
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
@@ -183,7 +183,7 @@ public class AST {
 
   }
 
-  static class OperatorHandler extends BaseHandler{
+  private static class OperatorHandler extends BaseHandler{
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
@@ -234,7 +234,7 @@ public class AST {
   }
 
   // handle name like variable name
-  static class VariableNameHandler extends BaseHandler{
+  private static class VariableNameHandler extends BaseHandler{
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return token.tag == Token.Identifier && token.value.chars().reduce(0, (old, el) -> (Identifiers.identifiers.contains((char)el) ? 0 : -1) + old ) == 0;
@@ -249,7 +249,7 @@ public class AST {
   // handle the expression like
   //    let a : Int = 2 or
   //    b = 1
-  static class AssignmentHandler extends BaseHandler {
+  private static class AssignmentHandler extends BaseHandler {
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return token.tag == Token.Assignment;
@@ -290,7 +290,7 @@ public class AST {
   //      let a : Int , or
   //      val a , or
   //      val a : Int
-  static class DeclarationHandler extends BaseHandler {
+  private static class DeclarationHandler extends BaseHandler {
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return token.tag == Token.Declaration;
@@ -312,29 +312,29 @@ public class AST {
     }
   }
 
-  static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
+  private static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
     return new CommonNode(_op, left, right);
   }
 
-  static ValNode token2ValNode(final Token token){
+  private static ValNode token2ValNode(final Token token){
     return token.tag == Token.DOUBLE_V ? new ValNode(Double.valueOf(token.value)) : new ValNode(Integer.valueOf(token.value));
   }
 
-  static boolean operatorEquals(final String operator, final Token token){
+  private static boolean operatorEquals(final String operator, final Token token){
     return Objects.equals(operator, token.value);
   }
 
   // a static instance
   private static TokenHandler HANDLER;
 
-  static TokenHandler getTokenHandler(){
+  private static TokenHandler getTokenHandler(){
     if(Objects.isNull(HANDLER))
       buildHandler();
     return HANDLER;
   }
 
   // when all the other handler can't handle this token throw out an ASTProcessingException
-  static class DefaultHandler extends BaseHandler {
+  private static class DefaultHandler extends BaseHandler {
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
@@ -347,7 +347,7 @@ public class AST {
     }
   }
 
-  static void buildHandler(){
+  private static void buildHandler(){
     HANDLER = new HandlerBuilder()
     .next(new NumberHandler())
     .next(new OperatorHandler())
@@ -380,7 +380,13 @@ public class AST {
     }
   }
 
-  static class VmyTreeEvaluator implements Evaluator{
+  public static Evaluator defaultTreeEvaluator() {
+    return Evaluator;
+  }
+
+  private static VmyTreeEvaluator Evaluator = new VmyTreeEvaluator();
+
+  private static class VmyTreeEvaluator implements Evaluator{
     private Global  _g = Global.getInstance();
 
     @Override
