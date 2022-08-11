@@ -412,9 +412,19 @@ public class AST {
       }else if(node instanceof AssignNode assignment){
         String variable_name = (String) evalsub(assignment.variable);
         Object value = evalsub(assignment.expression);
+        if(value instanceof String value_name){
+          if(!_g.exists(value_name))
+            throw new EvaluatException(String.format("variable (%s) not exists", variable_name));
+          value = _g.get(value_name);
+        }
         _g.put(variable_name, value);
         return value;
-      } else
+      } else if(node instanceof DeclareNode declaration){
+        _g.put(declaration.identifier.value, null);
+        return declaration.identifier.value;
+      }else if(node instanceof IdentifierNode identifier){
+        return identifier.value;
+      }else
         throw new EvaluatException("unrecognizable AST node");
     }
 

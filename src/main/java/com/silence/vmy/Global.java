@@ -20,6 +20,10 @@ public class Global {
     }
   }
 
+  public boolean exists(String _name){
+    return primitives.containsKey(_name);
+  }
+
   public Object get(String _name){
     return primitives.get(_name);
   }
