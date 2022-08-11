@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public enum Ops {
+public enum BinaryOps {
   ADD{
 
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return shortStrategeApply(obj1, obj2, "add");
+      return shortStrategyApply(obj1, obj2, "add");
     }
 
   },
@@ -18,40 +18,40 @@ public enum Ops {
 
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return shortStrategeApply(obj1, obj2, "sub");
+      return shortStrategyApply(obj1, obj2, "sub");
     }
 
   },
   MULTI {
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return shortStrategeApply(obj1, obj2, "multi");
+      return shortStrategyApply(obj1, obj2, "multi");
     }
   },
   DIVIDE {
 
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return shortStrategeApply(obj1, obj2, "divide");
+      return shortStrategyApply(obj1, obj2, "divide");
     }
 
   }
   ;
 
-  static final Map<String, Ops> OpsMapper = new HashMap<>();
+  static final Map<String, BinaryOps> OpsMapper = new HashMap<>();
 
   static {
     OpsMapper.putAll(
       Map.of(
-        Identifiers.ADD, Ops.ADD,
-        Identifiers.SUB, Ops.SUB,
-        Identifiers.MULTI, Ops.MULTI,
-        Identifiers.DIVIDE, Ops.DIVIDE
+        Identifiers.ADD, BinaryOps.ADD,
+        Identifiers.SUB, BinaryOps.SUB,
+        Identifiers.MULTI, BinaryOps.MULTI,
+        Identifiers.DIVIDE, BinaryOps.DIVIDE
       )
     );
   }
 
-  static Object shortStrategeApply(Object p1, Object p2, String name){
+  static Object shortStrategyApply(Object p1, Object p2, String name){
     if(p1 instanceof Number n1 && p2 instanceof Number n2){
       if(n1 instanceof Integer && n2 instanceof Integer ){
         return invoke(p1, p2, name, int.class);

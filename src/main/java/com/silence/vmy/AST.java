@@ -381,6 +381,7 @@ public class AST {
   }
 
   static class VmyTreeEvaluator implements Evaluator{
+    private Global  _g = Global.getInstance();
 
     @Override
     public Object eval(Tree tree) {
@@ -398,15 +399,19 @@ public class AST {
         Object right  = evalsub(common.right);
         if(Objects.isNull(right) || Objects.isNull(left))
           throw new EvaluatException(common.OP + " can't handle null object");
-        Ops op = Ops.OpsMapper.get(common.OP);
+        BinaryOps op = BinaryOps.OpsMapper.get(common.OP);
         if(Objects.isNull(op))
           throw new EvaluatException("op(" + common.OP + ") not support!");
         return Objects.nonNull(op) ? op.apply(left, right) : null;
-      }else 
+      }else if(node instanceof AssignNode assignment){
+        String variable_name = (String) evalsub(assignment.variable);
+        Object value = evalsub(assignment.expression);
+        _g.put(variable_name, value);
+        return value;
+      } else
         throw new EvaluatException("unrecognizable AST node");
     }
 
-    
   }
   
 }

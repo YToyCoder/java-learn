@@ -22,7 +22,7 @@ public class Utils {
   }
 
   public static MethodHandle getOpsStaticMethod(final String name, Class<?> ...types){
-    return getStaticMethod(Ops.class, name, types);
+    return getStaticMethod(BinaryOps.class, name, types);
   }
 
   static final MethodHandles.Lookup lookup = MethodHandles.lookup();
