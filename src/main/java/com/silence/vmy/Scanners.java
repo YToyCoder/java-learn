@@ -116,7 +116,8 @@ public class Scanners {
       final StringBuilder identifierBuilder = new StringBuilder().append(source.charAt(start++));
       while(start < source.length() && Identifiers.operatorCharacters.contains(source.charAt(start)))
         identifierBuilder.append(source.charAt(start++));
-      tokens.add(new Token(Token.Identifier, identifierBuilder.toString()));
+      final String identifier_string = identifierBuilder.toString();
+      tokens.add(new Token( Objects.equals(identifier_string, "=") ? Token.Assignment : Token.Identifier, identifier_string));
       return start;
     }
   }
@@ -208,6 +209,7 @@ public class Scanners {
     .next(new NumberHandler())
     .next(new OperatorHandler())
     .next(new BlackHandler())
+//        .next(new )
     .next(new DeclarationHandler())
     .next(new DefaultHandler())
     .build();

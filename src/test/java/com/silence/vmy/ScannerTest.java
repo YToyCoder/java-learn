@@ -89,4 +89,26 @@ public class ScannerTest {
     }
   }
 
+  // test token like : a = b
+  @Test
+  public  void assignmentTest(){
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Assignment,"=")
+        },
+        Scanners.scan(" = ").toArray(new Token[0])
+    );
+  }
+
+  @Test
+  public void declarationTest(){
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Declaration, "let"),
+            new Token(Token.Declaration, "val")
+        },
+        Scanners.scan("let val").toArray(new Token[0])
+    );
+  }
+
 }
