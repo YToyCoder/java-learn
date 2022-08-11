@@ -6,7 +6,10 @@ import java.util.WeakHashMap;
 public class Runtime {
   private Runtime(){}
 
-
+  public static interface Variable {
+    VmyType getType();
+    Object getValue();
+  }
 
   static class DefaultOPool implements ObjPool {
     private Map<Long, Object> objectMapper = new WeakHashMap<>();
