@@ -3,7 +3,7 @@ package com.silence.vmy;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Global {
+public class Global implements Frame {
   private Global(){}
 
   private static Global INSTANCE = new Global();
@@ -26,5 +26,10 @@ public class Global {
 
   public Object get(String _name){
     return primitives.get(_name);
+  }
+
+  @Override
+  public Runtime.Variable local(String _name) {
+    return null;
   }
 }
