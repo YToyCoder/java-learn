@@ -20,15 +20,19 @@ now support:
 
 1 + 2 * (3 + 4)
 
-next support: 
 
-1. variable declaration 
+2. variable declaration 
 
 let a : Int; # variable
 
 val a : Int; # const variable
  
-2. assignment
+3. assignment
  
 let a : Int = 1;
  
+**next support**
+
+1. valid type support at runtime
+
+2. full val declaration support
