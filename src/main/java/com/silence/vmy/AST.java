@@ -104,6 +104,7 @@ public class AST {
     return ast;
   }
 
+  // new version
   public static VmyAST build(Scanner scanner){
     Stack<String> operatorStack = new Stack<>();
     Stack<ASTNode> nodesStack = new Stack<>();
@@ -273,7 +274,7 @@ public class AST {
   //      let a : Int , or
   //      val a , or
   //      val a : Int
-  static class DeclarationHandle extends BaseHandler {
+  static class DeclarationHandler extends BaseHandler {
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return token.tag == Token.Declaration;
@@ -327,6 +328,7 @@ public class AST {
     .next(new NumberHandler())
     .next(new OperatorHandler())
     .next(new AssignmentHandler())
+    .next(new DeclarationHandler())
     .next(new DefaultHandler())
     .build();
   }

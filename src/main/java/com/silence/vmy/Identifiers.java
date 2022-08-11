@@ -30,11 +30,12 @@ final public class Identifiers {
     builtinIdentifiers.add(DIVIDE);
     builtinIdentifiers.add(OpenParenthesis);
     builtinIdentifiers.add(ClosingParenthesis);
+    builtinIdentifiers.add(Equals);
     operatorCharacters.addAll(
         Set.of('+','-', '*','/',':','?','%','>','<','|','^','&','~')
     );
     commonIdentifiers.addAll(
-        Set.of('(',')')
+        Set.of('(',')', '=')
     );
   }
 

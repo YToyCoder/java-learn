@@ -175,6 +175,22 @@ public class Scanners {
     }
   }
 
+  static final class DeclarationHandler extends  BaseHandler {
+    @Override
+    protected boolean canHandle(List<Token> tokens, String source, int start) {
+      // let val
+      final String maybeDeclaration = source.substring(start, start + 3);
+      return Objects.equals(maybeDeclaration, Identifiers.ConstDeclaration) || Objects.equals(maybeDeclaration, Identifiers.VarDeclaration);
+    }
+
+    @Override
+    protected int doHandle(List<Token> tokens, String source, int start) {
+      // let val
+      tokens.add(new Token(Token.Declaration, source.substring(start, start + 3)));
+      return start + 3;
+    }
+  }
+
 
   static SourceStringHandler getHandler(){
     if(Objects.isNull(HANDLER)) 
@@ -187,6 +203,7 @@ public class Scanners {
     .next(new NumberHandler())
     .next(new OperatorHandler())
     .next(new BlackHandler())
+    .next(new DeclarationHandler())
     .next(new DefaultHandler())
     .build();
   }
