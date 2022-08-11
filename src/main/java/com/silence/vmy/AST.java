@@ -285,6 +285,14 @@ public class AST {
       Token identifier;
       if((identifier = remains.next()).tag != Token.Identifier)
         throw new ASTProcessingException("declaration has no right identifier " + identifier.value);
+      if(remains.hasNext() && Objects.equals( remains.peek().value, Identifiers.Colon)){
+        remains.next();
+        if(remains.hasNext() && remains.peek().tag != Token.Identifier)
+          throw new ASTProcessingException(remains.peek().value + " is not a valid type");
+        Token type = remains.next();
+        nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value) , type.value));
+      }else
+        nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value)));
     }
   }
 

@@ -27,7 +27,7 @@ public class Utils {
 
   static final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
-  // a mark that represet can be called recursive
+  // a mark that represent can be called recursive
   // @see
   static interface Recursive{}
 
@@ -66,6 +66,10 @@ public class Utils {
     }
 
     private final int level;
+
+    public int level(){
+      return level;
+    }
   }
 
 }

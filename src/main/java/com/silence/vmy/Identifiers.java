@@ -28,7 +28,7 @@ final public class Identifiers {
   public static final String Equals = "==";
   public static final String ConstDeclaration = "val";
   public static final String VarDeclaration = "let";
-  
+  public static final String Colon = ":";
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);

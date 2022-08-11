@@ -60,11 +60,24 @@ public class ASTTest {
   @Test
   public  void testBuildWithScanner(){
     cases4(
+        testCases,
         el -> AST.build(Scanners.scanner(el))
     );
   }
 
-  void cases4(Consumer<String> test){
-    testCases.forEach(test);
+  @Test
+  public void testDeclaration(){
+    cases4(
+        Set.of(
+            "let a",
+            "val b",
+            "val c : Int"
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
+
+  void cases4(Set<String> cases, Consumer<String> test){
+    cases.forEach(test);
   }
 }

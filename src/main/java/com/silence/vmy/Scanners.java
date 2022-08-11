@@ -207,8 +207,13 @@ public class Scanners {
     @Override
     protected boolean canHandle(List<Token> tokens, String source, int start) {
       // let val
-      final String maybeDeclaration = source.substring(start, start + 3);
-      return Objects.equals(maybeDeclaration, Identifiers.ConstDeclaration) || Objects.equals(maybeDeclaration, Identifiers.VarDeclaration);
+      final String maybeDeclaration;
+//      = source.substring(start, start + 3);
+      return source.length() - start >= 3 &&
+          (
+              Objects.equals(maybeDeclaration = source.substring(start, start + 3), Identifiers.ConstDeclaration) ||
+              Objects.equals(maybeDeclaration, Identifiers.VarDeclaration)
+          );
     }
 
     @Override
@@ -216,6 +221,28 @@ public class Scanners {
       // let | val
       tokens.add(new Token(Token.Declaration, source.substring(start, start + 3)));
       return start + 3;
+    }
+  }
+
+  // get the identifier like :
+  // a_name, b_name
+  static final class IdentifierHandler extends OrderedHandler{
+    public IdentifierHandler() {
+      super(Utils.Order.Three.level());
+    }
+
+    @Override
+    protected boolean canHandle(List<Token> tokens, String source, int start) {
+      return Identifiers.identifiers.contains(source.charAt(start));
+    }
+
+    @Override
+    protected int doHandle(List<Token> tokens, String source, int start) {
+      final int init_pos = start;
+      while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
+        start++;
+      tokens.add(new Token(Token.Identifier, source.substring(init_pos, start)));
+      return start;
     }
   }
 
@@ -233,6 +260,7 @@ public class Scanners {
     .next(new BlackHandler())
 //        .next(new )
     .next(new DeclarationHandler())
+    .next(new IdentifierHandler())
     .next(new DefaultHandler())
     .build();
   }
