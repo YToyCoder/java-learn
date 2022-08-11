@@ -175,9 +175,6 @@ public class Scanners {
     }
   }
 
-  static int handleSource(List<Token> tokens, final String source, final int start){
-    return getHandler().handle(tokens, source, start);
-  }
 
   static SourceStringHandler getHandler(){
     if(Objects.isNull(HANDLER)) 
