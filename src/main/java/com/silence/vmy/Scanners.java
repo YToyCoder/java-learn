@@ -84,6 +84,10 @@ public class Scanners {
     int handle(List<Token> tokens, final String source, final int start);
   }
 
+  /**
+   * Base Class for SourceStringHandler
+   * using ChainOfResponsibility Pattern
+   */
   static abstract class BaseHandler implements SourceStringHandler {
     private BaseHandler next;
     public void setNext(BaseHandler next){
@@ -101,6 +105,24 @@ public class Scanners {
     protected abstract boolean canHandle(List<Token> tokens, final String source, final int start);
     protected abstract int doHandle(List<Token> tokens, final String source, final int start);
 
+  }
+
+  /**
+   * <p>设置执行优先级</p>
+   * <P>如果{@code Utils#gt(a, b) == true}, b将会在a后面执行, 反之也是</P>
+   * <P>如果{@code Utils#eq(a, b) == true}, b,a执行顺序不定</P>
+   */
+  static abstract class OrderedHandler extends BaseHandler implements Ordering<OrderedHandler> {
+    private int order;
+
+    public OrderedHandler(int _order){
+      order = _order;
+    }
+
+    @Override
+    final public int compare(OrderedHandler other) {
+      return order - other.order;
+    }
   }
 
   static final class OperatorHandler extends BaseHandler{
@@ -191,7 +213,7 @@ public class Scanners {
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
-      // let val
+      // let | val
       tokens.add(new Token(Token.Declaration, source.substring(start, start + 3)));
       return start + 3;
     }

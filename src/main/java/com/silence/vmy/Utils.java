@@ -37,4 +37,35 @@ public class Utils {
     }
   }
 
+  // if two obj is equal
+  // a == b
+  public static <T extends Ordering<T>> boolean eq(T a , T b){
+    return a.compare(b) == 0;
+  }
+
+  // like : a > b
+  public static <T extends Ordering<T>> boolean gt(T a , T b){
+    return a.compare(b) > 0;
+  }
+
+  // like : a < b
+  public static <T extends Ordering<T>> boolean lt(T a , T b){
+    return a.compare(b) < 0;
+  }
+
+  static enum Order {
+    // 5 level : 1 -> 5
+    One(1),
+    Two(2),
+    Three(3),
+    Four(4),
+    Five(5);
+
+    Order(int _level){
+      level = _level;
+    }
+
+    private final int level;
+  }
+
 }
