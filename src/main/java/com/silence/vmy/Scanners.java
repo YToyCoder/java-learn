@@ -38,25 +38,28 @@ public class Scanners {
 
     private final List<Token> tokens;
     private final String source;
-    private int pos;
+    private int pos = 0;
 
     @Override
     public Token peek() {
-      if(tokens.isEmpty())
-        doScan();
+      checkNotEmpty();
       return tokens.get(0);
     }
 
     @Override
     public Token next() {
-      if(tokens.isEmpty())
-        doScan();
+      checkNotEmpty();
       return tokens.remove(0);
     }
 
     @Override
     public boolean hasNext() {
       return !tokens.isEmpty() || pos < source.length();
+    }
+
+    void checkNotEmpty(){
+      while(tokens.isEmpty())
+        doScan();
     }
 
     void doScan(){
@@ -171,7 +174,9 @@ public class Scanners {
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
-      return start + 1;
+      while(start < source.length() && Objects.equals(source.charAt(start), ' '))
+        start++;
+      return start;
     }
   }
 

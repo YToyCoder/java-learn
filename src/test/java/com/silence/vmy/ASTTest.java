@@ -5,6 +5,13 @@ import static org.junit.Assert.assertThrows;
 import org.junit.Test;
 
 import com.silence.vmy.AST.VmyAST;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class ASTTest {
 
@@ -42,5 +49,22 @@ public class ASTTest {
     AST.build(Scanners.scan("(1 + 2) / (3 + 4)"));
     AST.build(Scanners.scan("(1 + 2) / (3 + 4 * 5)"));
     AST.build(Scanners.scan("(1 + 2) / (3 + 4 * (5 + 1))"));
+  }
+
+  static Set<String> testCases = Set.of(
+      "1 + 2 * ( 3 + 4 )",
+      "1 + 2 / (3 + 4 )",
+      "(1 + 2) / ( 3 + 4 ) * 4",
+      "( 2 + 4 ) * 2 + 3 - 4 * 5"
+  );
+  @Test
+  public  void testBuildWithScanner(){
+    cases4(
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
+
+  void cases4(Consumer<String> test){
+    testCases.forEach(test);
   }
 }
