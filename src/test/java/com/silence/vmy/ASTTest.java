@@ -77,6 +77,19 @@ public class ASTTest {
     );
   }
 
+  @Test
+  public void testAssignment(){
+    cases4(
+        Set.of(
+            "let a = b",
+            "let a : Int = 1",
+            "let a : Int = 1 + 2",
+            "let a : Int = 1 + 2 * ( 10 + 9) - 1"
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
+
   void cases4(Set<String> cases, Consumer<String> test){
     cases.forEach(test);
   }

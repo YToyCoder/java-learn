@@ -187,7 +187,8 @@ public class AST {
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      return token.tag == Token.Identifier;
+      return token.tag == Token.Identifier &&
+          ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)));
     }
 
     @Override
@@ -232,6 +233,19 @@ public class AST {
 
   }
 
+  // handle name like variable name
+  static class VariableNameHandler extends BaseHandler{
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return token.tag == Token.Identifier && token.value.chars().reduce(0, (old, el) -> (Identifiers.identifiers.contains((char)el) ? 0 : -1) + old ) == 0;
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      nodesStack.add(new IdentifierNode(token.value));
+    }
+  }
+
   // handle the expression like
   //    let a : Int = 2 or
   //    b = 1
@@ -248,8 +262,10 @@ public class AST {
       ASTNode variable;
       if(
           nodesStack.isEmpty() ||
-          !((variable = nodesStack.pop()) instanceof DeclareNode) ||
-          !(variable instanceof IdentifierNode)
+          (
+              !((variable = nodesStack.pop()) instanceof DeclareNode) &&
+              !(variable instanceof IdentifierNode)
+          )
       )
         throw new ASTProcessingException("assignment has no variable or declare expression");
       operatorStack.add(token.value);
@@ -337,6 +353,7 @@ public class AST {
     .next(new OperatorHandler())
     .next(new AssignmentHandler())
     .next(new DeclarationHandler())
+    .next(new VariableNameHandler())
     .next(new DefaultHandler())
     .build();
   }
