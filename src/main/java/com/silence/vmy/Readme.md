@@ -16,21 +16,19 @@
 
 now support:
 
-> digital cacluate
-> 
-> 1 + 2 * (3 + 4)
->
->
+1. digital calculate
+
+1 + 2 * (3 + 4)
 
 next support: 
 
-> 1. variable declaration
->
-> let a : Int; # variable
->
-> val a : Int; # const variable
->  
-> 2. assignment
->  
-> let a : Int = 1;
-> 
+1. variable declaration 
+
+let a : Int; # variable
+
+val a : Int; # const variable
+ 
+2. assignment
+ 
+let a : Int = 1;
+ 
