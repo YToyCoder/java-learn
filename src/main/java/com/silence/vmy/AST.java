@@ -408,15 +408,10 @@ public class AST {
         BinaryOps op = BinaryOps.OpsMapper.get(common.OP);
         if(Objects.isNull(op))
           throw new EvaluatException("op(" + common.OP + ") not support!");
-        return Objects.nonNull(op) ? op.apply(left, right) : null;
+        return Objects.nonNull(op) ? op.apply(getValue(left), getValue( right )) : null;
       }else if(node instanceof AssignNode assignment){
         String variable_name = (String) evalsub(assignment.variable);
-        Object value = evalsub(assignment.expression);
-        if(value instanceof String value_name){
-          if(!_g.exists(value_name))
-            throw new EvaluatException(String.format("variable (%s) not exists", variable_name));
-          value = _g.get(value_name);
-        }
+        Object value = getValue( evalsub(assignment.expression) );
         _g.put(variable_name, value);
         return value;
       } else if(node instanceof DeclareNode declaration){
@@ -426,6 +421,15 @@ public class AST {
         return identifier.value;
       }else
         throw new EvaluatException("unrecognizable AST node");
+    }
+
+    Object getValue(Object obj){
+      if(obj instanceof String obj_name) {
+        if(!_g.exists(obj_name))
+          throw new EvaluatException(String.format("variable (%s) not exists", obj_name));
+        return _g.get(obj_name);
+      }
+      return obj;
     }
 
   }
