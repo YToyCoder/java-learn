@@ -277,11 +277,11 @@ public class Scanners {
   static void buildHandler(){
     HANDLER = new SimpleHandlerBuilder()
     .next(new NumberHandler())
+    .next(new DeclarationHandler())
     .next(new IdentifierHandler())
     .next(new OperatorHandler())
     .next(new BlackHandler())
 //        .next(new )
-    .next(new DeclarationHandler())
     .next(new DefaultHandler())
     .build();
   }
