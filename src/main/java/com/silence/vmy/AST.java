@@ -225,9 +225,9 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)){
+      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)|| operatorEquals(Identifiers.Concat, token)){
         operatorStack.add(token.value);
-      }else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token)){
+      }else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
         if(!remains.hasNext()) 
           throw new ASTProcessingException("*(multiply) doesn't have right side");
         if(nodesStack.isEmpty())

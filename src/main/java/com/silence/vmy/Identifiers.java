@@ -30,6 +30,8 @@ final public class Identifiers {
   public static final String VarDeclaration = "let";
   public static final String Colon = ":";
   public static final String Print = "print";
+  // to combine two string
+  public static final String Concat = "++";
 
   public static final char Quote = '"';
   static{

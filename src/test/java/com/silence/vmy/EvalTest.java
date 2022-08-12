@@ -1,6 +1,9 @@
 package com.silence.vmy;
 
 import org.junit.Test;
+
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 
 public class EvalTest {
@@ -26,4 +29,24 @@ public class EvalTest {
     assertEquals(1 + 2 / 3 * 4 * 7, Eval.eval("let b : Int = 1 + 2 / 3 * 4 * 7", AST.variableStoreTreeEvaluator()));
     assertEquals(1 + 14 / (3 + 4), Eval.eval("let c : Int = 1 + 14 / (3 + 4)", AST.variableStoreTreeEvaluator()));
   }
+
+  @Test
+  public void concat_two_string(){
+    List<String> ls = List.of(
+        "\"111\"",
+        "\"222\"",
+        "\"333\"",
+        "\"444\""
+    );
+    for(int i=0; i < ls.size() - 1; i++){
+      for(int j=i + 1; j < ls.size(); j++ ){
+        cts(ls.get(i), ls.get(j));
+      }
+    }
+  }
+
+  void cts(String v1, String v2){
+    assertEquals(v1.substring(1, v1.length() - 1) + v2.substring(1, v2.length() - 1), Eval.eval(v1 + " ++ " + v2, AST.variableStoreTreeEvaluator()));
+  }
+
 }

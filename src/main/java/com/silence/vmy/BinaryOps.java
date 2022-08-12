@@ -35,6 +35,14 @@ public enum BinaryOps {
       return shortStrategyApply(obj1, obj2, "divide");
     }
 
+  },
+  Concat {
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      if(obj1 instanceof String s1 && obj2 instanceof String s2)
+        return s1 + s2;
+      throw new OpsException("concat(++) only support for string ");
+    }
   }
   ;
 
@@ -46,7 +54,8 @@ public enum BinaryOps {
         Identifiers.ADD, BinaryOps.ADD,
         Identifiers.SUB, BinaryOps.SUB,
         Identifiers.MULTI, BinaryOps.MULTI,
-        Identifiers.DIVIDE, BinaryOps.DIVIDE
+        Identifiers.DIVIDE, BinaryOps.DIVIDE,
+        Identifiers.Concat, BinaryOps.Concat
       )
     );
   }
