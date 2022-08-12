@@ -658,6 +658,8 @@ public class AST {
         return get_variable(identifier.value);
       }else if(node instanceof LiteralNode literal){
         return literal.val();
+      } else if(node instanceof CallNode call){
+        return do_call(call);
       } else
         throw new EvaluatException("unrecognizable AST node");
     }
@@ -710,6 +712,19 @@ public class AST {
       if(!Utils.equal(variable_type, expression_type))
         throw new ASTProcessingException("type " + expression_type + " can not be assigned to type " + variable_type);
       return true;
+    }
+
+    /**
+     * handle a call expression like:
+     *
+     * print(1, "string")
+     * @param call_node
+     * @return
+     */
+    Object do_call(CallNode call_node){
+      // get params and check if the type is matched
+      // get the called function type
+      return null;
     }
 
     Runtime.VariableWithName get_variable(String name){
