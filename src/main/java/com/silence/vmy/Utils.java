@@ -101,6 +101,23 @@ public class Utils {
     return VmyTypes.BuiltinType.valueOf(type_name);
   }
 
+  public static VmyType get_obj_type(Object obj){
+    if(obj instanceof Runtime.VariableWithName obj_variable)
+      return obj_variable.getType();
+    else if(obj instanceof String)
+      return VmyTypes.BuiltinType.String;
+    else if(obj instanceof Character)
+      return VmyTypes.BuiltinType.Char;
+    else if(obj instanceof Integer)
+      return VmyTypes.BuiltinType.Int;
+    else if(obj instanceof Boolean)
+      return VmyTypes.BuiltinType.Boolean;
+    else if(obj instanceof Double)
+      return VmyTypes.BuiltinType.Double;
+    else
+      throw new VmyRuntimeException("current version not support this type");
+  }
+
   public static boolean is_mutable(String string){
     return switch (string) {
       case Identifiers.ConstDeclaration -> false;
