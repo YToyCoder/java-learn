@@ -9,9 +9,10 @@ public class Runtime {
   public static interface Variable {
     VmyType getType();
     Object getValue();
+    void setValue(Object value);
   }
 
-  static class DefaultOPool implements ObjPool {
+  private static class DefaultOPool implements ObjPool {
     private Map<Long, Object> objectMapper = new WeakHashMap<>();
 
     @Override
@@ -25,6 +26,16 @@ public class Runtime {
     public Object get(Long identity) {
       return objectMapper.get(identity);
     }
+
+    @Override
+    public boolean exists(Long identity) {
+      return objectMapper.containsKey(identity);
+    }
+  }
+
+  // create a pool to store objects
+  public static ObjPool create_pool(){
+    return new DefaultOPool();
   }
 
   private static ObjPool OBJPool = new DefaultOPool();

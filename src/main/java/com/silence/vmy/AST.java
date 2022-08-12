@@ -459,6 +459,8 @@ public class AST {
       }else if(node instanceof AssignNode assignment){
         String variable_name = (String) evalsub(assignment.variable);
         Object value = getValue( evalsub(assignment.expression) );
+        if(value instanceof LiteralNode string_literal)
+          value = string_literal.val();
         findAndPut(variable_name, value);
         return value;
       } else if(node instanceof DeclareNode declaration){
@@ -466,7 +468,9 @@ public class AST {
         return declaration.identifier.value;
       }else if(node instanceof IdentifierNode identifier){
         return identifier.value;
-      }else
+      }else if(node instanceof LiteralNode literal){
+        return literal;
+      } else
         throw new EvaluatException("unrecognizable AST node");
     }
 
@@ -490,5 +494,12 @@ public class AST {
     }
 
   }
-  
+
+  private static class VariableStoreTreeEvaluator implements Evaluator{
+    @Override
+    public Object eval(Tree tree) {
+      return null;
+    }
+
+  }
 }

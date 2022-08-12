@@ -9,4 +9,7 @@ package com.silence.vmy;
 public interface Frame {
   // get local variable from current frame
   Runtime.Variable local(String _name);
+
+  // put variable and it's value
+  void put(String name ,Runtime.Variable head, Object value);
 }

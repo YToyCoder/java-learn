@@ -93,4 +93,8 @@ public class Utils {
     return EOL(source, start) != -1;
   }
 
+  public static boolean isType(Runtime.Variable head, VmyType type){
+    return head.getType().equals(type);
+  }
+
 }

@@ -15,4 +15,6 @@ public interface ObjPool {
    * @return
    */
   Object get(Long identity);
+
+  boolean exists(Long identity);
 }
