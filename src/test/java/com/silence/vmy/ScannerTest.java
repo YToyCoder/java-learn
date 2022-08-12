@@ -136,4 +136,19 @@ public class ScannerTest {
 
   }
 
+  @Test
+  public void black_test(){
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Declaration, Identifiers.VarDeclaration)
+        },
+        Scanners.scan("let     ").toArray(new Token[0])
+    );
+    Scanner scanner = Scanners.scanner("let  let ");
+    while(scanner.hasNext()){
+      scanner.next();
+    }
+  }
+
+
 }

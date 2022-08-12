@@ -54,11 +54,12 @@ public class Scanners {
 
     @Override
     public boolean hasNext() {
-      return !tokens.isEmpty() || pos < source.length();
+      checkNotEmpty();
+      return !tokens.isEmpty();
     }
 
     void checkNotEmpty(){
-      while(tokens.isEmpty())
+      while(tokens.isEmpty() && pos < source.length())
         doScan();
     }
 
