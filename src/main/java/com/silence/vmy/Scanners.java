@@ -176,6 +176,23 @@ public class Scanners {
     }
   }
 
+  private static class CommaHandler extends OrderedHandler {
+    public CommaHandler() {
+      super(Utils.Order.Three.level());
+    }
+
+    @Override
+    protected boolean canHandle(List<Token> tokens, String source, int start) {
+      return Utils.equal(source.charAt(start), Identifiers.Comma.charAt(0));
+    }
+
+    @Override
+    protected int doHandle(List<Token> tokens, String source, int start) {
+      tokens.add(new Token(Token.Comma, String.valueOf(source.charAt(start))));
+      return start + 1;
+    }
+  }
+
   static final class DefaultHandler extends BaseHandler {
 
     @Override
@@ -283,6 +300,7 @@ public class Scanners {
     .next(new IdentifierHandler())
     .next(new OperatorHandler())
     .next(new BlackHandler())
+    .next(new CommaHandler())
 //        .next(new )
     .next(new DefaultHandler())
     .build();

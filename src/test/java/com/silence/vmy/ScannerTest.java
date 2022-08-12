@@ -166,6 +166,17 @@ public class ScannerTest {
         },
         Scanners.scan("print 1").toArray(new Token[0])
     );
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.BuiltinCall, "print"),
+            new Token(Token.Identifier, "("),
+            new Token(Token.INT_V, "1"),
+            new Token(Token.Comma, ","),
+            new Token(Token.INT_V, "2"),
+            new Token(Token.Identifier, ")")
+        },
+        Scanners.scan("print(1, 2)").toArray(new Token[0])
+    );
   }
 
 

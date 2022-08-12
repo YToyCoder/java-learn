@@ -104,4 +104,17 @@ public class ASTTest {
         el -> AST.build(Scanners.scanner(el))
     );
   }
+
+  @Test
+  public void print_call_test(){
+    cases4(
+        Set.of(
+            "print(1)",
+            "print(1, 2)",
+            "print(1 + 2, 3)",
+            "print(1 + 4 * 5 , 7 - 10 * ( 3 -1 ))"
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
 }

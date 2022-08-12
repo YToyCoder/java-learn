@@ -1,10 +1,6 @@
 package com.silence.vmy;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
 
 public class AST {
   private AST(){}
@@ -239,8 +235,10 @@ public class AST {
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return
-          (token.tag == Token.Identifier &&
-          ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)))) ||
+          (
+              token.tag == Token.Identifier &&
+              ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)))
+          ) ||
           token.tag == Token.BuiltinCall;
     }
 
@@ -249,10 +247,52 @@ public class AST {
       if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)|| operatorEquals(Identifiers.Concat, token)){
         operatorStack.add(token.value);
       }else if(token.tag == Token.BuiltinCall){
+        // no content
         // todo
         // handle order
         // ( a, b, c)
         // List.of(a, b, c)
+        Token should_be_open_parenthesis;
+        if(!remains.hasNext() || !operatorEquals(Identifiers.OpenParenthesis, (should_be_open_parenthesis = remains.next())))
+          throw new ASTProcessingException("builtin call " + token.value + " should be followed with open parenthesis '('");
+        if(operatorEquals(Identifiers.ClosingParenthesis, remains.peek())){
+          remains.next();
+          nodesStack.add(new CallNode(token.value, new ListExpression(List.of())));
+          return;
+        }
+        Token start_token = should_be_open_parenthesis;
+        while(
+            remains.hasNext() &&
+            (operatorStack.isEmpty() || !Utils.equal(operatorStack.peek(), Identifiers.ClosingParenthesis))
+        ){
+          travel_back_build(
+              start_token,
+              remains,
+              operatorStack,
+              nodesStack,
+              Set.of(Identifiers.Comma, Identifiers.ClosingParenthesis),
+              Set.of(Identifiers.Comma, Identifiers.OpenParenthesis)
+          );
+          start_token = new Token(-1, operatorStack.pop());
+        }
+        // last operators must be like this : (, , )
+        if(!Utils.equal(start_token.value, Identifiers.ClosingParenthesis))
+          throw new ASTProcessingException("there is no closing parenthesis when handle builtin call " + token.value);
+        LinkedList<ASTNode> params = new LinkedList<>();
+        while(
+            !operatorStack.isEmpty() &&
+            !nodesStack.isEmpty() &&
+            !Utils.equal( operatorStack.peek(), Identifiers.OpenParenthesis)
+        ){
+          if(
+              !Utils.equal(operatorStack.pop(), Identifiers.Comma)
+          ) throw new ASTProcessingException("error when merge builtin call " + token.value);
+          // do merge
+          params.addFirst(nodesStack.pop());
+        }
+        operatorStack.pop(); // pop the "("
+        params.addFirst(nodesStack.pop());
+        nodesStack.add(new CallNode(token.value, new ListExpression(params)));
       }
       else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
         if(!remains.hasNext()) 
@@ -286,7 +326,7 @@ public class AST {
 //          throw new ASTProcessingException("error at processing parenthesise");
 //        operatorStack.pop();
 //        nodesStack.add(mergeNode);
-        travel_back_build(token, remains, operatorStack, nodesStack, Identifiers.ClosingParenthesis, Identifiers.OpenParenthesis);
+        travel_back_build(token, remains, operatorStack, nodesStack, Set.of(Identifiers.ClosingParenthesis), Set.of(Identifiers.OpenParenthesis));
         // remove "(" and ")"
         if(
             !Utils.equal(operatorStack.pop(), Identifiers.ClosingParenthesis) ||
@@ -305,14 +345,16 @@ public class AST {
         Scanner remains,
         Stack<String> operation_stack,
         Stack<ASTNode> nodes_stack,
-        String end_op,
-        String start_op
+        Set<String> end_op,
+        Set<String> start_op
     ) {
       operation_stack.add(token.value);
-      Token next_token;
-      while(remains.hasNext() && !operatorEquals(end_op, next_token = remains.next())){
+      Token next_token = null;
+      while(remains.hasNext() && !end_op.contains((next_token = remains.next()).value)){
         recall(next_token, remains, operation_stack, nodes_stack);
       }
+      if(Objects.isNull(next_token) || !end_op.contains(next_token.value))
+        throw new ASTProcessingException("there is no end_op");
       if(nodes_stack.isEmpty())
         throw new ASTProcessingException(String.format("there is not content between %s and %s", start_op, end_op));
       ASTNode merge_node = nodes_stack.pop();
@@ -320,15 +362,15 @@ public class AST {
       while(
           !operation_stack.isEmpty() &&
           !nodes_stack.isEmpty() &&
-          !operation_stack.peek().equals(start_op)
+          !start_op.contains(operation_stack.peek())
       ){
         final String operator = operation_stack.pop();
         final ASTNode asLeft = nodes_stack.pop();
         merge_node = mergeTwoNodes(asLeft, merge_node, operator);
       }
-      if(operation_stack.isEmpty() || !operation_stack.peek().equals(start_op))
+      if(operation_stack.isEmpty() || !start_op.contains(operation_stack.peek()))
         throw new ASTProcessingException("error at processing travel_back_build between " + start_op + " and " + end_op);
-      operation_stack.add(end_op);
+      operation_stack.add(next_token.value);
       nodes_stack.add(merge_node);
     }
 

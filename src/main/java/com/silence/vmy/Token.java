@@ -17,4 +17,5 @@ public class Token {
   static final int Literal = 6;
 
   static final int BuiltinCall = 7;
+  static final int Comma = 8;
 }
