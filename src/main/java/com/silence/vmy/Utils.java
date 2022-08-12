@@ -76,7 +76,7 @@ public class Utils {
   public static  boolean isQuote(char c){
     return equal(c, Identifiers.Quote);
   }
-  private static boolean equal(Object a, Object b){
+  public static boolean equal(Object a, Object b){
     return Objects.equals(a, b);
   }
 
