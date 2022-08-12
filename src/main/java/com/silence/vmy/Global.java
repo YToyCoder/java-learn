@@ -1,6 +1,7 @@
 package com.silence.vmy;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public class Global implements Frame {
@@ -15,7 +16,7 @@ public class Global implements Frame {
   private Map<String, Object> primitives = new TreeMap<>();
 
   public void put(String _name, Object _value){
-    if(_value instanceof Number || _value instanceof Boolean || _value instanceof Character){
+    if( Objects.isNull(_value) || _value instanceof Number || _value instanceof Boolean || _value instanceof Character){
       primitives.put(_name, _value);
     }
   }
