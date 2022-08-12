@@ -22,7 +22,10 @@ public class Eval {
       System.out.print("> ");
       input = scanner.nextLine();
       if(input.trim().length() == 0 ) continue;
-      if(Objects.equals(input, "#")) System.exit(0);
+      if(Objects.equals(input, "#")){
+        scanner.close();
+        System.exit(0);
+      } 
       try{
         System.out.println( eval(input) );
       }catch (Exception e){
