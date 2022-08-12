@@ -29,6 +29,7 @@ final public class Identifiers {
   public static final String ConstDeclaration = "val";
   public static final String VarDeclaration = "let";
   public static final String Colon = ":";
+  public static final String Print = "print";
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);
@@ -38,6 +39,7 @@ final public class Identifiers {
     builtinIdentifiers.add(OpenParenthesis);
     builtinIdentifiers.add(ClosingParenthesis);
     builtinIdentifiers.add(Equals);
+    builtinIdentifiers.add(Print);
     operatorCharacters.addAll(
         Set.of('+','-', '*','/',':','?','%','>','<','|','^','&','~')
     );
