@@ -150,5 +150,23 @@ public class ScannerTest {
     }
   }
 
+  @Test
+  public void print_call() {
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.BuiltinCall, "print")
+        },
+        Scanners.scan("print").toArray(new Token[0])
+    );
+
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.BuiltinCall, "print"),
+            new Token(Token.INT_V, "1")
+        },
+        Scanners.scan("print 1").toArray(new Token[0])
+    );
+  }
+
 
 }

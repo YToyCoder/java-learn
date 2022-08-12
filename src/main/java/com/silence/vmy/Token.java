@@ -15,4 +15,6 @@ public class Token {
   static final int NewLine = 4;
   static final int Declaration = 5;
   static final int Literal = 6;
+
+  static final int BuiltinCall = 7;
 }

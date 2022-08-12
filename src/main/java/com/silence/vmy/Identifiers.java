@@ -16,6 +16,7 @@ final public class Identifiers {
 
   // variable name / function name
   public static  final Set<Character> identifiers = new TreeSet<>();
+  public static final Set<String> builtinCall = new TreeSet<>();
 
   public static final String ADD = "+";
   public static final String SUB = "-";
@@ -60,6 +61,8 @@ final public class Identifiers {
     );
     // _ 下划线
     identifiers.add('_');
+
+    builtinCall.add(Print);
   }
 
 

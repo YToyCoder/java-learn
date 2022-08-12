@@ -250,7 +250,8 @@ public class Scanners {
       final int init_pos = start;
       while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
         start++;
-      tokens.add(new Token(Token.Identifier, source.substring(init_pos, start)));
+      final String identifier = source.substring(init_pos, start);
+      tokens.add(new Token(Identifiers.builtinCall.contains(identifier) ? Token.BuiltinCall : Token.Identifier, identifier));
       return start;
     }
 
