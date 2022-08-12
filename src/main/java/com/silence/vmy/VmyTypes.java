@@ -6,6 +6,7 @@ public class VmyTypes {
     Double,
     Boolean,
     Char,
+    String,
     Table,
     Function;
   }
