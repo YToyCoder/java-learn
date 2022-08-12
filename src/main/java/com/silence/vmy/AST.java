@@ -495,10 +495,75 @@ public class AST {
 
   }
 
+  public static Evaluator variableStoreTreeEvaluator(){
+    return VSTEvaluator;
+  }
+
+  private static VariableStoreTreeEvaluator VSTEvaluator = new VariableStoreTreeEvaluator();
+
   private static class VariableStoreTreeEvaluator implements Evaluator{
+    private Global  _g = Global.getInstance();
+
     @Override
     public Object eval(Tree tree) {
-      return null;
+      if(tree instanceof VmyAST ast){
+        return eval_sub(ast.root);
+      }else
+        throw new EvaluatException("unrecognized AST");
+    }
+
+    Object eval_sub(ASTNode node){
+
+      if(node instanceof ValNode val){
+        return val.value;
+      }else if(node instanceof CommonNode common){
+        return binary_op_call(common.OP ,eval_sub(common.left), eval_sub(common.right));
+        // Object left = eval_sub(common.left);
+        // Object right  = eval_sub(common.right);
+        // if(Objects.isNull(right) || Objects.isNull(left))
+        //   throw new EvaluatException(common.OP + " can't handle null object");
+        // BinaryOps op = BinaryOps.OpsMapper.get(common.OP);
+        // if(Objects.isNull(op))
+        //   throw new EvaluatException("op(" + common.OP + ") not support!");
+        // return Objects.nonNull(op) ? op.apply(getValue(left), getValue( right )) : null;
+      }else if(node instanceof AssignNode assignment){
+        Runtime.VariableWithName variable = (Runtime.VariableWithName) eval_sub(assignment.variable);
+        Object value = get_value( eval_sub(assignment.expression) );
+         _g.put(variable.name(), variable, value);
+        return value;
+      } else if(node instanceof DeclareNode declaration){
+        // _g.put(declaration.identifier.value, null);
+        return Utils.variable_with_name(
+            declaration.identifier.value,
+            Runtime.declare_variable(_g, declaration.identifier.value, Utils.to_type(declaration.type), Utils.is_mutable(declaration.declare))
+        );
+      }else if(node instanceof IdentifierNode identifier){
+        return get_variable(identifier.value);
+      }else if(node instanceof LiteralNode literal){
+        return literal;
+      } else
+        throw new EvaluatException("unrecognizable AST node");
+    }
+
+    Object binary_op_call(String op, Object left , Object right){
+      if(Objects.isNull(right) || Objects.isNull(left))
+        throw new EvaluatException(op + " can't handle null object");
+      BinaryOps b_op = BinaryOps.OpsMapper.get(op);
+      if(Objects.isNull(b_op))
+        throw new EvaluatException("op(" + op + ") not support!");
+      return Objects.nonNull(b_op) ? b_op.apply(get_value(left), get_value( right )) : null;
+    }
+
+    Runtime.Variable get_variable(String name){
+      return Utils.variable_with_name(name, _g.local(name));
+    }
+
+
+    Object get_value(Object obj){
+      if(obj instanceof Runtime.VariableWithName variable) {
+        return Runtime.get_value(variable.name(), _g);
+      }
+      return obj;
     }
 
   }

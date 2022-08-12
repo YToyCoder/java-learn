@@ -10,6 +10,7 @@ public class Runtime {
     VmyType getType();
     Object getValue();
     void setValue(Object value);
+    boolean mutable();
   }
 
   private static class DefaultOPool implements ObjPool {
@@ -57,4 +58,75 @@ public class Runtime {
   public static Object get(Long identity) {
     return OBJPool.get(identity);
   }
+
+  private static class DefaultVariableImpl implements Variable{
+
+    private final VmyType type;
+    private Object value;
+
+    public DefaultVariableImpl(VmyType _Type){
+      type = _Type;
+    }
+
+    @Override
+    public VmyType getType() {
+      return type;
+    }
+
+    @Override
+    public Object getValue() {
+      return value;
+    }
+
+    @Override
+    public void setValue(Object _value) {
+      value = _value;
+    }
+
+    @Override
+    public boolean mutable() {
+      return true;
+    }
+  }
+
+  private static class ImmutableVariable extends DefaultVariableImpl {
+
+    public ImmutableVariable(VmyType _Type) {
+      super(_Type);
+    }
+
+    @Override
+    public boolean mutable() {
+      return false;
+    }
+  }
+
+  public static interface WithName {
+    String name();
+  }
+
+  public static interface VariableWithName extends Variable , WithName{}
+
+  // create a new variable
+  private static Variable create_variable(VmyType type, boolean mutable){
+    return mutable ? new DefaultVariableImpl(type) : new ImmutableVariable(type);
+  }
+
+  public static Variable declare_variable(Frame frame, String name, VmyType type){
+    return declare_variable(frame, name, type, true);
+  }
+
+  public static Variable declare_variable(Frame frame, String name, VmyType type, boolean mutable){
+    Variable variable = create_variable(type, mutable);
+    frame.put(name, variable, null);
+    return variable;
+  }
+
+  public static Object get_value(String name, Frame frame){
+    Variable variable = frame.local(name);
+    if(Utils.isType(variable, VmyTypes.BuiltinType.Table)){
+      return frame.get_obj((Long)variable.getValue());
+    }else return variable.getValue();
+  }
+
 }

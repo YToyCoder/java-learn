@@ -12,4 +12,6 @@ public interface Frame {
 
   // put variable and it's value
   void put(String name ,Runtime.Variable head, Object value);
+
+  Object get_obj(Long identity);
 }

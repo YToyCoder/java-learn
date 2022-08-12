@@ -97,4 +97,46 @@ public class Utils {
     return head.getType().equals(type);
   }
 
+  public static VmyType to_type(String type_name){
+    return VmyTypes.BuiltinType.valueOf(type_name);
+  }
+
+  public static boolean is_mutable(String string){
+    return switch (string) {
+      case Identifiers.ConstDeclaration -> false;
+      case Identifiers.VarDeclaration -> true;
+      default -> throw new RuntimeException(string + " is not valid declaration identifier!");
+    };
+  }
+
+  public static Runtime.VariableWithName variable_with_name(String name, Runtime.Variable variable){
+    return new Runtime.VariableWithName() {
+
+      @Override
+      public String name() {
+        return name;
+      }
+
+      @Override
+      public VmyType getType() {
+        return variable.getType();
+      }
+
+      @Override
+      public Object getValue() {
+        return variable.getValue();
+      }
+
+      @Override
+      public void setValue(Object value) {
+        variable.setValue(value);
+      }
+
+      @Override
+      public boolean mutable() {
+        return variable.mutable();
+      }
+    };
+  }
+
 }
