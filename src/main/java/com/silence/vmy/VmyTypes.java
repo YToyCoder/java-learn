@@ -8,6 +8,7 @@ public class VmyTypes {
     Char,
     String,
     Table,
-    Function;
+    Function,
+    Any;
   }
 }
