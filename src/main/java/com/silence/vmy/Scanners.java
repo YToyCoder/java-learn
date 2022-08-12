@@ -233,16 +233,31 @@ public class Scanners {
 
     @Override
     protected boolean canHandle(List<Token> tokens, String source, int start) {
-      return Identifiers.identifiers.contains(source.charAt(start));
+      return
+          Identifiers.identifiers.contains(source.charAt(start)) ||
+          Objects.equals(source.charAt(start), Identifiers.Quote); // support string
     }
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
+      if(Utils.isQuote(source.charAt(start))){
+        // handle string like : "string"
+        final String string_literal = extractString(source, start);
+        tokens.add(new Token(Token.Literal, string_literal));
+        return start + string_literal.length() + 1;
+      }
       final int init_pos = start;
       while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
         start++;
       tokens.add(new Token(Token.Identifier, source.substring(init_pos, start)));
       return start;
+    }
+
+    private String extractString(String source, int start){
+      final int init_pos = ++start;
+      while(start < source.length() && !Utils.isQuote(source.charAt(start)))
+        start++;
+      return source.substring(init_pos, start);
     }
   }
 
@@ -256,11 +271,11 @@ public class Scanners {
   static void buildHandler(){
     HANDLER = new SimpleHandlerBuilder()
     .next(new NumberHandler())
+    .next(new IdentifierHandler())
     .next(new OperatorHandler())
     .next(new BlackHandler())
 //        .next(new )
     .next(new DeclarationHandler())
-    .next(new IdentifierHandler())
     .next(new DefaultHandler())
     .build();
   }

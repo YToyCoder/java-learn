@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Utils {
   public static MethodHandle getStaticMethod(Class<?> refc, final String name, Class<?> ...types){
@@ -70,6 +71,13 @@ public class Utils {
     public int level(){
       return level;
     }
+  }
+
+  public static  boolean isQuote(char c){
+    return equal(c, Identifiers.Quote);
+  }
+  private static boolean equal(Object a, Object b){
+    return Objects.equals(a, b);
   }
 
 }
