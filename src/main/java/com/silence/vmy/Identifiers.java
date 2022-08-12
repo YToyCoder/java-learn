@@ -30,6 +30,8 @@ final public class Identifiers {
   public static final String VarDeclaration = "let";
   public static final String Colon = ":";
   public static final String Print = "print";
+
+  public static final char Quote = '"';
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);
@@ -44,7 +46,7 @@ final public class Identifiers {
         Set.of('+','-', '*','/',':','?','%','>','<','|','^','&','~')
     );
     commonIdentifiers.addAll(
-        Set.of('(',')', '=')
+        Set.of('(',')', '=', Quote)
     );
     // Alphabetic 字母 a -> z & A -> Z
     identifiers.addAll(
