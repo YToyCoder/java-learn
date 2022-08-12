@@ -22,6 +22,7 @@ public class EvalTest {
   @Test
   public void evalTest2(){
     assertEquals(1 + 2 * 3 * 4, Eval.eval("let a : Int = 1 + 2 * 3 * 4", AST.variableStoreTreeEvaluator()));
+    assertEquals(1 + 2 * 3 * 4, Eval.eval("let k = 1 + 2 * 3 * 4", AST.variableStoreTreeEvaluator()));
     assertEquals(1 + 2 / 3 * 4 * 7, Eval.eval("let b : Int = 1 + 2 / 3 * 4 * 7", AST.variableStoreTreeEvaluator()));
     assertEquals(1 + 14 / (3 + 4), Eval.eval("let c : Int = 1 + 14 / (3 + 4)", AST.variableStoreTreeEvaluator()));
   }

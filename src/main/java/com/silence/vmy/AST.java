@@ -512,6 +512,11 @@ public class AST {
         throw new EvaluatException("unrecognized AST");
     }
 
+    /**
+     * evaluate each node of the tree
+     * @param node {@link ASTNode}
+     * @return the node evaluating result , like
+     */
     Object eval_sub(ASTNode node){
 
       if(node instanceof ValNode val){
@@ -527,10 +532,11 @@ public class AST {
         //   throw new EvaluatException("op(" + common.OP + ") not support!");
         // return Objects.nonNull(op) ? op.apply(getValue(left), getValue( right )) : null;
       }else if(node instanceof AssignNode assignment){
-        Runtime.VariableWithName variable = (Runtime.VariableWithName) eval_sub(assignment.variable);
-        Object value = get_value( eval_sub(assignment.expression) );
-         _g.put(variable.name(), variable, value);
-        return value;
+//        Runtime.VariableWithName variable = (Runtime.VariableWithName) eval_sub(assignment.variable);
+//        Object value = get_value( eval_sub(assignment.expression) );
+//         _g.put(variable.name(), variable, value);
+//        return value;
+        return handle_assignment_node(assignment);
       } else if(node instanceof DeclareNode declaration){
         // _g.put(declaration.identifier.value, null);
         return Utils.variable_with_name(
@@ -545,6 +551,35 @@ public class AST {
         throw new EvaluatException("unrecognizable AST node");
     }
 
+    // compare type
+    // check if variable can be assigned
+    Object handle_assignment_node(AssignNode assignment){
+      Object expression = eval_sub(assignment.expression);
+      VmyType expression_type = Utils.get_obj_type(expression);
+//      if(expression instanceof Runtime.VariableWithName expression_variable)
+//        expression_type =
+      Object expression_value = get_value(expression);
+      if(assignment.variable instanceof IdentifierNode identifier){
+        Runtime.VariableWithName identifier_variable = get_variable(identifier.value);
+        can_assign(identifier_variable.getType(), expression_type);
+        assign_to(identifier_variable.name(), identifier_variable, expression_value);
+      }else if(assignment.variable instanceof  DeclareNode declaration){
+//        final String declaration_type_string = Objects.isNull(declaration.type) ? expression_type
+        // todo
+        final VmyType declaration_type = Objects.isNull(declaration.type) ? expression_type : Utils.to_type(declaration.type);
+        can_assign(declaration_type, expression_type);
+        assign_to(declaration.identifier.value, Runtime.declare_variable(_g, declaration.identifier.value, declaration_type, Utils.is_mutable(declaration.declare)), expression_value);
+      }
+      return expression_value;
+    }
+
+    /**
+     * handle the binary operation like : 1 + 2, 2 * 4
+     * @param op operation
+     * @param left operation left side
+     * @param right operation right side
+     * @return call result , like : 1 + 2 -> 3
+     */
     Object binary_op_call(String op, Object left , Object right){
       if(Objects.isNull(right) || Objects.isNull(left))
         throw new EvaluatException(op + " can't handle null object");
@@ -554,11 +589,39 @@ public class AST {
       return Objects.nonNull(b_op) ? b_op.apply(get_value(left), get_value( right )) : null;
     }
 
-    Runtime.Variable get_variable(String name){
+    /**
+     * if type of {@code expression_type} can be assigned to type of {@code variable_type}
+     * @param variable_type variable type
+     * @param expression_type expression type
+     * @return true else throw {@link ASTProcessingException}
+     */
+    boolean can_assign(VmyType variable_type, VmyType expression_type){
+      if(!Utils.equal(variable_type, expression_type))
+        throw new ASTProcessingException("type " + expression_type + " can not be assigned to type " + variable_type);
+      return true;
+    }
+
+    Runtime.VariableWithName get_variable(String name){
       return Utils.variable_with_name(name, _g.local(name));
     }
 
+    // assign value to variable
+    void assign_to(String variable_name, Runtime.Variable variable, Object value){
+      _g.put(variable_name, variable, value);
+    }
 
+
+    /**
+     * get the value of an object
+     *
+     * classified to 2 type
+     *
+     * 1. Variable type : get the value that the variable point at
+     *
+     * 2. it's a value : return
+     * @param obj
+     * @return
+     */
     Object get_value(Object obj){
       if(obj instanceof Runtime.VariableWithName variable) {
         return Runtime.get_value(variable.name(), _g);
