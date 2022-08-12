@@ -412,7 +412,7 @@ public class AST {
       }else if(node instanceof AssignNode assignment){
         String variable_name = (String) evalsub(assignment.variable);
         Object value = getValue( evalsub(assignment.expression) );
-        _g.put(variable_name, value);
+        findAndPut(variable_name, value);
         return value;
       } else if(node instanceof DeclareNode declaration){
         _g.put(declaration.identifier.value, null);
@@ -430,6 +430,16 @@ public class AST {
         return _g.get(obj_name);
       }
       return obj;
+    }
+
+    /**
+     * @param _name
+     * @param _value
+     */
+    void findAndPut(String _name, Object _value){
+      if(!_g.exists(_name))
+        throw new EvaluatException(_name + " haven't declared!");
+      _g.put(_name, _value);
     }
 
   }
