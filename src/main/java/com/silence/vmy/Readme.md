@@ -36,3 +36,6 @@ let a : Int = 1;
 1. valid type support at runtime
 
 2. full val declaration support
+
+3. String support
+
