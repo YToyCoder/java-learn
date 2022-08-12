@@ -80,4 +80,17 @@ public class Utils {
     return Objects.equals(a, b);
   }
 
+  // if from start is EOL return the start of next line
+  // else return -1
+  public static int EOL(String source, int start){
+    return start + 1 < source.length() && equal(source.charAt(start), '\r') && equal(source.charAt(start + 1), '\n') ?
+        start + 2 : equal(source.charAt(start), '\n') ?
+        start + 1 :
+        -1;
+  }
+
+  public static boolean isEOL(String source, int start){
+    return EOL(source, start) != -1;
+  }
+
 }

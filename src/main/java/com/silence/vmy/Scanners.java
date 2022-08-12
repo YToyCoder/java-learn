@@ -184,7 +184,7 @@ public class Scanners {
 
     @Override
     protected int doHandle(List<Token> tokens, String source, int start) {
-      throw new LexcicalException("not support source");
+      throw new LexicalException("not support source");
     }
   }
 
@@ -244,7 +244,7 @@ public class Scanners {
         // handle string like : "string"
         final String string_literal = extractString(source, start);
         tokens.add(new Token(Token.Literal, string_literal));
-        return start + string_literal.length() + 1;
+        return start + string_literal.length() + 2;
       }
       final int init_pos = start;
       while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
@@ -255,8 +255,14 @@ public class Scanners {
 
     private String extractString(String source, int start){
       final int init_pos = ++start;
-      while(start < source.length() && !Utils.isQuote(source.charAt(start)))
+      while(
+          start < source.length() &&
+          !Utils.isQuote(source.charAt(start)) &&
+          !Utils.isEOL(source, start)
+      )
         start++;
+      if(start >= source.length() || !Utils.isQuote(source.charAt(start)))
+        throw new LexicalException("string literal has no close quote");
       return source.substring(init_pos, start);
     }
   }

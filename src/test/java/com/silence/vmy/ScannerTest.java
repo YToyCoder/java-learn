@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+import org.eclipse.collections.impl.factory.Strings;
 import org.junit.Test;
 
 public class ScannerTest {
@@ -109,6 +110,30 @@ public class ScannerTest {
         },
         Scanners.scan("let val").toArray(new Token[0])
     );
+  }
+
+  @Test
+  public void string_literal_test(){
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Literal, "string literal"),
+            new Token(Token.Literal, " has black ")
+        },
+        Scanners.scan("\"string literal\" \" has black \"").toArray(new Token[0])
+    );
+    assertThrows(
+        LexicalException.class,
+        () -> {
+          Scanners.scan("\"");
+        }
+    );
+    assertThrows(
+        LexicalException.class,
+        () -> {
+          Scanners.scan("\" lexical\r\n \"");
+        }
+    );
+
   }
 
 }
