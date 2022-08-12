@@ -33,6 +33,38 @@ public class AST {
     }
   }
 
+  private static class StringLiteral extends LiteralNode{
+    private final String value;
+
+    public StringLiteral(String value) {
+      super(LiteralKind.String.ordinal());
+      this.value = value;
+    }
+
+    @Override
+    public Object val() {
+      return value;
+    }
+  }
+
+  private static abstract class LiteralNode implements ASTNode {
+    private final int tag;
+    public LiteralNode(int _tag){
+      tag = _tag;
+    }
+    public abstract Object val();
+    public int tag(){
+      return tag;
+    }
+  }
+
+  public static enum LiteralKind{
+    Int,
+    Double,
+    Char,
+    String;
+  }
+
   // node for assignment
   // like : 
   //      let a : Type = 1
@@ -246,6 +278,20 @@ public class AST {
     }
   }
 
+  private static class LiteralHandler extends BaseHandler{
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return token.tag == Token.Literal;
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      // currently, it only needs to handle the string literal
+      // the Int and Double literal it handled by ValHandler
+      nodesStack.add(new StringLiteral(token.value));
+    }
+  }
+
   // handle the expression like
   //    let a : Int = 2 or
   //    b = 1
@@ -354,6 +400,7 @@ public class AST {
     .next(new AssignmentHandler())
     .next(new DeclarationHandler())
     .next(new VariableNameHandler())
+    .next(new LiteralHandler())
     .next(new DefaultHandler())
     .build();
   }

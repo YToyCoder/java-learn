@@ -93,4 +93,15 @@ public class ASTTest {
   void cases4(Set<String> cases, Consumer<String> test){
     cases.forEach(test);
   }
+
+  @Test
+  public void string_literal_test(){
+    cases4(
+        Set.of(
+            "\"literal string\"",
+            "let a = \" literal string \""
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
 }
