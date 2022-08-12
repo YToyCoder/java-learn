@@ -546,7 +546,7 @@ public class AST {
       }else if(node instanceof IdentifierNode identifier){
         return get_variable(identifier.value);
       }else if(node instanceof LiteralNode literal){
-        return literal;
+        return literal.val();
       } else
         throw new EvaluatException("unrecognizable AST node");
     }
