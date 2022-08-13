@@ -41,6 +41,12 @@ public enum BinaryOps {
     public Object apply(Object obj1, Object obj2) {
       return obj1.toString() + obj2.toString();
     }
+  },
+  GT{
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      return null;
+    }
   }
   ;
 
@@ -80,8 +86,19 @@ public enum BinaryOps {
       throw new OpsException("can't convert" + obj.getClass().getName() +" to double");
   }
 
+  /**
+   * call this class static function
+   * @param p1
+   * @param p2
+   * @param name
+   * @param type
+   * @return
+   */
   static Object invoke( Object p1, Object p2, String name, Class<?> type){
-    MethodHandle method = Utils.getOpsStaticMethod(name, type, type, type);
+    MethodHandle method = switch (name){
+      case "gt", "eq", "lt" -> Utils.getOpsStaticMethod(name, boolean.class, type, type);
+      default -> Utils.getOpsStaticMethod(name, type, type, type);
+    };
     try {
       return Objects.isNull(method) ? null : method.invoke(p1, p2);
     } catch (Throwable e) {
@@ -91,6 +108,30 @@ public enum BinaryOps {
   }
   
   public abstract Object apply(Object obj1, Object obj2);
+
+
+  static boolean lt(int a, int b){
+    return a < b;
+  }
+
+  static boolean lt(double a, double b){
+    return a < b;
+  }
+
+  static boolean eq(int a, int b){
+    return a == b;
+  }
+
+  static boolean eq(double a, double b){
+    return a == b;
+  }
+  static boolean gt(int a, int b){
+    return a > b;
+  }
+
+  static boolean gt(double a, double b){
+    return a > b;
+  }
 
   static int divide(int a, int b){
     return a / b;
