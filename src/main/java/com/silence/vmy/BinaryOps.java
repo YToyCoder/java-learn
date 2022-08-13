@@ -39,9 +39,7 @@ public enum BinaryOps {
   Concat {
     @Override
     public Object apply(Object obj1, Object obj2) {
-      if(obj1 instanceof String s1 && obj2 instanceof String s2)
-        return s1 + s2;
-      throw new OpsException("concat(++) only support for string ");
+      return obj1.toString() + obj2.toString();
     }
   }
   ;
