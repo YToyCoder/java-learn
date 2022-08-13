@@ -221,4 +221,16 @@ public class ScannerTest {
     );
   }
 
+  @Test
+  public void bool_literal_test(){
+
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Literal, "true"),
+            new Token(Token.Literal, "false")
+        },
+        Scanners.scan("true false").toArray(new Token[0])
+    );
+  }
+
 }

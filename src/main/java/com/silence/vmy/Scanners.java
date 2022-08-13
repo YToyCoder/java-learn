@@ -268,8 +268,19 @@ public class Scanners {
       while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
         start++;
       final String identifier = source.substring(init_pos, start);
-      tokens.add(new Token( Utils.equal(Identifiers.While, identifier) ? Token.Builtin : Identifiers.builtinCall.contains(identifier) ? Token.BuiltinCall : Token.Identifier, identifier));
+      tokens.add(new Token( identifier_tag(identifier), identifier));
       return start;
+    }
+
+    int identifier_tag(String identifier){
+      return switch (identifier){
+        case Identifiers.While -> Token.Builtin;
+        case Identifiers.True , Identifiers.False -> Token.Literal;
+        default -> {
+          if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
+          yield Token.Identifier;
+        }
+      };
     }
 
     private String extractString(String source, int start){

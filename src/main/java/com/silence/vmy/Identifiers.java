@@ -42,6 +42,9 @@ final public class Identifiers {
   public static final char ClosingBraceChar = '}';
   public static final String OpenBrace = "{";
   public static final String ClosingBrace = "}";
+  public static final String True = "true";
+  public static final String False = "false";
+
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);
