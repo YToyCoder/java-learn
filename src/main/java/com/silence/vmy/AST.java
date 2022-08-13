@@ -724,7 +724,12 @@ public class AST {
     Object do_call(CallNode call_node){
       // get params and check if the type is matched
       // get the called function type
-      return null;
+      return FunctionSupport.call(
+          call_node.identifier,
+          call_node.params.elements.stream()
+              .map(param -> get_value(eval_sub(param)))
+              .toList()
+      );
     }
 
     Runtime.VariableWithName get_variable(String name){

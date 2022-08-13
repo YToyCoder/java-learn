@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Utils {
@@ -154,6 +155,35 @@ public class Utils {
         return variable.mutable();
       }
     };
+  }
+
+  // compare two function type
+  public static int function_type_compare(FunctionSupport.FunctionType a, FunctionSupport.FunctionType b){
+    return concat_type_to_string(a.types()).compareTo(concat_type_to_string(b.types()));
+  }
+
+  private static String concat_type_to_string(List<VmyType> types){
+    return types.stream()
+        .map(VmyType::toString)
+        .reduce(String::concat)
+        .orElse("");
+  }
+
+  public static String function_to_string(String name, FunctionSupport.FunctionType type){
+    String params = "";
+    List<VmyType> types = type.types();
+    for(int i=1; i<types.size(); i++){
+      params += type.param_type(i).toString();
+    }
+    return String.format("%s(%s) : %s",name, params, type.types().size() > 0 ? type.param_type(0) : "any");
+  }
+
+  public static void log(String msg){
+    System.out.println("[vmy-info] " + msg);
+  }
+
+  public static void warning(String msg){
+    System.out.println("[vmy-warning] " + msg);
   }
 
 }
