@@ -272,6 +272,11 @@ public class Scanners {
       return start;
     }
 
+    /**
+     * get identifier tag , while -> Builtin, bool (true, false) -> literal, print -> BuiltinCall
+     * @param identifier
+     * @return {@code int}
+     */
     int identifier_tag(String identifier){
       return switch (identifier){
         case Identifiers.While -> Token.Builtin;
