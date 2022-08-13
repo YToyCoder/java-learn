@@ -31,9 +31,11 @@ public class Eval {
         System.exit(0);
       }
       try{
-        System.out.println( eval(input, evaluator) );
+        Object ans = eval(input, evaluator);
+        if(Objects.nonNull(ans))
+          System.out.println(ans);
       }catch (Exception e){
-        e.printStackTrace();
+        Utils.error(e.getMessage());
       }
     }
   }
