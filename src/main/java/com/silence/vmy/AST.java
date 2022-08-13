@@ -43,6 +43,19 @@ public class AST {
     }
   }
 
+  private static class BoolLiteral extends LiteralNode{
+    final Boolean value;
+    public BoolLiteral(Boolean _value) {
+      super(LiteralKind.Bool.ordinal());
+      value = _value;
+    }
+
+    @Override
+    public Object val() {
+      return value;
+    }
+  }
+
   private static abstract class LiteralNode implements ASTNode {
     private final int tag;
     public LiteralNode(int _tag){
@@ -58,6 +71,7 @@ public class AST {
     Int,
     Double,
     Char,
+    Bool,
     String;
   }
 
@@ -397,9 +411,12 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      // currently, it only needs to handle the string literal
+      // currently, it only needs to handle the string literal and bool literal
       // the Int and Double literal it handled by ValHandler
-      nodesStack.add(new StringLiteral(token.value));
+      if(Utils.equal(token.value, Identifiers.True) || Utils.equal(token.value, Identifiers.False))
+        nodesStack.add(new BoolLiteral(Utils.equal( token.value, Identifiers.True)));
+      else
+        nodesStack.add(new StringLiteral(token.value));
     }
   }
 

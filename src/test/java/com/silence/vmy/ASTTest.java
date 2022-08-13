@@ -117,4 +117,15 @@ public class ASTTest {
         el -> AST.build(Scanners.scanner(el))
     );
   }
+
+  @Test
+  public void bool_literal_test(){
+
+    cases4(
+        Set.of(
+            "let b : Boolean = true "
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
 }
