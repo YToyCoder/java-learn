@@ -1,9 +1,45 @@
 package com.silence.vmy;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class Main {
   public static void main(String[] args) {
-    Eval.repl();
+    String[] strings = handle_args(args);
+    if(Objects.nonNull(strings) && strings.length > 0 )
+    switch (strings[0]){
+      case Repl:
+        Eval.repl();
+        break;
+      case Run:
+        Scripts.run(Arrays.copyOfRange(strings, 1, strings.length));
+        break;
+    }
   }
+
+  private static String[] handle_args(String[] args){
+    Map<String, Integer> string_index_mapper = new HashMap<>();
+    for(int i=0; i < args.length; i++){
+      string_index_mapper.put(args[i], i);
+    }
+    if(string_index_mapper.containsKey(Repl) && string_index_mapper.containsKey(Run))
+      throw new RuntimeException("can't use -sh and -r both");
+    if(string_index_mapper.containsKey(Repl))
+      return new String[] {Repl};
+    Integer index = string_index_mapper.get(Run);
+    return Objects.isNull(index) ? null :
+        string_index_mapper.entrySet().stream()
+            .filter(entry -> entry.getValue() >= index)
+            .sorted((a, b)-> a.getValue() - b.getValue())
+            .map(Map.Entry::getKey)
+            .toList()
+            .toArray(new String[0]);
+  }
+
+  private static final String Repl = "-sh";
+  private static final String Run  = "-r";
   /**
    * string -> tokenize() ->
    *
