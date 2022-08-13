@@ -655,7 +655,12 @@ public class AST {
             Runtime.declare_variable(_g, declaration.identifier.value, Utils.to_type(declaration.type), Utils.is_mutable(declaration.declare))
         );
       }else if(node instanceof IdentifierNode identifier){
-        return get_variable(identifier.value);
+        try {
+          return get_variable(identifier.value);
+        }catch (Exception e){
+          Utils.error(e.getMessage());
+          return null;
+        }
       }else if(node instanceof LiteralNode literal){
         return literal.val();
       } else if(node instanceof CallNode call){
@@ -673,9 +678,13 @@ public class AST {
 //        expression_type =
       Object expression_value = get_value(expression);
       if(assignment.variable instanceof IdentifierNode identifier){
-        Runtime.VariableWithName identifier_variable = get_variable(identifier.value);
-        can_assign(identifier_variable.getType(), expression_type);
-        assign_to(identifier_variable.name(), identifier_variable, expression_value);
+        try {
+          Runtime.VariableWithName identifier_variable = get_variable(identifier.value);
+          can_assign(identifier_variable.getType(), expression_type);
+          assign_to(identifier_variable.name(), identifier_variable, expression_value);
+        }catch (Exception e){
+          Utils.error(e.getMessage());
+        }
       }else if(assignment.variable instanceof  DeclareNode declaration){
 //        final String declaration_type_string = Objects.isNull(declaration.type) ? expression_type
         // todo
@@ -733,7 +742,10 @@ public class AST {
     }
 
     Runtime.VariableWithName get_variable(String name){
-      return Utils.variable_with_name(name, _g.local(name));
+      Runtime.Variable variable = _g.local(name);
+      if(Objects.isNull(variable))
+        throw new EvaluatException("variable " + name + " haven't declared!");
+      return Utils.variable_with_name(name, variable);
     }
 
     // assign value to variable

@@ -186,4 +186,8 @@ public class Utils {
     System.out.println("[vmy-warning] " + msg);
   }
 
+  public static void error(String msg) {
+    System.err.println(msg);
+  }
+
 }
