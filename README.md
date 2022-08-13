@@ -4,6 +4,19 @@
 
 java语言学习 和 设计模式
 
+### 0 vmy 
+
+<p align="right"> —— my simple language</p>
+
+个人语言实现 vmy
+
+源码(source code) : com/silence/vmy
+
+[doc](./src/main/java/com/silence/vmy/Readme.md)
+
+vmy脚本(scripts write in vmy) : scripts
+
+
 ### 1 設計模式(design pattern)
 
 三類設計模式:
