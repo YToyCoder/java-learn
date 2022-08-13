@@ -34,6 +34,7 @@ final public class Identifiers {
   // to combine two string
   public static final String Concat = "++";
   public static final char Quote = '"';
+  public static final char SingleQuote = 39;
   public static final  String Comma = ",";
   static{
     // set builtinOperators
