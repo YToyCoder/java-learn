@@ -680,7 +680,7 @@ public class AST {
       if(assignment.variable instanceof IdentifierNode identifier){
         try {
           Runtime.VariableWithName identifier_variable = get_variable(identifier.value);
-          can_assign(identifier_variable.getType(), expression_type);
+          can_assign(identifier_variable, expression);
           assign_to(identifier_variable.name(), identifier_variable, expression_value);
         }catch (Exception e){
           Utils.error(e.getMessage());
@@ -721,6 +721,17 @@ public class AST {
       if(!Utils.equal(variable_type, expression_type))
         throw new ASTProcessingException("type " + expression_type + " can not be assigned to type " + variable_type);
       return true;
+    }
+
+    /**
+     * check the declaration , if it's const variable , it will not be assigned, then check if the type is match
+     * @param variable {@link Runtime.VariableWithName}
+     * @param value assigned value
+     */
+    void can_assign(Runtime.VariableWithName variable, Object value){
+      if(!variable.mutable())
+        throw new EvaluatException("const variable (let) can't be assigned : " + variable.name());
+      can_assign(variable.getType(), Utils.get_obj_type(value));
     }
 
     /**
