@@ -610,6 +610,10 @@ public class AST {
     return VSTEvaluator;
   }
 
+  public static Evaluator evaluator(boolean create){
+    return create ? new VariableStoreTreeEvaluator() : variableStoreTreeEvaluator();
+  }
+
   private static VariableStoreTreeEvaluator VSTEvaluator = new VariableStoreTreeEvaluator();
 
   private static class VariableStoreTreeEvaluator implements Evaluator{
