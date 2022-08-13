@@ -3,10 +3,16 @@ package com.silence.vmy;
 public class Token {
   final int tag;
   final String value;
-  public Token(int _tag, String val){
+  final int pos;
+  public Token(int _tag, String val, int pos){
     tag = _tag;
     value = val;
+    this.pos = pos;
   }
+  public Token(int _tag, String val){
+    this(_tag, val, -1);
+  }
+
 
   static final int INT_V = 0;
   static final int DOUBLE_V = 1;

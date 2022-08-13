@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-import org.eclipse.collections.impl.factory.Strings;
 import org.junit.Test;
 
 public class ScannerTest {
