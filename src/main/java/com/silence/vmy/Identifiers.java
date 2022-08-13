@@ -37,6 +37,7 @@ final public class Identifiers {
   public static final char SingleQuote = 39;
   public static final  String Comma = ",";
   public static final char Dot = '.';
+  public static final String While = "while";
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);
