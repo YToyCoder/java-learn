@@ -187,7 +187,7 @@ public class Utils {
   }
 
   public static void error(String msg) {
-    System.err.println(msg);
+    System.err.println("[vmy-error]" + msg);
   }
 
 }
