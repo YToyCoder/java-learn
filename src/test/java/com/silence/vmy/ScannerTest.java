@@ -198,5 +198,27 @@ public class ScannerTest {
     );
   }
 
+  @Test
+  public void braces_test(){
+
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Identifier, "{"),
+            new Token(Token.Identifier, "}")
+        },
+        Scanners.scan("{}").toArray(new Token[0])
+    );
+
+    assertEqualTo(
+        new Token[]{
+            new Token(Token.Builtin, "while"),
+            new Token(Token.Identifier, "("),
+            new Token(Token.Identifier, ")"),
+            new Token(Token.Identifier, "{"),
+            new Token(Token.Identifier, "}")
+        },
+        Scanners.scan("while(){}").toArray(new Token[0])
+    );
+  }
 
 }

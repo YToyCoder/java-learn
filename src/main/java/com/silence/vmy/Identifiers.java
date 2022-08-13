@@ -38,6 +38,10 @@ final public class Identifiers {
   public static final  String Comma = ",";
   public static final char Dot = '.';
   public static final String While = "while";
+  public static final char OpenBraceChar = '{';
+  public static final char ClosingBraceChar = '}';
+  public static final String OpenBrace = "{";
+  public static final String ClosingBrace = "}";
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);

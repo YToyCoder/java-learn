@@ -268,7 +268,7 @@ public class Scanners {
       while(start < source.length() && Identifiers.identifiers.contains(source.charAt(start)))
         start++;
       final String identifier = source.substring(init_pos, start);
-      tokens.add(new Token(Identifiers.builtinCall.contains(identifier) ? Token.BuiltinCall : Token.Identifier, identifier));
+      tokens.add(new Token( Utils.equal(Identifiers.While, identifier) ? Token.Builtin : Identifiers.builtinCall.contains(identifier) ? Token.BuiltinCall : Token.Identifier, identifier));
       return start;
     }
 
@@ -283,6 +283,25 @@ public class Scanners {
       if(start >= source.length() || !Utils.isQuote(source.charAt(start)))
         throw new LexicalException("string literal has no close quote");
       return source.substring(init_pos, start);
+    }
+  }
+
+  private static class BracesHandler extends OrderedHandler {
+    public BracesHandler() {
+      super(Utils.Order.Three.level());
+    }
+
+    @Override
+    protected boolean canHandle(List<Token> tokens, String source, int start) {
+      return
+          Utils.equal(source.charAt(start), Identifiers.OpenBraceChar) ||
+          Utils.equal(source.charAt(start), Identifiers.ClosingBraceChar) ;
+    }
+
+    @Override
+    protected int doHandle(List<Token> tokens, String source, int start) {
+      tokens.add(new Token(Token.Identifier, source.substring(start, start+1), start));
+      return start + 1;
     }
   }
 
@@ -301,6 +320,7 @@ public class Scanners {
     .next(new OperatorHandler())
     .next(new BlackHandler())
     .next(new CommaHandler())
+    .next(new BracesHandler())
 //        .next(new )
     .next(new DefaultHandler())
     .build();
