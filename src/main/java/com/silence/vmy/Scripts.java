@@ -1,9 +1,10 @@
 package com.silence.vmy;
 
-import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,19 @@ public class Scripts {
    * @param script_files files of script
    */
   public static void run(String[] script_files){
+    for (String file_path : script_files)
+      one_line_handle_support(file_path);
+  }
+
+  private static void one_line_handle_support(String file){
+    AST.Evaluator evaluator = AST.evaluator(true);
+    try {
+      List<String> lines = Files.readAllLines(Path.of(file));
+      for(String line : lines)
+        Eval.eval(line, evaluator);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static class FileInputScanner implements Scanner, AutoCloseable {
