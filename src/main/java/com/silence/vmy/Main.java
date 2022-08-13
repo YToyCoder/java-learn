@@ -1,9 +1,6 @@
 package com.silence.vmy;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Main {
   public static void main(String[] args) {
@@ -32,7 +29,7 @@ public class Main {
     return Objects.isNull(index) ? null :
         string_index_mapper.entrySet().stream()
             .filter(entry -> entry.getValue() >= index)
-            .sorted((a, b)-> a.getValue() - b.getValue())
+            .sorted(Comparator.comparingInt(Map.Entry::getValue))
             .map(Map.Entry::getKey)
             .toList()
             .toArray(new String[0]);
