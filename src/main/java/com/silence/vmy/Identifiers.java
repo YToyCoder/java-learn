@@ -36,6 +36,7 @@ final public class Identifiers {
   public static final char Quote = '"';
   public static final char SingleQuote = 39;
   public static final  String Comma = ",";
+  public static final char Dot = '.';
   static{
     // set builtinOperators
     builtinIdentifiers.add(ADD);
