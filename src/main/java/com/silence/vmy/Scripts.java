@@ -121,10 +121,12 @@ public class Scripts {
             // identifier :
             if(Identifiers.identifiers.contains(peek_char()))
               handle_identifier_kind();
-            if(
+            else if(
                 Identifiers.operatorCharacters.contains(peek_char()) ||
                     Identifiers.commonIdentifiers.contains(peek_char())
             ) handle_operator();
+            else
+              throw new LexicalException(pos(), file_path, "can't handle char : " + peek_char());
         }
       }
     }
