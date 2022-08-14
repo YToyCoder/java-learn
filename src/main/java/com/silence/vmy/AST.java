@@ -67,6 +67,19 @@ public class AST {
     }
   }
 
+  /**
+   * a code block, like:
+   * <p>let a : Int </p>
+   * <p>a = 1 </p>
+   * <p>print(a)</p>
+   */
+  private static class BlockNode implements ASTNode {
+    List<ASTNode> process;
+    public BlockNode(List<ASTNode> _process){
+      process = _process;
+    }
+  }
+
   public static enum LiteralKind{
     Int,
     Double,
@@ -244,7 +257,7 @@ public class AST {
 
   }
 
-  private static class OperatorHandler extends BaseHandler{
+  private static class OperatorHandler extends Tool{
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
@@ -351,10 +364,14 @@ public class AST {
         throw new ASTProcessingException("not support operator " + token.value);
     }
 
+  }
+
+  private static abstract class Tool extends BaseHandler {
+
     // travel build like : binary operation
     // when in front specific node , merge all this traveled node
     // just like : combine the calculating the formula : 1 + 2 * () + 3
-    private void travel_back_build(
+    protected void travel_back_build(
         Token token,
         Scanner remains,
         Stack<String> operation_stack,
@@ -375,8 +392,8 @@ public class AST {
 
       while(
           !operation_stack.isEmpty() &&
-          !nodes_stack.isEmpty() &&
-          !start_op.contains(operation_stack.peek())
+              !nodes_stack.isEmpty() &&
+              !start_op.contains(operation_stack.peek())
       ){
         final String operator = operation_stack.pop();
         final ASTNode asLeft = nodes_stack.pop();
@@ -387,8 +404,8 @@ public class AST {
       operation_stack.add(next_token.value);
       nodes_stack.add(merge_node);
     }
-
   }
+
 
   // handle name like variable name
   private static class VariableNameHandler extends BaseHandler{
@@ -443,9 +460,8 @@ public class AST {
       )
         throw new ASTProcessingException("assignment has no variable or declare expression");
       operatorStack.add(token.value);
-      Token nextToken;
-      while(remains.hasNext() && (nextToken = remains.next()).tag != Token.NewLine){
-        recall(nextToken, remains, operatorStack, nodesStack);
+      while(remains.hasNext() && ( remains.peek().tag != Token.NewLine && !Utils.equal(remains.peek().value, Identifiers.ClosingBrace))){
+        recall(remains.next(), remains, operatorStack, nodesStack);
       }
       // build it
       if(nodesStack.isEmpty())
@@ -483,6 +499,61 @@ public class AST {
         nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value) , type.value));
       }else
         nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value)));
+    }
+  }
+
+  /**
+   * handle code block start at "{" and closed at "}"
+   */
+  private static class BlockHandler extends Tool{
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return Utils.equal(token.value, Identifiers.OpenBrace);
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      // no content
+      if(operatorEquals(Identifiers.ClosingBrace, remains.peek())){
+        remains.next();
+        nodesStack.add(new BlockNode(List.of()));
+        return;
+      }
+      Token start_token = token;
+      Set<String> end_ops = Set.of(Identifiers.ClosingBrace, "\n", "\r\n");
+      Set<String> start_ops = Set.of(Identifiers.OpenBrace, "\n", "\r\n");
+      while (remains.hasNext() && ( operatorStack.isEmpty() || !Utils.equal(operatorStack.peek(), Identifiers.ClosingBrace) )){
+        travel_back_build(
+            start_token,
+            remains,
+            operatorStack,
+            nodesStack,
+            end_ops,
+            start_ops
+        );
+        start_token = new Token(-1, operatorStack.pop());
+      }
+
+      // last operators must be like this : { ... new-line .... new-line ... }
+      if(!Utils.equal(start_token.value, Identifiers.ClosingBrace))
+        throw new ASTProcessingException("there is no closing parenthesis when handle builtin call " + token.value);
+      LinkedList<ASTNode> params = new LinkedList<>();
+
+      //
+      while(
+          !operatorStack.isEmpty() &&
+              !nodesStack.isEmpty() &&
+              !Utils.equal( operatorStack.peek(), Identifiers.OpenBrace)
+      ){
+        if(
+            !Set.of("\n","\r\n").contains(operatorStack.pop())
+        ) throw new ASTProcessingException("error when merge builtin call " + token.value);
+        // do merge
+        params.addFirst(nodesStack.pop());
+      }
+      operatorStack.pop(); // pop the "("
+      params.addFirst(nodesStack.pop());
+      nodesStack.add(new BlockNode(params));
     }
   }
 
@@ -529,6 +600,7 @@ public class AST {
     .next(new DeclarationHandler())
     .next(new VariableNameHandler())
     .next(new LiteralHandler())
+    .next(new BlockHandler())
     .next(new DefaultHandler())
     .build();
   }

@@ -128,4 +128,16 @@ public class ASTTest {
         el -> AST.build(Scanners.scanner(el))
     );
   }
+
+  @Test
+  public void block_test(){
+
+    cases4(
+        Set.of(
+            "{ let a = 1 }",
+            "{ let b : Int = a }"
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
 }
