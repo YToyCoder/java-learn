@@ -80,6 +80,15 @@ public class AST {
     }
   }
 
+  private static class WhileLoop implements ASTNode {
+    final ASTNode condition;
+    final BlockNode body;
+    public WhileLoop(ASTNode _cond, BlockNode _body){
+      condition = _cond;
+      body = _body;
+    }
+  }
+
   public static enum LiteralKind{
     Int,
     Double,
@@ -271,7 +280,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)|| operatorEquals(Identifiers.Concat, token)){
+      if(operatorEquals(Identifiers.ADD, token) || operatorEquals(Identifiers.SUB, token)|| operatorEquals(Identifiers.Concat, token) || operatorEquals("<", token)){
         operatorStack.add(token.value);
       }else if(token.tag == Token.BuiltinCall){
         // no content
@@ -557,6 +566,42 @@ public class AST {
     }
   }
 
+  /**
+   * while loop
+   */
+  private static class WhileHandler extends Tool {
+
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return Utils.equal(token.value, Identifiers.While);
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      Token should_be_open_parenthesis = remains.next();
+      if( /* check if it is "while()"*/
+          !operatorEquals(Identifiers.OpenParenthesis, should_be_open_parenthesis) ||
+              operatorEquals(Identifiers.ClosingParenthesis, remains.peek())
+      )
+        throw new ASTProcessingException("while loop condition is empty at " + token.pos );
+      // it should handle "(...)"
+      // @see OperatorHandler , condition is OpenParenthesis
+      recall(should_be_open_parenthesis, remains, operatorStack, nodesStack);
+      if(!remains.hasNext())
+        throw new ASTProcessingException("while should has following code ");
+      // it should handle "{....}"
+      // @see BlockHandler
+      recall(remains.next(), remains, operatorStack, nodesStack);
+      // after operations, nodesStack should have at least two elements ( condition and block )
+      ASTNode should_be_block = nodesStack.pop();
+      if(!(should_be_block instanceof BlockNode))
+        throw new ASTProcessingException("while should followed by block");
+      if(nodesStack.isEmpty())
+        throw new ASTProcessingException("while loop has no condition");
+      nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
+    }
+  }
+
   private static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
     return new CommonNode(_op, left, right);
   }
@@ -601,6 +646,7 @@ public class AST {
     .next(new VariableNameHandler())
     .next(new LiteralHandler())
     .next(new BlockHandler())
+    .next(new WhileHandler())
     .next(new DefaultHandler())
     .build();
   }

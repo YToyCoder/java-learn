@@ -140,4 +140,16 @@ public class ASTTest {
         el -> AST.build(Scanners.scanner(el))
     );
   }
+
+  @Test
+  public void while_loop_test(){
+
+    cases4(
+        Set.of(
+            "while(true){ let a = 1 }",
+            "while(a < 2){ let a = 1 }"
+        ),
+        el -> AST.build(Scanners.scanner(el))
+    );
+  }
 }
