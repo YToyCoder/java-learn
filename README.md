@@ -1577,3 +1577,41 @@ Java14 之后switch表达式可以有返回值，如果想显示的返回值需�
   }else assertTrue("should not reach here", false);
 
 ```
+
+### 21 lambda
+
+#### 21.1 lambda变量捕获
+
+存在如下代码:
+
+```java
+
+public class Demo {
+  public static void main(String[] args){
+    VoidFunction<String> c1 = s -> System.out.println(s); // 1, 
+
+
+    VoidFunction<String> c2 = System.out::println; // 2 函数引用
+
+    PrintStream print = System.out;
+    VoidFunction<String> c1 = s -> print.println(s); // 3
+  }
+
+  public static interface VoidFunction<T>{
+    void call(T t)
+  } 
+}
+
+```
+
+**1,2,3表达式的区别:**
+
+(1) 无变量捕获
+
+(2) 实例变量捕获
+
+(3)
+
+*参考*
+
+[RednaxelaFX回答 > 知乎问题: Java中普通lambda表达式和方法引用本质上有什么区别? ](https://www.zhihu.com/question/51491241/answer/126232275)
