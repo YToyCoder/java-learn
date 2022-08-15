@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,6 +59,8 @@ public class Scripts {
       origin = new RandomAccessFile(file_path, "rw");
       channel = origin.getChannel();
       buffer = ByteBuffer.wrap(new byte[1028]);
+      pos = 0;
+      cs = new LinkedList<>();
     }
 
     private ReadableByteChannel channel;
@@ -65,7 +68,10 @@ public class Scripts {
     private List<Token> tokens;
     private ByteBuffer buffer;
     private final String file_path;
+    private int pos;
     private int record;
+    private LinkedList<Character> cs;
+    private boolean end_of_file;
 
     @Override
     public List<Token> scan(String source) {
@@ -90,7 +96,7 @@ public class Scripts {
       return !tokens.isEmpty();
     }
 
-    void checkNotEmpty(){
+    void checkNotEmpty() {
 //      channel.read()
       if(hash_char()){
         switch (peek_char()){
@@ -132,13 +138,13 @@ public class Scripts {
     }
 
     int pos(){
-      return 0;
+      return pos;
     }
 
     /**
      * handle the string literal , like : "string literal"
      */
-    void handle_string_literal(){
+    void handle_string_literal() {
       record_position();
       char c = next_char();
       StringBuilder builder = new StringBuilder();
@@ -160,7 +166,7 @@ public class Scripts {
      * handle digit literal , like :
      *    1 , 2.0, 100
      */
-    void handle_digit_literal(){
+    void handle_digit_literal() {
       final StringBuilder builder = new StringBuilder();
       record_position();
       while( hash_char() && Character.isDigit(peek_char()) )
@@ -177,7 +183,7 @@ public class Scripts {
     /**
      * identifier things, variable name , function name or declaration
      */
-    void handle_identifier_kind(){
+    void handle_identifier_kind() {
       record_position();
       final StringBuilder builder = new StringBuilder();
       while(hash_char() && Identifiers.identifiers.contains(peek_char()))
@@ -192,7 +198,7 @@ public class Scripts {
       );
     }
 
-    void handle_operator(){
+    void handle_operator() {
       record_position();
       final StringBuilder builder = new StringBuilder();
       while (hash_char() && Identifiers.operatorCharacters.contains(peek_char()))
@@ -231,7 +237,7 @@ public class Scripts {
     /**
      * remove the black between two token
      */
-    void handle_black(){
+    void handle_black() {
       while(hash_char() && (Utils.equal(peek_char(), ' ')  || is_end_of_line() )){
         if (is_end_of_line())handle_end_of_line();
         else peek_char();
@@ -239,22 +245,54 @@ public class Scripts {
     }
 
     boolean is_end_of_line(){
-      return false;
+      if(hash_char() && Utils.equal( cs.peek() , '\n'))
+        return true;
+      // check if next two char is "\r\n"
+      char next_char = next_char(); // move out
+      boolean end_of_line = (Utils.equal(next_char, '\r') && Utils.equal(peek_char(), '\n'));
+      cs.addFirst(next_char); // set back
+      return end_of_line;
     }
 
     void handle_end_of_line(){
+      if(!Utils.equal(next_char() /* may be '\n' or '\r\n'*/, '\n'))
+        next_char();
+      tokens.add(new Token(Token.NewLine, ""));
     }
 
-    boolean hash_char(){
-      return false;
+    boolean hash_char() {
+      if(buffer.hasRemaining())
+        return true;
+      if(end_of_file) /* already at end_of_file */
+        return false;
+      //
+      buffer.clear();
+
+      try {
+        end_of_file = channel.read(buffer) == 0;
+      }catch (IOException e){
+        throw new LexicalException(pos(), file_path, e.getMessage());
+      }
+      buffer.flip();
+      return buffer.hasRemaining();
     }
 
     char peek_char(){
-      return 'c';
+      check_and_set_char();
+      return cs.peek();
     }
 
     char next_char(){
-      return 'c';
+      check_and_set_char();
+      return cs.pop();
+    }
+
+    /**
+     * call this after @see hash_char
+     */
+    void check_and_set_char(){
+      if(cs.isEmpty())
+        cs.add((char) buffer.get());
     }
 
     @Override
