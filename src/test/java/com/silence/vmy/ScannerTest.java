@@ -4,13 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.logging.Logger;
 
+import com.silence.Utils;
 import org.junit.Test;
 
 public class ScannerTest {
+  private static final Logger log = Logger.getLogger(ScannerTest.class.getName());
 
   static Map<Integer, String> oneCharSource = new HashMap<>();
 
@@ -231,6 +235,27 @@ public class ScannerTest {
         },
         Scanners.scan("true false").toArray(new Token[0])
     );
+  }
+
+  private static String ofScript(String name){
+    return String.format("%s/%s", Utils.get_dir_of_project("scripts"), name);
+  }
+  @Test
+  public void file_scanner_test(){
+    log.info(Utils.project_dir);
+    Scripts.FileInputScanner scanner = null;
+    try {
+      scanner = Scripts.file_scanner(ofScript("hello_word.vmy"));
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+    System.out.println(scanner.scan(""));
+    try {
+      scanner.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
 }
