@@ -43,7 +43,14 @@ public class Scripts {
     }
   }
 
-  private static class FileInputScanner implements Scanner, AutoCloseable {
+  public static FileInputScanner file_scanner(String file) throws FileNotFoundException {
+    return new FileInputScanner(file);
+  }
+
+  /**
+   * a new version handler to handle the file by NIO
+   */
+  public static class FileInputScanner implements Scanner, AutoCloseable {
 
     public FileInputScanner(String file_path) throws FileNotFoundException {
       this.file_path = file_path;
@@ -55,12 +62,16 @@ public class Scripts {
      * @param file_path
      * @throws FileNotFoundException
      */
-    void init(String file_path) throws FileNotFoundException {
+    private void init(String file_path) throws FileNotFoundException {
       origin = new RandomAccessFile(file_path, "rw");
       channel = origin.getChannel();
       buffer = ByteBuffer.wrap(new byte[1028]);
+      System.out.println(buffer.hasRemaining());
+      buffer.flip();
+      System.out.println(buffer.hasRemaining());
       pos = 0;
       cs = new LinkedList<>();
+      tokens = new LinkedList<>();
     }
 
     private ReadableByteChannel channel;
@@ -75,7 +86,10 @@ public class Scripts {
 
     @Override
     public List<Token> scan(String source) {
-      return null;
+      List<Token> tos = new LinkedList<>();
+      while(hasNext())
+        tos.add(next());
+      return tos;
     }
 
     @Override
@@ -96,7 +110,7 @@ public class Scripts {
       return !tokens.isEmpty();
     }
 
-    void checkNotEmpty() {
+    private void checkNotEmpty() {
 //      channel.read()
       if(hash_char()){
         switch (peek_char()){
@@ -123,28 +137,31 @@ public class Scripts {
             break;
           case ' ':
             handle_black();
+            break;
           default:
             // identifier :
             if(Identifiers.identifiers.contains(peek_char()))
               handle_identifier_kind();
+            else if(is_end_of_line())
+              handle_end_of_line();
             else if(
                 Identifiers.operatorCharacters.contains(peek_char()) ||
                     Identifiers.commonIdentifiers.contains(peek_char())
             ) handle_operator();
             else
-              throw new LexicalException(pos(), file_path, "can't handle char : " + peek_char());
+              throw new LexicalException(pos(), file_path, "can't handle char : " + peek_char() + " at position " + pos);
         }
       }
     }
 
-    int pos(){
+    private int pos(){
       return pos;
     }
 
     /**
      * handle the string literal , like : "string literal"
      */
-    void handle_string_literal() {
+    private void handle_string_literal() {
       record_position();
       char c = next_char();
       StringBuilder builder = new StringBuilder();
@@ -166,7 +183,7 @@ public class Scripts {
      * handle digit literal , like :
      *    1 , 2.0, 100
      */
-    void handle_digit_literal() {
+    private void handle_digit_literal() {
       final StringBuilder builder = new StringBuilder();
       record_position();
       while( hash_char() && Character.isDigit(peek_char()) )
@@ -183,7 +200,7 @@ public class Scripts {
     /**
      * identifier things, variable name , function name or declaration
      */
-    void handle_identifier_kind() {
+    private void handle_identifier_kind() {
       record_position();
       final StringBuilder builder = new StringBuilder();
       while(hash_char() && Identifiers.identifiers.contains(peek_char()))
@@ -198,16 +215,21 @@ public class Scripts {
       );
     }
 
-    void handle_operator() {
+    private void handle_operator() {
       record_position();
       final StringBuilder builder = new StringBuilder();
-      while (hash_char() && Identifiers.operatorCharacters.contains(peek_char()))
-        builder.append(next_char());
+      while (
+          hash_char() &&
+              (
+                  Identifiers.operatorCharacters.contains(peek_char()) ||
+                      Identifiers.commonIdentifiers.contains(peek_char())
+              )
+      ) builder.append(next_char());
       final String operator = builder.toString();
       tokens.add(new Token(get_identifier_kind(operator), operator, get_record()));
     }
 
-    int get_identifier_kind(String identifier){
+    private int get_identifier_kind(String identifier){
       return switch (identifier){
         case /* let , val */Identifiers.ConstDeclaration, Identifiers.VarDeclaration -> Token.Declaration;
         case /* = */ Identifiers.Assignment -> Token.Assignment;
@@ -221,7 +243,7 @@ public class Scripts {
     /**
      * record current position
      */
-    void record_position(){
+    private void record_position(){
       record = pos();
     }
 
@@ -230,21 +252,20 @@ public class Scripts {
      * @see FileInputScanner#get_record()
      * @return recorded position
      */
-    int get_record(){
+    private int get_record(){
       return record;
     }
 
     /**
      * remove the black between two token
      */
-    void handle_black() {
-      while(hash_char() && (Utils.equal(peek_char(), ' ')  || is_end_of_line() )){
-        if (is_end_of_line())handle_end_of_line();
-        else peek_char();
+    private void handle_black() {
+      while(hash_char() && Utils.equal(peek_char(), ' ')  ){
+        next_char();
       }
     }
 
-    boolean is_end_of_line(){
+    private boolean is_end_of_line(){
       if(hash_char() && Utils.equal( cs.peek() , '\n'))
         return true;
       // check if next two char is "\r\n"
@@ -254,13 +275,13 @@ public class Scripts {
       return end_of_line;
     }
 
-    void handle_end_of_line(){
+    private void handle_end_of_line(){
       if(!Utils.equal(next_char() /* may be '\n' or '\r\n'*/, '\n'))
         next_char();
       tokens.add(new Token(Token.NewLine, ""));
     }
 
-    boolean hash_char() {
+    private boolean hash_char() {
       if(buffer.hasRemaining())
         return true;
       if(end_of_file) /* already at end_of_file */
@@ -271,26 +292,28 @@ public class Scripts {
       try {
         end_of_file = channel.read(buffer) == 0;
       }catch (IOException e){
+        e.printStackTrace();
         throw new LexicalException(pos(), file_path, e.getMessage());
       }
       buffer.flip();
       return buffer.hasRemaining();
     }
 
-    char peek_char(){
+    private char peek_char(){
       check_and_set_char();
       return cs.peek();
     }
 
-    char next_char(){
+    private char next_char(){
       check_and_set_char();
+      pos++;
       return cs.pop();
     }
 
     /**
      * call this after @see hash_char
      */
-    void check_and_set_char(){
+    private void check_and_set_char(){
       if(cs.isEmpty())
         cs.add((char) buffer.get());
     }
