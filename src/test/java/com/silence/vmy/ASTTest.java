@@ -147,7 +147,9 @@ public class ASTTest {
     cases4(
         Set.of(
             "while(true){ let a = 1 }",
-            "while(a < 2){ let a = 1 }"
+            "while(a < 2){ let a = 1 }",
+            "while(a < b + c * (1 - 5)) { a = 1 + ( 3 - 2 ) * 1.5}",
+            "while(a + b < b + c * (1 - 5)) { a = 1 + ( 3 - 2 ) * 1.5}"
         ),
         el -> AST.build(Scanners.scanner(el))
     );
