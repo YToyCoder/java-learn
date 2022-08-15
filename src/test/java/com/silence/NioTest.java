@@ -14,11 +14,12 @@ public class NioTest {
 
   static String project_root_dir = System.getProperty("user.dir");
   static final String Readme = full_path("README.md");
+  static final String script = full_path("scripts/hello_word.vmy");
 
   @Test
   public void read_file(){
     byte[] bytes = new byte[20];
-    try(FileInputStream fileInputStream = new FileInputStream(Readme)){
+    try(FileInputStream fileInputStream = new FileInputStream(script)){
       FileChannel channel = fileInputStream.getChannel();
       ByteBuffer buffer = ByteBuffer.wrap(bytes);
       while (channel.read(buffer) > 0){
