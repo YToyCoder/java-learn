@@ -13,6 +13,14 @@ public class Token {
     this(_tag, val, -1);
   }
 
+  @Override
+  public String toString() {
+    return "Token{" +
+        "tag=" + tag +
+        ", value='" + value + '\'' +
+        ", pos=" + pos +
+        '}';
+  }
 
   static final int INT_V = 0;
   static final int DOUBLE_V = 1;
