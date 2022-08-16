@@ -209,21 +209,27 @@ public class AST {
     }
     VmyAST ast = new VmyAST();
     // todo
-    if(!nodesStack.isEmpty()){
-      ASTNode merge = nodesStack.pop();
-      while(
-        !operatorStack.isEmpty() &&
-        !nodesStack.isEmpty()
-      ){
-          final String operator = operatorStack.pop();
-          final ASTNode asLeft = nodesStack.pop();
-          merge = new CommonNode(operator, asLeft, merge);
-      }
-      if(!nodesStack.isEmpty() || !operatorStack.isEmpty())
-        throw new ASTProcessingException("expression wrong");
-      ast.root = merge;
-    }
+    ast.root = merge_linear_nodes(nodesStack);
+//    if(!nodesStack.isEmpty()){
+//      ASTNode merge = nodesStack.pop();
+//      while(
+//        !operatorStack.isEmpty() &&
+//        !nodesStack.isEmpty()
+//      ){
+//          final String operator = operatorStack.pop();
+//          final ASTNode asLeft = nodesStack.pop();
+//          merge = new CommonNode(operator, asLeft, merge);
+//      }
+//      if(!nodesStack.isEmpty() || !operatorStack.isEmpty())
+//        throw new ASTProcessingException("expression wrong");
+//      ast.root = merge;
+//    }
     return ast;
+  }
+
+  private static ASTNode merge_linear_nodes(List<ASTNode> nodes){
+//    return new Process
+    return new BlockNode(nodes);
   }
 
   static interface TokenHandler{
@@ -387,6 +393,9 @@ public class AST {
 
   }
 
+  // represent an empty node
+  private static class EmptyNode implements ASTNode{}
+
   private static abstract class Tool extends BaseHandler {
 
     // travel build like : binary operation
@@ -400,7 +409,19 @@ public class AST {
         Set<String> end_op,
         Set<String> start_op
     ) {
+      // logic
+      // 1. add the start operator
+      // 2. if next is end_op , just add empty node
+      // 3. handle thing between start_op and end_op
+      // 4. merge all node between start_op and end_op
+      // 5. add end_op to operation stack and add merged node to nodes stack
       operation_stack.add(token.value);
+      if(/* not content */end_op.contains(remains.peek())){
+        // add an empty node
+        operation_stack.add(remains.next().value);
+        nodes_stack.add(new EmptyNode());
+        return;
+      }
       Token next_token = null;
       while(remains.hasNext() && !end_op.contains((next_token = remains.next()).value)){
         recall(next_token, remains, operation_stack, nodes_stack);
@@ -557,6 +578,10 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      // case : new-line {
+      if(remains.peek().tag == Token.NewLine)
+        // remove it (new-line)
+        remains.next();
       // no content
       if(operatorEquals(Identifiers.ClosingBrace, remains.peek())){
         remains.next();
@@ -566,6 +591,11 @@ public class AST {
       Token start_token = token;
       Set<String> end_ops = Set.of(Identifiers.ClosingBrace, "\n", "\r\n");
       Set<String> start_ops = Set.of(Identifiers.OpenBrace, "\n", "\r\n");
+      // not included case
+      // { \r\n let a : Int = 1 }
+      // \r\n { \r\n
+      // not right way to handle all cases
+      // each line must be one expression
       while (remains.hasNext() && ( operatorStack.isEmpty() || !Utils.equal(operatorStack.peek(), Identifiers.ClosingBrace) )){
         travel_back_build(
             start_token,
@@ -584,6 +614,7 @@ public class AST {
       LinkedList<ASTNode> params = new LinkedList<>();
 
       //
+      ASTNode temp_node;
       while(
           !operatorStack.isEmpty() &&
               !nodesStack.isEmpty() &&
@@ -593,10 +624,12 @@ public class AST {
             !Set.of("\n","\r\n").contains(operatorStack.pop())
         ) throw new ASTProcessingException("error when merge builtin call " + token.value);
         // do merge
-        params.addFirst(nodesStack.pop());
+        if(!((temp_node = nodesStack.peek()) instanceof EmptyNode))
+          params.addFirst(temp_node);
       }
       operatorStack.pop(); // pop the "("
-      params.addFirst(nodesStack.pop());
+      if(!((temp_node = nodesStack.peek()) instanceof EmptyNode))
+        params.addFirst(temp_node);
       nodesStack.add(new BlockNode(params));
     }
   }
@@ -668,7 +701,21 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      throw new ASTProcessingException("not support token for " + String.format("tag %d token %s", token.tag, token.value));
+      throw new ASTProcessingException("not support token for " + String.format("tag %d token %s", token.tag, Utils.display_newline(token.value)));
+    }
+  }
+
+  /**
+   */
+  private static class NewlineHandler extends BaseHandler {
+
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      return token.tag == Token.NewLine;
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
     }
   }
 
@@ -682,6 +729,7 @@ public class AST {
     .next(new LiteralHandler())
     .next(new BlockHandler())
     .next(new WhileHandler())
+    .next(new NewlineHandler())
     .next(new DefaultHandler())
     .build();
   }
