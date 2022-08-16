@@ -1,0 +1,3 @@
+let a : Int = 1
+let b : Boolean = true
+let c  = "hello, word"
