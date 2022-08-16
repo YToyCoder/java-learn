@@ -317,7 +317,7 @@ public class AST {
         Token start_token = should_be_open_parenthesis;
         while(
             remains.hasNext() &&
-            (operatorStack.isEmpty() || !Utils.equal(operatorStack.peek(), Identifiers.ClosingParenthesis))
+            (operatorStack.isEmpty() || !Utils.equal(start_token.value, Identifiers.ClosingParenthesis))
         ){
           travel_back_build(
               start_token,
@@ -329,7 +329,7 @@ public class AST {
           );
           start_token = new Token(-1, operatorStack.pop());
         }
-        // last operators must be like this : (, , )
+        // last operators must be like this : ( , , )
         if(!Utils.equal(start_token.value, Identifiers.ClosingParenthesis))
           throw new ASTProcessingException("there is no closing parenthesis when handle builtin call " + token.value);
         LinkedList<ASTNode> params = new LinkedList<>();
@@ -416,16 +416,18 @@ public class AST {
       // 4. merge all node between start_op and end_op
       // 5. add end_op to operation stack and add merged node to nodes stack
       operation_stack.add(token.value);
-      if(/* not content */end_op.contains(remains.peek())){
+      if(/* not content */end_op.contains(remains.peek().value)){
         // add an empty node
         operation_stack.add(remains.next().value);
         nodes_stack.add(new EmptyNode());
         return;
       }
       Token next_token = null;
-      while(remains.hasNext() && !end_op.contains((next_token = remains.next()).value)){
-        recall(next_token, remains, operation_stack, nodes_stack);
-      }
+      while(
+          remains.hasNext() &&
+          !end_op.contains((next_token = remains.next()).value)
+      ) recall(next_token, remains, operation_stack, nodes_stack);
+
       if(Objects.isNull(next_token) || !end_op.contains(next_token.value))
         throw new ASTProcessingException("there is no end_op");
       if(nodes_stack.isEmpty())
@@ -434,8 +436,8 @@ public class AST {
 
       while(
           !operation_stack.isEmpty() &&
-              !nodes_stack.isEmpty() &&
-              !start_op.contains(operation_stack.peek())
+          !nodes_stack.isEmpty() &&
+          !start_op.contains(operation_stack.peek())
       ){
         final String operator = operation_stack.pop();
         final ASTNode asLeft = nodes_stack.pop();
@@ -854,7 +856,13 @@ public class AST {
 
       if(node instanceof ValNode val){
         return val.value;
-      }else if(node instanceof CommonNode common){
+      }else if(node instanceof BlockNode block){
+        List<ASTNode> nodes = block.process;
+        for(ASTNode sub : nodes){
+          eval_sub(sub);
+        }
+        return null;
+      } else if(node instanceof CommonNode common){
         return binary_op_call(common.OP ,eval_sub(common.left), eval_sub(common.right));
         // Object left = eval_sub(common.left);
         // Object right  = eval_sub(common.right);

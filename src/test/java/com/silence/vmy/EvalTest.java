@@ -1,5 +1,6 @@
 package com.silence.vmy;
 
+import com.silence.Utils;
 import org.junit.Test;
 
 import java.util.List;
@@ -43,6 +44,16 @@ public class EvalTest {
         cts(ls.get(i), ls.get(j));
       }
     }
+  }
+
+  @Test
+  public void eval_script_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        FileInputScannerTestUtils.ofScript("number_literal_token_support_test.vmy"),
+        scanner -> {
+          AST.evaluator(true).eval(AST.build(scanner));
+        }
+    );
   }
 
   void cts(String v1, String v2){
