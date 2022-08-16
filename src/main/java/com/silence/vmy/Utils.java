@@ -190,4 +190,13 @@ public class Utils {
     System.err.println("[vmy-error]" + msg);
   }
 
+  /**
+   * convert \n and \r\n to \\n , \\r\\n
+   * @param string
+   * @return
+   */
+  public static String display_newline(String string) {
+    return string.replace("\n", "\\n").replace("\r", "\\r");
+  }
+
 }
