@@ -154,4 +154,12 @@ public class ASTTest {
         el -> AST.build(Scanners.scanner(el))
     );
   }
+
+  @Test
+  public void number_literal_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        FileInputScannerTestUtils.ofScript("number_literal_token_support_test.vmy"),
+        scanner -> AST.build(scanner)
+    );
+  }
 }

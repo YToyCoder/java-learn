@@ -56,6 +56,18 @@ public class AST {
     }
   }
 
+  private static class NumberLiteral extends LiteralNode {
+    final Number val;
+
+    public NumberLiteral(Number _number){
+      super( _number instanceof Integer ? LiteralKind.Int.ordinal() : LiteralKind.Double.ordinal());
+      val = _number;
+    }
+    @Override
+    public Object val() {
+      return val;
+    }
+  }
   private static abstract class LiteralNode implements ASTNode {
     private final int tag;
     public LiteralNode(int _tag){
@@ -98,7 +110,7 @@ public class AST {
   }
 
   // node for assignment
-  // like : 
+  // like :
   //      let a : Type = 1
   //      a = 2
   private static class AssignNode implements ASTNode {
@@ -173,7 +185,7 @@ public class AST {
     if(!nodesStack.isEmpty()){
       ASTNode merge = nodesStack.pop();
       while(
-        !operatorStack.isEmpty() && 
+        !operatorStack.isEmpty() &&
         !nodesStack.isEmpty()
       ){
           final String operator = operatorStack.pop();
@@ -200,7 +212,7 @@ public class AST {
     if(!nodesStack.isEmpty()){
       ASTNode merge = nodesStack.pop();
       while(
-        !operatorStack.isEmpty() && 
+        !operatorStack.isEmpty() &&
         !nodesStack.isEmpty()
       ){
           final String operator = operatorStack.pop();
@@ -245,8 +257,8 @@ public class AST {
       else if(Objects.nonNull(next))
         next.handle(token, remains, operatorStack, nodesStack);
     }
-    
-    public abstract boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack); 
+
+    public abstract boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
     public abstract void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
 
   }
@@ -331,7 +343,7 @@ public class AST {
         nodesStack.add(new CallNode(token.value, new ListExpression(params)));
       }
       else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
-        if(!remains.hasNext()) 
+        if(!remains.hasNext())
           throw new ASTProcessingException("*(multiply) doesn't have right side");
         if(nodesStack.isEmpty())
           throw new ASTProcessingException("*(multiply) left side not exists");
@@ -439,10 +451,33 @@ public class AST {
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       // currently, it only needs to handle the string literal and bool literal
       // the Int and Double literal it handled by ValHandler
+      int digit_flag;
       if(Utils.equal(token.value, Identifiers.True) || Utils.equal(token.value, Identifiers.False))
         nodesStack.add(new BoolLiteral(Utils.equal( token.value, Identifiers.True)));
-      else
+      else if((digit_flag = is_digit(token.value)) != 0){
+        // todo
+        nodesStack.add( digit_flag == 1 ?
+            new NumberLiteral(Integer.parseInt(token.value)) :
+            new NumberLiteral(Double.parseDouble(token.value))
+        );
+      } else
         nodesStack.add(new StringLiteral(token.value));
+    }
+
+    // double : 2
+    // int : 1
+    // not digit: 0
+    private int is_digit(String _value){
+      int walk = 0;
+      while(walk < _value.length() && !Utils.equal(_value.charAt(walk), '.'))
+        if(!Character.isDigit(_value.charAt(walk++))) return 0;
+      if(walk < _value.length() && Utils.equal(_value.charAt(walk), '.')){
+        walk++;
+        while(walk < _value.length())
+          if(!Character.isDigit(_value.charAt(walk++))) return 0;
+        return 2;
+      }
+      return 1; // 1
     }
   }
 
