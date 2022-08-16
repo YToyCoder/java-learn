@@ -290,6 +290,26 @@ public class ScannerTest {
   }
 
   @Test
+  public void number_literal_token_support_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        ofScript("number_literal_token_support_test.vmy"),
+        scanner -> {
+          assertEqualTo(
+              new Token[] {
+                  new Token(Token.Declaration, "let"),
+                  new Token(Token.Identifier, "a"),
+                  new Token(Token.Identifier, ":"),
+                  new Token(Token.Identifier, "Int"),
+                  new Token(Token.Assignment, "="),
+                  new Token(Token.Literal, "1")
+              },
+              to_token_arr(scanner.scan(""))
+          );
+        }
+    );
+  }
+
+  @Test
   public void quote_test(){
     System.out.println((int)'"');
   }

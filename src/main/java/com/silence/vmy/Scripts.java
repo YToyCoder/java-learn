@@ -66,9 +66,7 @@ public class Scripts {
       origin = new RandomAccessFile(file_path, "rw");
       channel = origin.getChannel();
       buffer = ByteBuffer.wrap(new byte[1028]);
-      System.out.println(buffer.hasRemaining());
       buffer.flip();
-      System.out.println(buffer.hasRemaining());
       pos = 0;
       cs = new LinkedList<>();
       tokens = new LinkedList<>();
@@ -112,7 +110,7 @@ public class Scripts {
 
     private void checkNotEmpty() {
 //      channel.read()
-      if(hash_char()){
+      if(has_char()){
         switch (peek_char()){
           case '"': // string literal
             handle_string_literal();
@@ -131,10 +129,6 @@ public class Scripts {
           case '0':
             handle_digit_literal();
             break;
-          case ':':
-            tokens.add(new Token(Token.Comma, Identifiers.Comma, pos()));
-            next_char();
-            break;
           case ' ':
             handle_black();
             break;
@@ -142,6 +136,7 @@ public class Scripts {
           case Identifiers.ClosingBraceChar:
           case ',': // Comma
           case '(':
+          case ':':
             handle_single_char_identifier();
             break;
           default:
@@ -172,13 +167,13 @@ public class Scripts {
       next_char(); // remove "
       StringBuilder builder = new StringBuilder();
       while(
-          hash_char() &&
+          has_char() &&
                   // not quote
                   !Utils.equal(peek_char(), Identifiers.Quote) &&
                       // not end of line
                   !is_end_of_line()
       ) builder.append(next_char());
-      if(!hash_char() || !Utils.equal(next_char(), Identifiers.Quote)) /* try to remove " */
+      if(!has_char() || !Utils.equal(next_char(), Identifiers.Quote)) /* try to remove " */
         throw new LexicalException(get_record(), file_path, "string literal has no closing parenthesis");
       tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
     }
@@ -190,12 +185,12 @@ public class Scripts {
     private void handle_digit_literal() {
       final StringBuilder builder = new StringBuilder();
       record_position();
-      while( hash_char() && Character.isDigit(peek_char()) )
+      while( has_char() && Character.isDigit(peek_char()) )
         builder.append(next_char());
-      if( hash_char() && Utils.equal(peek_char(), Identifiers.Dot)){
+      if( has_char() && Utils.equal(peek_char(), Identifiers.Dot)){
         // double
         builder.append(next_char());
-        while( hash_char() && Character.isDigit(peek_char()) )
+        while( has_char() && Character.isDigit(peek_char()) )
           builder.append(next_char());
       }
       tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
@@ -207,7 +202,7 @@ public class Scripts {
     private void handle_identifier_kind() {
       record_position();
       final StringBuilder builder = new StringBuilder();
-      while(hash_char() && Identifiers.identifiers.contains(peek_char()))
+      while(has_char() && Identifiers.identifiers.contains(peek_char()))
         builder.append(next_char());
       final String identifier = builder.toString();
       tokens.add(
@@ -223,7 +218,7 @@ public class Scripts {
       record_position();
       final StringBuilder builder = new StringBuilder();
       while (
-          hash_char() &&
+          has_char() &&
               (
                   Identifiers.operatorCharacters.contains(peek_char()) ||
                       Identifiers.commonIdentifiers.contains(peek_char())
@@ -272,13 +267,13 @@ public class Scripts {
      * remove the black between two token
      */
     private void handle_black() {
-      while(hash_char() && Utils.equal(peek_char(), ' ')  ){
+      while(has_char() && Utils.equal(peek_char(), ' ')  ){
         next_char();
       }
     }
 
     private boolean is_end_of_line(){
-      if(hash_char() && Utils.equal( cs.peek() , '\n'))
+      if(has_char() && Utils.equal( cs.peek() , '\n'))
         return true;
       // check if next two char is "\r\n"
       char next_char = next_char(); // move out
@@ -293,8 +288,8 @@ public class Scripts {
       tokens.add(new Token(Token.NewLine, "", pos()));
     }
 
-    private boolean hash_char() {
-      if(buffer.hasRemaining())
+    private boolean has_char() {
+      if(!cs.isEmpty() || buffer.hasRemaining())
         return true;
       if(end_of_file) /* already at end_of_file */
         return false;
