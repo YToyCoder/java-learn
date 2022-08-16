@@ -258,4 +258,44 @@ public class ScannerTest {
     }
   }
 
+  @Test
+  public void file_scanner_toke_support_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        ofScript("token_support_test.vmy"),
+        el -> {
+          assertEqualTo(
+              new Token[]{
+                  new Token(Token.Declaration, "let"),
+                  new Token(Token.Identifier, "a"),
+                  new Token(Token.Assignment, "="),
+                  new Token(Token.Literal, "1"),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Builtin, "while"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "1"),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.Identifier, Identifiers.OpenBrace),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.BuiltinCall, Identifiers.Print),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "hello, word"),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Identifier, Identifiers.ClosingBrace)
+              },
+              to_token_arr(el.scan(""))
+          );
+        }
+    );
+  }
+
+  @Test
+  public void quote_test(){
+    System.out.println((int)'"');
+  }
+
+  private static Token[] to_token_arr(List<Token> tokens){
+    return tokens.toArray(new Token[0]);
+  }
+
 }
