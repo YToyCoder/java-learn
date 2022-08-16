@@ -281,6 +281,7 @@ public class Scanners {
       return switch (identifier){
         case Identifiers.While -> Token.Builtin;
         case Identifiers.True , Identifiers.False -> Token.Literal;
+        case Identifiers.Print -> Token.BuiltinCall;
         default -> {
           if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
           yield Token.Identifier;
