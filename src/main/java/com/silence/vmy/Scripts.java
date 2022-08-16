@@ -138,6 +138,12 @@ public class Scripts {
           case ' ':
             handle_black();
             break;
+          case Identifiers.OpenBraceChar:
+          case Identifiers.ClosingBraceChar:
+          case ',': // Comma
+          case '(':
+            handle_single_char_identifier();
+            break;
           default:
             // identifier :
             if(Identifiers.identifiers.contains(peek_char()))
@@ -163,18 +169,16 @@ public class Scripts {
      */
     private void handle_string_literal() {
       record_position();
-      char c = next_char();
+      next_char(); // remove "
       StringBuilder builder = new StringBuilder();
       while(
           hash_char() &&
-              (
                   // not quote
                   !Utils.equal(peek_char(), Identifiers.Quote) &&
                       // not end of line
                   !is_end_of_line()
-              )
       ) builder.append(next_char());
-      if(!hash_char() || !Utils.equal(next_char(), Identifiers.Quote))
+      if(!hash_char() || !Utils.equal(next_char(), Identifiers.Quote)) /* try to remove " */
         throw new LexicalException(get_record(), file_path, "string literal has no closing parenthesis");
       tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
     }
@@ -233,11 +237,19 @@ public class Scripts {
       return switch (identifier){
         case /* let , val */Identifiers.ConstDeclaration, Identifiers.VarDeclaration -> Token.Declaration;
         case /* = */ Identifiers.Assignment -> Token.Assignment;
+        case /* while */ Identifiers.While -> Token.Builtin;
         default -> {
           if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
           yield Token.Identifier;
         }
       };
+    }
+
+    /**
+     * handle builtin character which is single character
+     */
+    private void handle_single_char_identifier(){
+      tokens.add(new Token(Token.Identifier, Character.toString(next_char()), pos()));
     }
 
     /**
@@ -278,7 +290,7 @@ public class Scripts {
     private void handle_end_of_line(){
       if(!Utils.equal(next_char() /* may be '\n' or '\r\n'*/, '\n'))
         next_char();
-      tokens.add(new Token(Token.NewLine, ""));
+      tokens.add(new Token(Token.NewLine, "", pos()));
     }
 
     private boolean hash_char() {
