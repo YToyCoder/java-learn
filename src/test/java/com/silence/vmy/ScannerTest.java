@@ -301,7 +301,14 @@ public class ScannerTest {
                   new Token(Token.Identifier, ":"),
                   new Token(Token.Identifier, "Int"),
                   new Token(Token.Assignment, "="),
-                  new Token(Token.Literal, "1")
+                  new Token(Token.Literal, "1"),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Declaration, "let"),
+                  new Token(Token.Identifier, "b"),
+                  new Token(Token.Identifier, ":"),
+                  new Token(Token.Identifier, "Boolean"),
+                  new Token(Token.Assignment, "="),
+                  new Token(Token.Literal, "true"),
               },
               to_token_arr(scanner.scan(""))
           );

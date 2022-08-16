@@ -109,11 +109,17 @@ public class Scripts {
     }
 
 
+    /**
+     * check if the token list is empty, if empty and has char , then add new token to token list
+     */
     private void checkNotEmpty() {
       while(has_char() && tokens.isEmpty())
         do_fill_tokens();
     }
 
+    /**
+     * fill the tokens
+     */
     private void do_fill_tokens(){
 //      channel.read()
       if(has_char()){
@@ -161,6 +167,10 @@ public class Scripts {
       }
     }
 
+    /**
+     * current offset from first word
+     * @return
+     */
     private int pos(){
       return pos;
     }
@@ -239,6 +249,7 @@ public class Scripts {
         case /* let , val */Identifiers.ConstDeclaration, Identifiers.VarDeclaration -> Token.Declaration;
         case /* = */ Identifiers.Assignment -> Token.Assignment;
         case /* while */ Identifiers.While -> Token.Builtin;
+        case /* true false */ Identifiers.True, Identifiers.False -> Token.Literal;
         default -> {
           if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
           yield Token.Identifier;
