@@ -300,9 +300,12 @@ public class Scripts {
     }
 
     private void handle_end_of_line(){
-      if(!Utils.equal(next_char() /* may be '\n' or '\r\n'*/, '\n'))
-        next_char();
-      tokens.add(new Token(Token.NewLine, "", pos()));
+      record_position();
+      StringBuilder builder = new StringBuilder();
+      if(!Utils.equal(peek_char() /* may be '\n' or '\r\n'*/, '\n')){
+        builder.append(next_char()).append(next_char());
+      }else builder.append(next_char());
+      tokens.add(new Token(Token.NewLine, builder.toString(), pos()));
     }
 
     private boolean has_char() {

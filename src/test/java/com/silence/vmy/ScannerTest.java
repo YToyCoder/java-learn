@@ -89,7 +89,8 @@ public class ScannerTest {
     assertTrue("length should equal", expects.length == real.length);
     for(int i=0; i<expects.length; i++){
       assertTrue("token " + expects[i].value, expects[i].tag == real[i].tag);
-      assertEquals("token " + expects[i].value, expects[i].value , real[i].value);
+      if(real[i].tag != Token.NewLine)
+        assertEquals("token " + expects[i].value, expects[i].value , real[i].value);
     }
   }
 
