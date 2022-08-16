@@ -108,7 +108,13 @@ public class Scripts {
       return !tokens.isEmpty();
     }
 
+
     private void checkNotEmpty() {
+      while(has_char() && tokens.isEmpty())
+        do_fill_tokens();
+    }
+
+    private void do_fill_tokens(){
 //      channel.read()
       if(has_char()){
         switch (peek_char()){
@@ -136,7 +142,7 @@ public class Scripts {
           case Identifiers.ClosingBraceChar:
           case ',': // Comma
           case '(':
-          case ':':
+//          case ':':
             handle_single_char_identifier();
             break;
           default:
@@ -321,7 +327,7 @@ public class Scripts {
      * call this after @see hash_char
      */
     private void check_and_set_char(){
-      if(cs.isEmpty())
+      while(cs.isEmpty())
         cs.add((char) buffer.get());
     }
 
