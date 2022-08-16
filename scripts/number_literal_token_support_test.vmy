@@ -1,2 +1,3 @@
 let a : Int = 1
 let b : Boolean = true
+print(b)
