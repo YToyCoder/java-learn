@@ -23,4 +23,8 @@ public class FileInputScannerTestUtils {
   public static String ofScript(String _name){
     return String.format("%s/%s", Utils.get_dir_of_project("scripts" ), _name);
   }
+
+  public static Consumer<Scripts.FileInputScanner> build_with_scanner(){
+    return scanner -> AST.build(scanner);
+  }
 }
