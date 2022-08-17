@@ -1,6 +1,7 @@
 package com.silence.vmy;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.WeakHashMap;
 
 public class Runtime {
@@ -117,9 +118,15 @@ public class Runtime {
   }
 
   public static Variable declare_variable(Frame frame, String name, VmyType type, boolean mutable){
+    if(is_declared(frame, name))
+      throw new VmyRuntimeException(name + " is declared, can't redeclare it!");
     Variable variable = create_variable(type, mutable);
     frame.put(name, variable, null);
     return variable;
+  }
+
+  public static boolean is_declared(Frame frame, String name){
+    return Objects.nonNull(frame.local(name));
   }
 
   public static Object get_value(String name, Frame frame){
