@@ -57,7 +57,13 @@ public enum BinaryOps {
   EQ{/* == */
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return shortStrategyApply(obj1, obj2, "eq");
+      return Objects.equals(obj1, obj2);
+    }
+  },
+  NEQ {
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      return !Objects.equals(obj1, obj2);
     }
   }
   ;
@@ -74,7 +80,8 @@ public enum BinaryOps {
         Identifiers.Concat, BinaryOps.Concat,
           "<",BinaryOps.LT,
           "==",BinaryOps.EQ,
-          ">", BinaryOps.GT
+          ">", BinaryOps.GT,
+          "!=",BinaryOps.NEQ
       )
     );
   }

@@ -58,7 +58,7 @@ final public class Identifiers {
     builtinIdentifiers.add(Equals);
     builtinIdentifiers.add(Print);
     operatorCharacters.addAll(
-        Set.of('+','-', '*','/',':','?','%','>','<','|','^','&','~')
+        Set.of('+','-', '*','/',':','?','%','>','<','|','^','&','~','!')
     );
     commonIdentifiers.addAll(
         Set.of('(',')', '=', Quote)
@@ -76,7 +76,7 @@ final public class Identifiers {
 
     builtinCall.add(Print);
     BoolOperators.addAll(
-        Set.of(">","<","<=",">=", "==")
+        Set.of(">","<","<=",">=", "==", "!=")
     );
   }
 

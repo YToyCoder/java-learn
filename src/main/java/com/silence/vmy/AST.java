@@ -549,13 +549,14 @@ public class AST {
             new NumberLiteral(Double.parseDouble(token.value))
         );
       } else /* string literal : "..." */
-        nodesStack.add(new StringLiteral(token.value));
+        nodesStack.add(new StringLiteral(token.value.substring(1, token.value.length() - 1)));
     }
 
     // double : 2
     // int : 1
     // not digit: 0
     private int is_digit(String _value){
+      if(_value.length() == 0) return 0;
       int walk = 0;
       while(walk < _value.length() && !Utils.equal(_value.charAt(walk), '.'))
         if(!Character.isDigit(_value.charAt(walk++))) return 0;
