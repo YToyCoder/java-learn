@@ -42,10 +42,22 @@ public enum BinaryOps {
       return obj1.toString() + obj2.toString();
     }
   },
-  GT{
+  GT{ /* > */
     @Override
     public Object apply(Object obj1, Object obj2) {
-      return null;
+      return shortStrategyApply(obj1, obj2, "gt");
+    }
+  },
+  LT{/* < */
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      return shortStrategyApply(obj1, obj2, "lt");
+    }
+  },
+  EQ{/* == */
+    @Override
+    public Object apply(Object obj1, Object obj2) {
+      return shortStrategyApply(obj1, obj2, "eq");
     }
   }
   ;
@@ -59,7 +71,10 @@ public enum BinaryOps {
         Identifiers.SUB, BinaryOps.SUB,
         Identifiers.MULTI, BinaryOps.MULTI,
         Identifiers.DIVIDE, BinaryOps.DIVIDE,
-        Identifiers.Concat, BinaryOps.Concat
+        Identifiers.Concat, BinaryOps.Concat,
+          "<",BinaryOps.LT,
+          "==",BinaryOps.EQ,
+          ">", BinaryOps.GT
       )
     );
   }
