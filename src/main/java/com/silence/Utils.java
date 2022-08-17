@@ -10,9 +10,9 @@ public class Utils {
   }
 
   public static <T> String collection_to_string(Collection<T> collection){
-    final StringBuilder builder = new StringBuilder("[");
+    final StringBuilder builder = new StringBuilder("[ ");
     for(T el : collection){
-      builder.append(el.toString()).append(" ");
+      builder.append(com.silence.vmy.Utils.display_newline(el.toString())).append(" ");
     }
     builder.append("]");
     return builder.toString();
