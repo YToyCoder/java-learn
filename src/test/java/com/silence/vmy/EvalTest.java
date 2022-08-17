@@ -56,6 +56,14 @@ public class EvalTest {
     );
   }
 
+  @Test
+  public void eval_script_while_loop(){
+    FileInputScannerTestUtils.do_with_instance(
+        FileInputScannerTestUtils.ofScript("while_loop_test.vmy"),
+        FileInputScannerTestUtils.eval_with_scanner()
+    );
+  }
+
   void cts(String v1, String v2){
     assertEquals(v1.substring(1, v1.length() - 1) + v2.substring(1, v2.length() - 1), Eval.eval(v1 + " ++ " + v2, AST.variableStoreTreeEvaluator()));
   }

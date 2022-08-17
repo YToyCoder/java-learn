@@ -313,6 +313,7 @@ public class AST {
         );
         operatorStack.pop();
 
+        ASTNode right = nodesStack.pop();
         nodesStack.add(
             new CommonNode(
                 operatorStack.pop(), // operator
@@ -321,7 +322,7 @@ public class AST {
                     nodesStack,
                     (nodes, op_stack) -> Utils.equal(op_stack.peek(), Identifiers.OpenParenthesis)
                 ),
-                nodesStack.pop() // right side
+                right
             )
         );
       } else if(/* a call like : print(1) */token.tag == Token.BuiltinCall){
@@ -972,6 +973,11 @@ public class AST {
         return literal.val();
       } else if(node instanceof CallNode call){
         return do_call(call);
+      } else if( node instanceof WhileLoop while_loop){
+        while((boolean)eval_sub(while_loop.condition)){
+          eval_sub(while_loop.body);
+        }
+        return null;
       } else
         throw new EvaluatException("unrecognizable AST node");
     }
