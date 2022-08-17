@@ -266,7 +266,6 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-//      nodesStack.add(new ValNode(token.tag == Token.DOUBLE_V ? Double.parseDouble(token.value) : Integer.parseInt(token.value)));
       nodesStack.add(token.tag == Token.DOUBLE_V ? new ValNode( Double.parseDouble(token.value) ) : new ValNode(Integer.parseInt(token.value)));
     }
 
@@ -276,12 +275,11 @@ public class AST {
 
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      return
+      return token.tag == Token.BuiltinCall ||
           (
-              token.tag == Token.Identifier &&
-              ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)))
-          ) ||
-          token.tag == Token.BuiltinCall;
+            token.tag == Token.Identifier &&
+            ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)))
+          );
     }
 
     @Override
@@ -326,17 +324,17 @@ public class AST {
                 nodesStack.pop() // right side
             )
         );
-//        operatorStack.pop();
       } else if(/* a call like : print(1) */token.tag == Token.BuiltinCall){
-        // no content
         Token should_be_open_parenthesis;
         if(!remains.hasNext() || !operatorEquals(Identifiers.OpenParenthesis, (should_be_open_parenthesis = remains.next())))
           throw new ASTProcessingException("builtin call " + token.value + " should be followed with open parenthesis '('");
         if(operatorEquals(Identifiers.ClosingParenthesis, remains.peek())){
+          // no content, empty call like : print()
           remains.next();
           nodesStack.add(new CallNode(token.value, new ListExpression(List.of())));
           return;
         }
+
         Token start_token = should_be_open_parenthesis;
         while(
             remains.hasNext() &&
@@ -352,6 +350,7 @@ public class AST {
           );
           start_token = new Token(-1, operatorStack.pop());
         }
+
         // last operators must be like this : ( , , )
         if(!Utils.equal(start_token.value, Identifiers.ClosingParenthesis))
           throw new ASTProcessingException("there is no closing parenthesis when handle builtin call " + token.value);
@@ -372,6 +371,7 @@ public class AST {
         nodesStack.add(new CallNode(token.value, new ListExpression(params)));
       }
       else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
+
         if(!remains.hasNext())
           throw new ASTProcessingException("*(multiply) doesn't have right side");
         if(nodesStack.isEmpty())
@@ -379,7 +379,9 @@ public class AST {
         ASTNode left = nodesStack.pop();
         recall(remains.next(), remains, operatorStack, nodesStack);
         nodesStack.add(new CommonNode(token.value, left, nodesStack.pop()));
+
       }else if(operatorEquals(Identifiers.OpenParenthesis, token)){
+
         travel_back_build(
             token,
             remains,
@@ -390,8 +392,8 @@ public class AST {
         );
         // remove "(" and ")"
         if(
-            !Utils.equal(operatorStack.pop(), Identifiers.ClosingParenthesis) ||
-            !Utils.equal(operatorStack.pop(), Identifiers.OpenParenthesis)
+          !Utils.equal(operatorStack.pop(), Identifiers.ClosingParenthesis) ||
+          !Utils.equal(operatorStack.pop(), Identifiers.OpenParenthesis)
         ) throw new ASTProcessingException("Parenthesis process error");
 
       }else
@@ -508,8 +510,7 @@ public class AST {
   private static class VariableNameHandler extends BaseHandler{
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      return
-          token.tag == Token.Identifier &&
+      return token.tag == Token.Identifier &&
           /* if any char not in Identifiers.identifiers, result will be less than 0, if this is necessary */
           token.value.chars()
               .reduce(
@@ -581,17 +582,17 @@ public class AST {
       // 1 get the variable name or a declaration
       ASTNode variable;
       if(
-          nodesStack.isEmpty() ||
-          (
-            !((variable = nodesStack.pop()) instanceof DeclareNode) &&
-            !(variable instanceof IdentifierNode)
-          )
+        nodesStack.isEmpty() ||
+        (
+          !((variable = nodesStack.pop()) instanceof DeclareNode) &&
+          !(variable instanceof IdentifierNode)
+        )
       ) throw new ASTProcessingException("assignment has no variable or declare expression");
 
       operatorStack.add(token.value);
       while(
-          remains.hasNext() &&
-          ( remains.peek().tag != Token.NewLine && !Utils.equal(remains.peek().value, Identifiers.ClosingBrace))
+        remains.hasNext() &&
+        ( remains.peek().tag != Token.NewLine && !Utils.equal(remains.peek().value, Identifiers.ClosingBrace))
       ) recall(remains.next(), remains, operatorStack, nodesStack);
 
       // build it
@@ -648,12 +649,14 @@ public class AST {
       if(remains.peek().tag == Token.NewLine)
         // remove it (new-line)
         remains.next();
+
       // no content
       if(operatorEquals(Identifiers.ClosingBrace, remains.peek())){
         remains.next();
         nodesStack.add(new BlockNode(List.of()));
         return;
       }
+
       Token start_token = token;
       Set<String> end_ops = Set.of(Identifiers.ClosingBrace, "\n", "\r\n");
       Set<String> start_ops = Set.of(Identifiers.OpenBrace, "\n", "\r\n");
@@ -686,9 +689,8 @@ public class AST {
           !nodesStack.isEmpty() &&
           !Utils.equal( operatorStack.peek(), Identifiers.OpenBrace)
       ){
-        if(
-            !Set.of("\n","\r\n").contains(operatorStack.pop())
-        ) throw new ASTProcessingException("error when merge builtin call " + token.value);
+        if(!Set.of("\n","\r\n").contains(operatorStack.pop()))
+          throw new ASTProcessingException("error when merge builtin call " + token.value);
         // do merge
         if(!((temp_node = nodesStack.peek()) instanceof EmptyNode))
           params.addFirst(temp_node);
@@ -712,20 +714,24 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       Token should_be_open_parenthesis = remains.next();
       if( /* check if it is "while()"*/
           !operatorEquals(Identifiers.OpenParenthesis, should_be_open_parenthesis) ||
               operatorEquals(Identifiers.ClosingParenthesis, remains.peek())
       )
         throw new ASTProcessingException("while loop condition is empty at " + token.pos );
+
       // it should handle "(...)"
       // @see OperatorHandler , condition is OpenParenthesis
       recall(should_be_open_parenthesis, remains, operatorStack, nodesStack);
       if(!remains.hasNext())
         throw new ASTProcessingException("while should has following code ");
+
       // it should handle "{....}"
       // @see BlockHandler
       recall(remains.next(), remains, operatorStack, nodesStack);
+
       // after operations, nodesStack should have at least two elements ( condition and block )
       ASTNode should_be_block = nodesStack.pop();
       if(!(should_be_block instanceof BlockNode))
@@ -767,7 +773,14 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      throw new ASTProcessingException("not support token for " + String.format("tag %d token %s", token.tag, Utils.display_newline(token.value)));
+      throw new ASTProcessingException(
+          "not support token for " +
+          String.format(
+              "tag %d token %s",
+              token.tag,
+              Utils.display_newline(token.value)
+          )
+      );
     }
   }
 
@@ -921,31 +934,44 @@ public class AST {
       if(node instanceof ValNode val){
         return val.value;
       }else if(node instanceof BlockNode block){
+
         List<ASTNode> nodes = block.process;
         for(ASTNode sub : nodes){
           eval_sub(sub);
         }
         return null;
+
       } else if(node instanceof CommonNode common){
+
         return binary_op_call(
             common.OP ,
             eval_sub(common.left),
             eval_sub(common.right)
         );
+
       }else if(node instanceof AssignNode assignment){
+
         return handle_assignment_node(assignment);
+
       } else if(node instanceof DeclareNode declaration){
         return Utils.variable_with_name(
             declaration.identifier.value,
-            Runtime.declare_variable(_g, declaration.identifier.value, Utils.to_type(declaration.type), Utils.is_mutable(declaration.declare))
+            Runtime.declare_variable(
+                _g,
+                declaration.identifier.value,
+                Utils.to_type(declaration.type),
+                Utils.is_mutable(declaration.declare)
+            )
         );
       }else if(node instanceof IdentifierNode identifier){
+
         try {
           return get_variable(identifier.value);
         }catch (Exception e){
           Utils.error(e.getMessage());
           return null;
         }
+
       }else if(node instanceof LiteralNode literal){
         return literal.val();
       } else if(node instanceof CallNode call){
@@ -959,8 +985,7 @@ public class AST {
     Object handle_assignment_node(AssignNode assignment){
       Object expression = eval_sub(assignment.expression);
       VmyType expression_type = Utils.get_obj_type(expression);
-//      if(expression instanceof Runtime.VariableWithName expression_variable)
-//        expression_type =
+
       Object expression_value = get_value(expression);
       if(assignment.variable instanceof IdentifierNode identifier){
         try {
@@ -971,11 +996,19 @@ public class AST {
           Utils.error(e.getMessage());
         }
       }else if(assignment.variable instanceof  DeclareNode declaration){
-//        final String declaration_type_string = Objects.isNull(declaration.type) ? expression_type
-        // todo
+
         final VmyType declaration_type = Objects.isNull(declaration.type) ? expression_type : Utils.to_type(declaration.type);
         can_assign(declaration_type, expression_type);
-        assign_to(declaration.identifier.value, Runtime.declare_variable(_g, declaration.identifier.value, declaration_type, Utils.is_mutable(declaration.declare)), expression_value);
+        assign_to(
+            declaration.identifier.value,
+            Runtime.declare_variable(
+                _g,
+                declaration.identifier.value,
+                declaration_type,
+                Utils.is_mutable(declaration.declare)
+            ),
+            expression_value
+        );
       }
       return expression_value;
     }

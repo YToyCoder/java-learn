@@ -130,8 +130,9 @@ public class Scanners {
 
     @Override
     protected boolean canHandle(List<Token> tokens, String source, int start) {
-//      return Identifiers.builtinIdentifiers.contains(Character.toString( source.charAt(start)));
-      return Identifiers.operatorCharacters.contains(source.charAt(start)) || Identifiers.commonIdentifiers.contains(source.charAt(start));
+      return
+          Identifiers.operatorCharacters.contains(source.charAt(start)) ||
+          Identifiers.commonIdentifiers.contains(source.charAt(start));
     }
 
     @Override
@@ -156,19 +157,19 @@ public class Scanners {
     protected int doHandle(List<Token> tokens, String source, int start) {
       final StringBuilder builder = new StringBuilder();
       int walk = start;
-      boolean isfloat = false;
+      boolean is_float = false;
       while(
         walk < source.length() && 
         (Objects.equals('.', source.charAt(walk)) || Character.isDigit(source.charAt(walk)))
       ){
         builder.append(source.charAt(walk));
         if(Objects.equals('.', source.charAt(walk))) 
-          isfloat = true;
+          is_float = true;
         walk++;
       }
       tokens.add(
         new Token(
-          isfloat ? Token.DOUBLE_V : Token.INT_V,
+          is_float ? Token.DOUBLE_V : Token.INT_V,
           builder.toString()
         )
       );
@@ -229,8 +230,8 @@ public class Scanners {
 //      = source.substring(start, start + 3);
       return source.length() - start >= 3 &&
           (
-              Objects.equals(maybeDeclaration = source.substring(start, start + 3), Identifiers.ConstDeclaration) ||
-              Objects.equals(maybeDeclaration, Identifiers.VarDeclaration)
+            Objects.equals(maybeDeclaration = source.substring(start, start + 3), Identifiers.ConstDeclaration) ||
+            Objects.equals(maybeDeclaration, Identifiers.VarDeclaration)
           );
     }
 

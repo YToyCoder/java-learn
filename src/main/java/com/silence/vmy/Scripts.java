@@ -121,7 +121,6 @@ public class Scripts {
      * fill the tokens
      */
     private void do_fill_tokens(){
-//      channel.read()
       if(has_char()){
         switch (peek_char()){
           case '"': // string literal
@@ -148,7 +147,6 @@ public class Scripts {
           case Identifiers.ClosingBraceChar:
           case ',': // Comma
           case '(':
-//          case ':':
             handle_single_char_identifier();
             break;
           default:
@@ -158,8 +156,8 @@ public class Scripts {
             else if(is_end_of_line())
               handle_end_of_line();
             else if(
-                Identifiers.operatorCharacters.contains(peek_char()) ||
-                    Identifiers.commonIdentifiers.contains(peek_char())
+              Identifiers.operatorCharacters.contains(peek_char()) ||
+              Identifiers.commonIdentifiers.contains(peek_char())
             ) handle_operator();
             else
               throw new LexicalException(pos(), file_path, "can't handle char : " + peek_char() + " at position " + pos);
@@ -183,14 +181,18 @@ public class Scripts {
       next_char(); // remove "
       StringBuilder builder = new StringBuilder();
       while(
-          has_char() &&
-                  // not quote
-                  !Utils.equal(peek_char(), Identifiers.Quote) &&
-                      // not end of line
-                  !is_end_of_line()
+        has_char() &&
+        // not quote
+        !Utils.equal(peek_char(), Identifiers.Quote) &&
+        // not end of line
+        !is_end_of_line()
       ) builder.append(next_char());
       if(!has_char() || !Utils.equal(next_char(), Identifiers.Quote)) /* try to remove " */
-        throw new LexicalException(get_record(), file_path, "string literal has no closing parenthesis");
+        throw new LexicalException(
+          get_record(),
+          file_path,
+          "string literal has no closing parenthesis"
+        );
       tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
     }
 
@@ -222,11 +224,11 @@ public class Scripts {
         builder.append(next_char());
       final String identifier = builder.toString();
       tokens.add(
-          new Token(
-              get_identifier_kind(identifier),
-              identifier,
-              get_record()
-          )
+        new Token(
+          get_identifier_kind(identifier),
+          identifier,
+          get_record()
+        )
       );
     }
 
@@ -234,11 +236,11 @@ public class Scripts {
       record_position();
       final StringBuilder builder = new StringBuilder();
       while (
-          has_char() &&
-              (
-                  Identifiers.operatorCharacters.contains(peek_char()) ||
-                      Identifiers.commonIdentifiers.contains(peek_char())
-              )
+        has_char() &&
+        (
+          Identifiers.operatorCharacters.contains(peek_char()) ||
+          Identifiers.commonIdentifiers.contains(peek_char())
+        )
       ) builder.append(next_char());
       final String operator = builder.toString();
       tokens.add(new Token(get_identifier_kind(operator), operator, get_record()));
@@ -313,7 +315,7 @@ public class Scripts {
         return true;
       if(end_of_file) /* already at end_of_file */
         return false;
-      //
+
       buffer.clear();
 
       try {

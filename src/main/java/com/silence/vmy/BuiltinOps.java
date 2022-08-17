@@ -30,7 +30,7 @@ public class BuiltinOps implements FunctionRegister, FunctionFactory{
 
   @Override
   public Callable get_function(String name, FunctionType type) {
-    List<Callable> with_type = type_mapper.get(type);
+    // just looking by name
     List<Callable> with_name = name_mapper.get(name);
     return Objects.isNull(with_name) ? null : with_name.get(0);
   }
