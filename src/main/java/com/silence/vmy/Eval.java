@@ -20,6 +20,7 @@ public class Eval {
 
   public static void repl(final AST.Evaluator evaluator){
     System.out.println(notice);
+//    Scripts.run_with_file_input_scanner();
     String input = "";
     Scanner scanner = new Scanner(System.in);
     while(!Objects.equals(input, "#")){
@@ -46,7 +47,11 @@ public class Eval {
    * @return evaluate result like : 1 + 2 -> 3
    */
   public static Object eval(final String expression, final AST.Evaluator evaluator){
-    return evaluator.eval(AST.build(Scanners.scanner(expression)));
+    return Scripts.run_with_file_input_scanner(
+        expression,
+        false,
+        scanner -> evaluator.eval(AST.build(scanner))
+    );
   }
 
 //  private static AST.VmyTreeEvaluator EVALUATOR = new AST.VmyTreeEvaluator();
