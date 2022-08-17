@@ -12,30 +12,30 @@
 
 `Table` 
 
-### todo
-
 now support:
 
-1. digital calculate
+1. digital calculate , like  "1 + 2 * (3 + 4)"
 
-1 + 2 * (3 + 4)
+2. variable declaration , like  "let a : Int " , "val a : Int"
 
-
-2. variable declaration 
-
-let a : Int; # variable
-
-val a : Int; # const variable
+3. assignment , like "let a : Int = 1"
  
-3. assignment
- 
-let a : Int = 1;
- 
-**next support**
+4. literal (Int, Double, String, Boolean), like "12", "1.01", ""string literal"", "true"
 
-1. valid type support at runtime
+5. builtin call (print), like "print("hello, world")"
 
-2. full val declaration support
+6. bool binary operator, like "<", ">", ">=", "=="
 
-3. String support
+7. while loop, like "while(a < 10) { a = 1 + a }"
 
+8. script run
+
+plan : 
+
+1. if-else
+
+2. function
+
+3. local variable(current only support global)
+
+4. 'table' type variable support 
