@@ -231,7 +231,7 @@ public class Scripts {
     private void handle_string_literal() {
       record_position();
       next_char(); // remove "
-      StringBuilder builder = new StringBuilder();
+      StringBuilder builder = new StringBuilder().append('"');
       while(
         has_char() &&
         // not quote
@@ -245,7 +245,7 @@ public class Scripts {
           file_path,
           "string literal has no closing parenthesis"
         );
-      tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
+      tokens.add(new Token(Token.Literal, builder.append('"').toString(), get_record()));
     }
 
     /**
