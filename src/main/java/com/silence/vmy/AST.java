@@ -184,7 +184,7 @@ public class AST {
       handler.handle(scanner.next(), scanner, operatorStack, nodesStack);
     }
     VmyAST ast = new VmyAST();
-    // todo
+
     if(!nodesStack.isEmpty()){
       ASTNode merge = nodesStack.pop();
       while(
@@ -645,10 +645,6 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      // case : new-line {
-      if(remains.peek().tag == Token.NewLine)
-        // remove it (new-line)
-        remains.next();
 
       // no content
       if(operatorEquals(Identifiers.ClosingBrace, remains.peek())){
@@ -664,7 +660,7 @@ public class AST {
       // handle each line, group each line as one node
       while (
           remains.hasNext() &&
-          ( operatorStack.isEmpty() || !Utils.equal(operatorStack.peek(), Identifiers.ClosingBrace) )
+          ( operatorStack.isEmpty() || !Utils.equal(start_token.value, Identifiers.ClosingBrace) )
       ){
         travel_back_build(
             start_token,
@@ -692,11 +688,11 @@ public class AST {
         if(!Set.of("\n","\r\n").contains(operatorStack.pop()))
           throw new ASTProcessingException("error when merge builtin call " + token.value);
         // do merge
-        if(!((temp_node = nodesStack.peek()) instanceof EmptyNode))
+        if(!((temp_node = nodesStack.pop()) instanceof EmptyNode))
           params.addFirst(temp_node);
       }
-      operatorStack.pop(); // pop the "("
-      if(!((temp_node = nodesStack.peek()) instanceof EmptyNode))
+      operatorStack.pop(); // pop the "{"
+      if(!((temp_node = nodesStack.pop()) instanceof EmptyNode))
         params.addFirst(temp_node);
       nodesStack.add(new BlockNode(params));
     }

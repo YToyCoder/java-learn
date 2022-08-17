@@ -170,4 +170,12 @@ public class ASTTest {
         scanner -> AST.build(scanner)
     );
   }
+
+  @Test
+  public void script_block_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        FileInputScannerTestUtils.ofScript("block_test.vmy"),
+        FileInputScannerTestUtils.build_with_scanner()
+    );
+  }
 }
