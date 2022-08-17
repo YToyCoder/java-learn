@@ -2,12 +2,14 @@ package com.silence.vmy;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * vmy script support
@@ -43,6 +45,31 @@ public class Scripts {
     }
   }
 
+  /**
+   * safe way to run with scanner
+   * @param file_or_pure_string
+   * @param is_file
+   * @param run_with_scanner
+   */
+  public static Object run_with_file_input_scanner(String file_or_pure_string, boolean is_file, Function<FileInputScanner, Object> run_with_scanner){
+    try(FileInputScanner scanner = new FileInputScanner(file_or_pure_string, is_file)){
+      return run_with_scanner.apply(scanner);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * default is file
+   * @param file_or_pure_string
+   * @param run_with_scanner
+   */
+  public static Object run_with_file_input_scanner(String file_or_pure_string, Function<FileInputScanner, Object> run_with_scanner){
+    return run_with_file_input_scanner(file_or_pure_string, true, run_with_scanner);
+  }
+
   public static FileInputScanner file_scanner(String file) throws FileNotFoundException {
     return new FileInputScanner(file);
   }
@@ -53,18 +80,21 @@ public class Scripts {
   public static class FileInputScanner implements Scanner, AutoCloseable {
 
     public FileInputScanner(String file_path) throws FileNotFoundException {
-      this.file_path = file_path;
-      init(file_path);
+      this(file_path, true);
+    }
+
+    public FileInputScanner(String file_path_or_pure_string, boolean is_file_path) throws FileNotFoundException {
+      this.file_path = file_path_or_pure_string;
+      init(file_path_or_pure_string, is_file_path);
     }
 
     /**
      * init resource
-     * @param file_path
+     * @param filename_or_string_expression
      * @throws FileNotFoundException
      */
-    private void init(String file_path) throws FileNotFoundException {
-      origin = new RandomAccessFile(file_path, "rw");
-      channel = origin.getChannel();
+    private void init(String filename_or_string_expression, boolean is_file_name) throws FileNotFoundException {
+      channel = getChannel(filename_or_string_expression, is_file_name);
       buffer = ByteBuffer.wrap(new byte[1028]);
       buffer.flip();
       pos = 0;
@@ -72,8 +102,19 @@ public class Scripts {
       tokens = new LinkedList<>();
     }
 
+    private ReadableByteChannel getChannel(String filename_or_string_expression, boolean is_name) throws FileNotFoundException {
+      if(is_name){
+        origin = new RandomAccessFile(filename_or_string_expression, "rw");
+        return origin.getChannel();
+      }else {
+        arr_origin = new ByteArrayInputStream(filename_or_string_expression.getBytes());
+        return Channels.newChannel(arr_origin);
+      }
+    }
+
     private ReadableByteChannel channel;
     private RandomAccessFile origin;
+    private ByteArrayInputStream arr_origin;
     private List<Token> tokens;
     private ByteBuffer buffer;
     private final String file_path;
@@ -362,6 +403,8 @@ public class Scripts {
     public void close() throws Exception {
       if(Objects.nonNull(origin))
         origin.close();
+      if(Objects.nonNull(arr_origin))
+        arr_origin.close();
     }
   }
 }
