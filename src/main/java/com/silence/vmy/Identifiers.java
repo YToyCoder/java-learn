@@ -45,6 +45,7 @@ final public class Identifiers {
   public static final String ClosingBrace = "}";
   public static final String True = "true";
   public static final String False = "false";
+  public static final String AnnotationPrefix = "#";
 
   static{
     // set builtinOperators

@@ -39,3 +39,5 @@ plan :
 3. local variable(current only support global)
 
 4. 'table' type variable support 
+
+5. comment support

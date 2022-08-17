@@ -126,6 +126,9 @@ public class Scripts {
           case '"': // string literal
             handle_string_literal();
             break;
+          case '#':
+            handle_annotation();
+            break;
           case Identifiers.SingleQuote:
             break;
           case '1':
@@ -171,6 +174,14 @@ public class Scripts {
      */
     private int pos(){
       return pos;
+    }
+
+    /**
+     * handle annotation which start with "#“
+     */
+    private void handle_annotation(){
+      while(has_char() && !is_end_of_line())
+        next_char();
     }
 
     /**
