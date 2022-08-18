@@ -46,6 +46,9 @@ final public class Identifiers {
   public static final String True = "true";
   public static final String False = "false";
   public static final String AnnotationPrefix = "#";
+  public static final String If = "if";
+  public static final String Elif = "elif";
+  public static final String Else = "else";
 
   static{
     // set builtinOperators
