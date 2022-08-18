@@ -1,9 +1,8 @@
 package com.silence.vmy;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
 public class AST {
   private AST(){}
@@ -204,9 +203,11 @@ public class AST {
 
   // new version
   public static VmyAST build(Scanner scanner){
+    TokenHistoryRecorder recorder = new OneCapabilityTokenRecorder();
+    scanner.register(recorder, false);
     Stack<String> operatorStack = new Stack<>();
     Stack<ASTNode> nodesStack = new Stack<>();
-    TokenHandler handler = getTokenHandler();
+    TokenHandler handler = getTokenHandler(recorder);
     while(scanner.hasNext()){
       handler.handle(scanner.next(), scanner, operatorStack, nodesStack);
     }
@@ -225,10 +226,12 @@ public class AST {
   }
 
 
-  private static abstract class BaseHandler implements TokenHandler, Utils.Recursive{
+  private static abstract class BaseHandler implements TokenHandler, Utils.Recursive, TokenHistoryRecorderGetter{
     private BaseHandler next;
 
     private BaseHandler head;
+
+    private TokenHistoryRecorder tokenHistoryRecorder;
 
     public void setNext(final BaseHandler _next){
       next = _next;
@@ -242,6 +245,15 @@ public class AST {
       if(Objects.isNull(head))
         throw new Utils.RecursiveException("can't do recall head is not exists!");
       head.handle(token, remains, operatorStack, nodesStack);
+    }
+
+    public void setTokenRecorder(TokenHistoryRecorder recorder){
+      tokenHistoryRecorder = recorder;
+    }
+
+    @Override
+    public TokenHistoryRecorder getTokenRecorder(){
+      return tokenHistoryRecorder;
     }
 
     @Override
@@ -755,10 +767,14 @@ public class AST {
   // a static instance
   private static TokenHandler HANDLER;
 
-  private static TokenHandler getTokenHandler(){
+  private static TokenHandler getTokenHandler(TokenHistoryRecorder recorder){
     if(Objects.isNull(HANDLER))
-      buildHandler();
+      buildHandler(recorder);
     return HANDLER;
+  }
+
+  private static TokenHandler getTokenHandler(){
+    return getTokenHandler(null);
   }
 
   // when all the other handler can't handle this token throw out an ASTProcessingException
@@ -796,7 +812,7 @@ public class AST {
     }
   }
 
-  private static void buildHandler(){
+  private static void buildHandler(TokenHistoryRecorder recorder){
     HANDLER = new HandlerBuilder()
     .next(new NumberHandler())
     .next(new OperatorHandler())
@@ -808,28 +824,43 @@ public class AST {
     .next(new WhileHandler())
     .next(new NewlineHandler())
     .next(new DefaultHandler())
+    .build_with_each(el -> el.setTokenRecorder(recorder))
     .build();
   }
 
   static class HandlerBuilder {
     private List<BaseHandler> handlers = new LinkedList<>();
+    private List<Consumer<BaseHandler>> before_each = new LinkedList<>();
+
     HandlerBuilder next(final BaseHandler next){
       handlers.add(next);
+      return this;
+    }
+
+    public HandlerBuilder build_with_each(Consumer<BaseHandler> handler){
+      before_each.add(handler);
       return this;
     }
 
     TokenHandler build(){
       if(handlers.isEmpty()) return null;
       BaseHandler head = handlers.get(0);
+      do_before_each(head);
       head.setHead(head);
       BaseHandler walk = head;
       for(int i=1; i<handlers.size(); i++){
         BaseHandler current = handlers.get(i);
+        do_before_each(current);
         current.setHead(head);
         walk.setNext(current);
         walk = current;
       }
       return head;
+    }
+
+    private void do_before_each(BaseHandler handler){
+      for(Consumer<BaseHandler> el : before_each)
+        el.accept(handler);
     }
   }
 
