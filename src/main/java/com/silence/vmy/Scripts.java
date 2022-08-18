@@ -122,6 +122,7 @@ public class Scripts {
     private int record;
     private LinkedList<Character> cs;
     private boolean end_of_file;
+    private TokenHistoryRecorder token_history_recorder;
 
     @Override
     public List<Token> scan(String source) {
@@ -140,7 +141,9 @@ public class Scripts {
     @Override
     public Token next() {
       checkNotEmpty();
-      return tokens.remove(0);
+      return Objects.isNull(token_history_recorder) ? 
+        tokens.remove(0) : 
+        token_history_recorder.record_to_history(tokens.remove(0)).last();
     }
 
     @Override
@@ -243,7 +246,7 @@ public class Scripts {
         throw new LexicalException(
           get_record(),
           file_path,
-          "string literal has no closing parenthesis"
+          "string literal has no closing quote"
         );
       tokens.add(new Token(Token.Literal, builder.append('"').toString(), get_record()));
     }
@@ -302,7 +305,11 @@ public class Scripts {
       return switch (identifier){
         case /* let , val */Identifiers.ConstDeclaration, Identifiers.VarDeclaration -> Token.Declaration;
         case /* = */ Identifiers.Assignment -> Token.Assignment;
-        case /* while */ Identifiers.While -> Token.Builtin;
+        case /* while, if, elif, else */ 
+        Identifiers.While, 
+        Identifiers.If, 
+        Identifiers.Elif, 
+        Identifiers.Else -> Token.Builtin;
         case /* true false */ Identifiers.True, Identifiers.False -> Token.Literal;
         default -> {
           if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
@@ -397,6 +404,20 @@ public class Scripts {
     private void check_and_set_char(){
       while(cs.isEmpty())
         cs.add((char) buffer.get());
+    }
+
+    @Override
+    public boolean register(TokenHistoryRecorder recorder, boolean force){
+      if(force){
+        this.token_history_recorder = recorder;
+        return true;
+      }
+
+      if(Objects.nonNull(this.token_history_recorder)) 
+        return false;
+
+      token_history_recorder = recorder;
+      return true;
     }
 
     @Override
