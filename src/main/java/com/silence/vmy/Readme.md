@@ -30,6 +30,8 @@ now support:
 
 8. script run
 
+9. annotation
+
 plan : 
 
 1. if-else
@@ -39,5 +41,3 @@ plan :
 3. local variable(current only support global)
 
 4. 'table' type variable support 
-
-5. comment support
