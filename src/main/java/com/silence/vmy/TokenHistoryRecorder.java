@@ -15,10 +15,18 @@ public interface TokenHistoryRecorder{
    * @return {@link Token} if exist return , if is empty Throw RecordHistoryEmpty exception
    */
   Token last();
+
+  /**
+   * @param index
+   * @return
+   */
+  Token get(int index);
   
   /**
    * check if the record is empty
    * @return  
    */
+  boolean has_history(int index);
+
   boolean has_history();
 }
