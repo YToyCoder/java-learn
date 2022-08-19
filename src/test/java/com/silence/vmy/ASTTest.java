@@ -5,11 +5,7 @@ import static org.junit.Assert.assertThrows;
 import org.junit.Test;
 
 import com.silence.vmy.AST.VmyAST;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -176,6 +172,14 @@ public class ASTTest {
     FileInputScannerTestUtils.do_with_instance(
         FileInputScannerTestUtils.ofScript("block_test.vmy"),
         FileInputScannerTestUtils.build_with_scanner()
+    );
+  }
+
+  @Test
+  public void script_negative_value_test() {
+    FileInputScannerTestUtils.do_with_instance(
+      "negative_number_test.vmy", 
+      FileInputScannerTestUtils.build_with_scanner()
     );
   }
 }

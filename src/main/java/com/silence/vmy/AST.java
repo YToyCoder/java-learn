@@ -203,7 +203,7 @@ public class AST {
 
   // new version
   public static VmyAST build(Scanner scanner){
-    TokenHistoryRecorder recorder = new OneCapabilityTokenRecorder();
+    TokenHistoryRecorder recorder = new FixedSizeCapabilityTokenRecorder(3);
     scanner.register(recorder, false);
     Stack<String> operatorStack = new Stack<>();
     Stack<ASTNode> nodesStack = new Stack<>();
@@ -290,8 +290,12 @@ public class AST {
       return token.tag == Token.BuiltinCall ||
           (
             token.tag == Token.Identifier &&
-            ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || Identifiers.operatorCharacters.contains(token.value.charAt(0)))
+            ( Identifiers.commonIdentifiers.contains(token.value.charAt(0)) || is_operator(token) )
           );
+    }
+
+    private boolean is_operator(Token token){
+      return Identifiers.operatorCharacters.contains(token.value.charAt(0)) || Utils.equal(token.value, "=");
     }
 
     @Override
@@ -304,7 +308,29 @@ public class AST {
           /* ++ */
           operatorEquals(Identifiers.Concat, token)
       ) {
-        operatorStack.add(token.value);
+        switch(token.value){
+          case Identifiers.SUB:
+            TokenHistoryRecorder recorder = getTokenRecorder();
+            if(
+              Objects.nonNull(recorder) && 
+              recorder.has_history() && 
+              is_operator( recorder.get(1) )
+            ){
+              // todo
+              final Token should_be_number = remains.next();
+              final int flag = is_digit(should_be_number.value);
+              if(flag == 0)
+                throw new ASTProcessingException("went error when process negative number");
+              String negative_value = token.value + should_be_number.value;
+              nodesStack.add(
+                flag == 1 ? new NumberLiteral(Integer.parseInt(negative_value) ) : new NumberLiteral( Double.parseDouble(negative_value) )
+              );
+              break;
+            }
+          default:
+            operatorStack.add(token.value);
+            break;
+        }
       } else if(/* >, <, <= , >=, == */ Identifiers.BoolOperators.contains(token.value)){
         /**
          * <p>
@@ -516,6 +542,23 @@ public class AST {
         throw new ASTProcessingException("error at processing merge back , not satisfied end_condition");
       return merge_node;
     }
+
+    // double : 2
+    // int : 1
+    // not digit: 0
+    protected int is_digit(String _value){
+      if(_value.length() == 0) return 0;
+      int walk = 0;
+      while(walk < _value.length() && !Utils.equal(_value.charAt(walk), '.'))
+        if(!Character.isDigit(_value.charAt(walk++))) return 0;
+      if(walk < _value.length() && Utils.equal(_value.charAt(walk), '.')){
+        walk++;
+        while(walk < _value.length())
+          if(!Character.isDigit(_value.charAt(walk++))) return 0;
+        return 2;
+      }
+      return 1; // 1
+    }
   }
 
 
@@ -538,7 +581,7 @@ public class AST {
     }
   }
 
-  private static class LiteralHandler extends BaseHandler{
+  private static class LiteralHandler extends Tool{
     @Override
     public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
       return token.tag == Token.Literal;
@@ -564,22 +607,6 @@ public class AST {
         nodesStack.add(new StringLiteral(token.value.substring(1, token.value.length() - 1)));
     }
 
-    // double : 2
-    // int : 1
-    // not digit: 0
-    private int is_digit(String _value){
-      if(_value.length() == 0) return 0;
-      int walk = 0;
-      while(walk < _value.length() && !Utils.equal(_value.charAt(walk), '.'))
-        if(!Character.isDigit(_value.charAt(walk++))) return 0;
-      if(walk < _value.length() && Utils.equal(_value.charAt(walk), '.')){
-        walk++;
-        while(walk < _value.length())
-          if(!Character.isDigit(_value.charAt(walk++))) return 0;
-        return 2;
-      }
-      return 1; // 1
-    }
   }
 
   // handle the expression like
