@@ -182,4 +182,12 @@ public class ASTTest {
       FileInputScannerTestUtils.build_with_scanner()
     );
   }
+
+  @Test
+  public void if_else_in_script_test() {
+    FileInputScannerTestUtils.do_with_instance(
+        FileInputScannerTestUtils.ofScript("if_else_token_test.vmy"),
+        FileInputScannerTestUtils.build_with_scanner()
+    );
+  }
 }

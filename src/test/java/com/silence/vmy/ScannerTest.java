@@ -357,7 +357,30 @@ public class ScannerTest {
                   new Token(Token.Literal, "\"true\""),
                   new Token(Token.Identifier, Identifiers.ClosingParenthesis),
                   new Token(Token.NewLine, ""),
-                  new Token(Token.Identifier, Identifiers.ClosingBrace)
+                  new Token(Token.Identifier, Identifiers.ClosingBrace),
+
+                  new Token(Token.Builtin, "elif"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "false"),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.Identifier, Identifiers.OpenBrace),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.BuiltinCall, "print"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "\"else if\""),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Identifier, Identifiers.ClosingBrace),
+
+                  new Token(Token.Builtin, Identifiers.Else),
+                  new Token(Token.Identifier, Identifiers.OpenBrace),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.BuiltinCall, "print"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "\"else\""),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Identifier, Identifiers.ClosingBrace),
               },
               to_token_arr(scanner.scan(""))
           )

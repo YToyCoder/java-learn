@@ -6,6 +6,7 @@ import java.lang.invoke.MethodType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiPredicate;
 
 public class Utils {
   public static MethodHandle getStaticMethod(Class<?> refc, final String name, Class<?> ...types){
@@ -92,6 +93,11 @@ public class Utils {
 
   public static boolean isEOL(String source, int start){
     return EOL(source, start) != -1;
+  }
+  public static boolean isEOL(Token token) {
+    return
+        Objects.nonNull(token) &&
+        (Objects.equals(token.value, "\n") || Objects.equals(token.value, "\r\n"));
   }
 
   public static boolean isType(Runtime.Variable head, VmyType type){
@@ -197,6 +203,19 @@ public class Utils {
    */
   public static String display_newline(String string) {
     return string.replace("\n", "\\n").replace("\r", "\\r");
+  }
+
+  public static BiPredicate<Token, Token> next_two_token_should_not_be_empty_parenthesis_for_token(
+      Token token,
+      String error_msg
+  ){
+    return (n, nn) -> {
+      if(/* check it is not "while()"*/
+          Objects.equals(Identifiers.OpenParenthesis, n.value) &&
+          !Objects.equals(Identifiers.ClosingParenthesis, nn.value)
+      ) return true;
+      throw new ASTProcessingException(String.format( error_msg + " (token start position %d)", token.pos));
+    };
   }
 
 }

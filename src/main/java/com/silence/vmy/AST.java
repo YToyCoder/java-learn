@@ -3,6 +3,7 @@ package com.silence.vmy;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AST {
   private AST(){}
@@ -613,6 +614,15 @@ public class AST {
 //        throw new ASTProcessingException("while loop has no condition");
 //      nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
     }
+
+    /**
+     * remove EOL till next token is not.
+     * @param remains
+     */
+    protected void remove_end_of_line(Scanner remains){
+      while(remains.hasNext() && Utils.isEOL(remains.peek()))
+        remains.next();
+    }
   }
 
 
@@ -810,31 +820,125 @@ public class AST {
           remains,
           operatorStack,
           nodesStack,
-          (next_token, next_next_token) -> {
-            if(/* check it is not "while()"*/
-              operatorEquals(Identifiers.OpenParenthesis, next_token) &&
-              !operatorEquals(Identifiers.ClosingParenthesis, next_next_token)
-            ) return true;
-            throw new ASTProcessingException("while loop condition is empty at " + token.pos);
-          }
+          Utils.next_two_token_should_not_be_empty_parenthesis_for_token(
+              token,
+              "while loop condition should not empty"
+          )
       );
 
       // after operations, nodesStack should have at least two elements ( condition and block )
-      ASTNode should_be_block = nodesStack.pop();
-      if(!(should_be_block instanceof BlockNode))
-        throw new ASTProcessingException("while should followed by block");
+      ASTNode should_be_block = get_next_node_as_block_node_or_throw(
+          nodesStack,
+          () -> new ASTProcessingException("while should followed by block")
+      );
       if(nodesStack.isEmpty())
         throw new ASTProcessingException("while loop has no condition");
       nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
     }
   }
 
-  private static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
-    return new CommonNode(_op, left, right);
+  private static  BlockNode get_next_node_as_block_node_or_throw(
+      Stack<ASTNode> nodes_stack,
+      Supplier<ASTProcessingException> exception_provider
+  ){
+    final ASTNode should_be_block = nodes_stack.pop();
+    if(!(should_be_block instanceof BlockNode))
+      throw exception_provider.get();
+    return (BlockNode) should_be_block;
   }
 
-  private static ValNode token2ValNode(final Token token){
-    return token.tag == Token.DOUBLE_V ? new ValNode(Double.valueOf(token.value)) : new ValNode(Integer.valueOf(token.value));
+  /**
+   * handle if-else syntax code block
+   */
+  private static class IfElHandler extends Tool {
+    @Override
+    public boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      /* if condition must be start at "if" */
+      return Objects.equals(token.value, Identifiers.If);
+    }
+
+    @Override
+    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+      // if
+      handle_name_params_and_block(
+          token,
+          remains,
+          operatorStack,
+          nodesStack,
+          /* next two token from token */
+          Utils.next_two_token_should_not_be_empty_parenthesis_for_token(
+              token,
+              "if condition should not empty"
+          )
+      );
+      final ConditionNode TheIf = collect_to_condition_node(nodesStack, "");
+
+      // elif
+      List<ConditionNode> _elseIfs = new LinkedList<>();
+      Token token_record;
+      while(remains.hasNext() && (is_elif(remains.peek()) || Utils.isEOL(remains.peek()))){
+        if(
+            // ignore end of line
+            // elif maybe like:
+            // if .. {
+            // }
+            //
+            //
+            //
+            // elif .. {
+            // }
+            !Utils.isEOL(token_record = remains.next())
+        ){
+          handle_name_params_and_block(
+              token_record,
+              remains,
+              operatorStack,
+              nodesStack,
+              Utils.next_two_token_should_not_be_empty_parenthesis_for_token(
+                  token_record,
+                  "elif condition should not empty!"
+              )
+          );
+          _elseIfs.add(collect_to_condition_node(nodesStack, ""));
+        }
+      }
+
+      // else
+      ASTNode _else = null;
+      remove_end_of_line(remains);
+      if(remains.hasNext() && is_else(remains.peek())){
+        remains.next();
+        remove_end_of_line(remains);
+        if(!remains.hasNext())
+          throw new ASTProcessingException("else has no body!");
+        recall(remains.next(), remains, operatorStack, nodesStack);
+        _else = nodesStack.pop();
+      }
+      nodesStack.add(new IfElse(TheIf, _elseIfs, _else));
+    }
+
+    private boolean is_elif(Token token){
+      return Objects.equals(token.value, Identifiers.Elif);
+    }
+
+    private boolean is_else(Token token){
+      return Objects.equals(token.value, Identifiers.Else);
+    }
+
+    private ConditionNode collect_to_condition_node(Stack<ASTNode> nodes_stack, String error_msg){
+      final BlockNode block = get_next_node_as_block_node_or_throw(
+          nodes_stack,
+          () -> new ASTProcessingException(error_msg)
+      );
+
+      if(nodes_stack.isEmpty())
+        throw new ASTProcessingException("if condition does not have condition");
+      return new ConditionNode(nodes_stack.pop(), block);
+    }
+  }
+
+  private static ASTNode mergeTwoNodes(ASTNode left, ASTNode right, String _op){
+    return new CommonNode(_op, left, right);
   }
 
   private static boolean operatorEquals(final String operator, final Token token){
@@ -900,6 +1004,7 @@ public class AST {
     .next(new BlockHandler())
     .next(new WhileHandler())
     .next(new NewlineHandler())
+    .next(new IfElHandler())
     .next(new DefaultHandler())
     .build_with_each(el -> el.setTokenRecorder(recorder))
     .build();
@@ -1087,6 +1192,9 @@ public class AST {
           eval_sub(while_loop.body);
         }
         return null;
+      } else if(node instanceof IfElse ifElse){
+        do_evaluate_if_else(ifElse);
+        return null;
       } else
         throw new EvaluatException("unrecognizable AST node");
     }
@@ -1161,6 +1269,29 @@ public class AST {
       if(!variable.mutable())
         throw new EvaluatException("const variable (let) can't be assigned : " + variable.name());
       can_assign(variable.getType(), Utils.get_obj_type(value));
+    }
+
+    /**
+     * evaluate the code block if-else
+     * @param if_else {@link IfElse}
+     */
+    void do_evaluate_if_else(IfElse if_else){
+      ConditionNode the_if = if_else.TheIf;
+      if((boolean)eval_sub(the_if.condition)){
+        eval_sub(the_if.body);
+      }else if(!eval_elif(if_else.Elif) && Objects.nonNull(if_else.Else)){
+        eval_sub(if_else.Else);
+      }
+    }
+
+    boolean eval_elif(List<ConditionNode> _ifEls){
+      for(ConditionNode _el : _ifEls){
+        if((boolean) eval_sub(_el.condition)){
+          eval_sub(_el.body);
+          return true;
+        }
+      }
+      return false;
     }
 
     /**
