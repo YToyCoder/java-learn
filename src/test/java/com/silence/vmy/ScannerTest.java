@@ -279,7 +279,7 @@ public class ScannerTest {
                   new Token(Token.NewLine, ""),
                   new Token(Token.BuiltinCall, Identifiers.Print),
                   new Token(Token.Identifier, Identifiers.OpenParenthesis),
-                  new Token(Token.Literal, "hello, word"),
+                  new Token(Token.Literal, "\"hello, word\""),
                   new Token(Token.Identifier, Identifiers.ClosingParenthesis),
                   new Token(Token.NewLine, ""),
                   new Token(Token.Identifier, Identifiers.ClosingBrace)
@@ -335,6 +335,32 @@ public class ScannerTest {
               to_token_arr(scanner.scan(""))
           );
         }
+    );
+  }
+
+  @Test
+  public void if_else_token_support_test(){
+    FileInputScannerTestUtils.do_with_instance(
+        ofScript("if_else_token_test.vmy"),
+        scanner ->
+          assertEqualTo(
+              new Token[]{
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Builtin, "if"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "true"),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.Identifier, Identifiers.OpenBrace),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.BuiltinCall, "print"),
+                  new Token(Token.Identifier, Identifiers.OpenParenthesis),
+                  new Token(Token.Literal, "\"true\""),
+                  new Token(Token.Identifier, Identifiers.ClosingParenthesis),
+                  new Token(Token.NewLine, ""),
+                  new Token(Token.Identifier, Identifiers.ClosingBrace)
+              },
+              to_token_arr(scanner.scan(""))
+          )
     );
   }
 

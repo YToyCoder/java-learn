@@ -94,12 +94,9 @@ public class AST {
     }
   }
 
-  private static class WhileLoop implements ASTNode {
-    final ASTNode condition;
-    final BlockNode body;
+  private static class WhileLoop extends ConditionNode {
     public WhileLoop(ASTNode _cond, BlockNode _body){
-      condition = _cond;
-      body = _body;
+      super(_cond, _body);
     }
   }
 
@@ -146,6 +143,26 @@ public class AST {
 
     public DeclareNode(String _declare, IdentifierNode _identifier){
       this(_declare, _identifier, null);
+    }
+  }
+
+  private static class ConditionNode implements ASTNode {
+    final ASTNode condition;
+    final BlockNode body;
+    public ConditionNode(ASTNode _condition, BlockNode _body){
+      condition = _condition;
+      body = _body;
+    }
+  }
+
+  private static class IfElse implements ASTNode {
+    final ConditionNode TheIf;
+    final List<ConditionNode> Elif;
+    final ASTNode Else;
+    public IfElse(ConditionNode _if, List<ConditionNode> _else_conditions, ASTNode _else){
+      TheIf = Objects.requireNonNull(_if);
+      Elif = _else_conditions;
+      Else = _else;
     }
   }
 
@@ -559,6 +576,43 @@ public class AST {
       }
       return 1; // 1
     }
+
+    // handle code like this :
+    // name (params) {
+    // .....
+    // }
+    protected void handle_name_params_and_block(
+        Token name,
+        Scanner remains,
+        Stack<String> operator_stack,
+        Stack<ASTNode> nodes_stack,
+        BiPredicate<Token,Token> pre_process_params_check
+    ){
+
+      Token should_be_open_parenthesis = remains.next();
+      if(
+        Objects.nonNull(pre_process_params_check) &&
+        !pre_process_params_check.test(should_be_open_parenthesis, remains.peek())
+      ) return;
+
+      // it should handle "(...)"
+      // @see OperatorHandler , condition is OpenParenthesis
+      recall(should_be_open_parenthesis, remains, operator_stack, nodes_stack);
+      if(!remains.hasNext())
+        throw new ASTProcessingException(name.value + " should has following code ");
+
+      // it should handle "{....}"
+      // @see BlockHandler
+      recall(remains.next(), remains, operator_stack, nodes_stack);
+
+      // after operations, nodesStack should have at least two elements ( condition and block )
+//      ASTNode should_be_block = nodes_stack.pop();
+//      if(!(should_be_block instanceof BlockNode))
+//        throw new ASTProcessingException("while should followed by block");
+//      if(nodes_stack.isEmpty())
+//        throw new ASTProcessingException("while loop has no condition");
+//      nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
+    }
   }
 
 
@@ -751,23 +805,19 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-
-      Token should_be_open_parenthesis = remains.next();
-      if( /* check if it is "while()"*/
-          !operatorEquals(Identifiers.OpenParenthesis, should_be_open_parenthesis) ||
-              operatorEquals(Identifiers.ClosingParenthesis, remains.peek())
-      )
-        throw new ASTProcessingException("while loop condition is empty at " + token.pos );
-
-      // it should handle "(...)"
-      // @see OperatorHandler , condition is OpenParenthesis
-      recall(should_be_open_parenthesis, remains, operatorStack, nodesStack);
-      if(!remains.hasNext())
-        throw new ASTProcessingException("while should has following code ");
-
-      // it should handle "{....}"
-      // @see BlockHandler
-      recall(remains.next(), remains, operatorStack, nodesStack);
+      handle_name_params_and_block(
+          token,
+          remains,
+          operatorStack,
+          nodesStack,
+          (next_token, next_next_token) -> {
+            if(/* check it is not "while()"*/
+              operatorEquals(Identifiers.OpenParenthesis, next_token) &&
+              !operatorEquals(Identifiers.ClosingParenthesis, next_next_token)
+            ) return true;
+            throw new ASTProcessingException("while loop condition is empty at " + token.pos);
+          }
+      );
 
       // after operations, nodesStack should have at least two elements ( condition and block )
       ASTNode should_be_block = nodesStack.pop();
