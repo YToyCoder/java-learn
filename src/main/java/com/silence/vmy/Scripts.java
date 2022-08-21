@@ -4,11 +4,10 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -31,18 +30,30 @@ public class Scripts {
    */
   public static void run(String[] script_files){
     for (String file_path : script_files)
-      one_line_handle_support(file_path);
+      do_with_file_input_scanner(
+          file_path,
+          eval_with_scanner()
+      );
   }
 
   private static void one_line_handle_support(String file){
-    AST.Evaluator evaluator = AST.evaluator(true);
-    try {
-      List<String> lines = Files.readAllLines(Path.of(file));
-      for(String line : lines)
-        Eval.eval(line, evaluator);
-    } catch (IOException e) {
+    do_with_file_input_scanner(file,eval_with_scanner());
+  }
+
+  public static void do_with_file_input_scanner(String file, Consumer<FileInputScanner> scanner_consumer){
+    try(Scripts.FileInputScanner scanner = new Scripts.FileInputScanner(file)) {
+      scanner_consumer.accept(scanner);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
     }
+  }
+
+  public static Consumer<Scripts.FileInputScanner> eval_with_scanner() {
+    return scanner -> AST.evaluator(true).eval(AST.build(scanner));
   }
 
   /**
