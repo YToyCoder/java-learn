@@ -336,4 +336,35 @@ public class ThreadTest {
     }
   }
 
+  @Test
+  public void interrupt_test(){
+    final Object interrupt_lock = new Object();
+    final Thread iner_thread = new Thread(() -> {
+      try{
+        synchronized(interrupt_lock){
+          Thread.sleep(100L);
+        }
+      }catch(InterruptedException ie){
+        ie.printStackTrace();
+      }
+    });
+    iner_thread.start();
+
+    sleep(80L);
+
+    iner_thread.interrupt();
+
+    sleep(100L);
+    System.out.println("end");
+  }
+
+  private void sleep(long time){
+    try{
+      Thread.sleep(time);
+    }catch(InterruptedException ie){
+      System.out.println(ie.getMessage());
+      ie.printStackTrace();
+    }
+  }
+
 }
