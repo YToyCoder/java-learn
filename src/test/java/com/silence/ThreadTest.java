@@ -310,4 +310,30 @@ public class ThreadTest {
     }
   }
 
+  @Test
+  public void local_variable_capture(){
+    final Thread thread = new Thread(() -> {
+      System.out.println(this.getClass().getSimpleName());
+    });
+    thread.start();
+
+    final Thread override_run = new Thread(){
+
+      @Override
+      public void run(){
+        System.out.println("before run");
+        System.out.println(this.getClass().getName());
+        System.out.println("after run");
+      }
+
+    };
+    override_run.start();
+
+    try{
+      Thread.sleep(1000L);
+    }catch(InterruptedException exception){
+      exception.printStackTrace();
+    }
+  }
+
 }
