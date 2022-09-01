@@ -87,6 +87,7 @@ public enum BinaryOps {
   }
 
   static Object shortStrategyApply(Object p1, Object p2, String name){
+
     if(p1 instanceof Number n1 && p2 instanceof Number n2){
       if(n1 instanceof Integer && n2 instanceof Integer ){
         return invoke(p1, p2, name, int.class);
@@ -97,15 +98,18 @@ public enum BinaryOps {
       }
     }else
       throw new OpsException("ops not support not Number type");
+
   }
 
   static double asDouble(Object obj){
+
     if(obj instanceof Integer p1int){
       return (double) p1int;
     }else if(obj instanceof Double p1double)
       return p1double;
     else 
       throw new OpsException("can't convert" + obj.getClass().getName() +" to double");
+
   }
 
   /**
@@ -117,20 +121,22 @@ public enum BinaryOps {
    * @return
    */
   static Object invoke( Object p1, Object p2, String name, Class<?> type){
+    
     MethodHandle method = switch (name){
       case "gt", "eq", "lt" -> Utils.getOpsStaticMethod(name, boolean.class, type, type);
       default -> Utils.getOpsStaticMethod(name, type, type, type);
     };
+
     try {
       return Objects.isNull(method) ? null : method.invoke(p1, p2);
     } catch (Throwable e) {
       e.printStackTrace();
       return null;
     }
+
   }
   
   public abstract Object apply(Object obj1, Object obj2);
-
 
   static boolean lt(int a, int b){
     return a < b;

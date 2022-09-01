@@ -6,8 +6,12 @@ import java.util.Scanner;
 public class Eval {
   // eval an expression , like 1 + 2 * (3 + 4)
   public static Object eval(final String expression){
-//    return EVALUATOR.eval( AST.build(Scanners.scan(expression)));
-    return AST.defaultTreeEvaluator().eval(AST.build(Scanners.scanner(expression)));
+    return 
+    AST.defaultTreeEvaluator().eval(
+      AST.build(
+        Scanners.scanner(expression)
+      )
+    );
   }
 
   private static final String notice = """
@@ -20,17 +24,18 @@ public class Eval {
 
   public static void repl(final AST.Evaluator evaluator){
     System.out.println(notice);
-//    Scripts.run_with_file_input_scanner();
     String input = "";
     Scanner scanner = new Scanner(System.in);
     while(!Objects.equals(input, "#")){
       System.out.print("> ");
       input = scanner.nextLine();
+
       if(input.trim().length() == 0 ) continue;
       if(Objects.equals(input, "#")){
         scanner.close();
         System.exit(0);
       }
+
       try{
         Object ans = eval(input, evaluator);
         if(Objects.nonNull(ans))
@@ -53,8 +58,5 @@ public class Eval {
         scanner -> evaluator.eval(AST.build(scanner))
     );
   }
-
-//  private static AST.VmyTreeEvaluator EVALUATOR = new AST.VmyTreeEvaluator();
-
 
 }

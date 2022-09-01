@@ -9,7 +9,12 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 
 public class Utils {
-  public static MethodHandle getStaticMethod(Class<?> refc, final String name, Class<?> ...types){
+  public static MethodHandle getStaticMethod(
+    Class<?> refc, 
+    final String name, 
+    Class<?> ...types
+  ){
+
     MethodType type = MethodType.methodType(types[0]);
     type = type.appendParameterTypes(Arrays.copyOfRange(types, 1, types.length));
     MethodHandle lookupMethod = null;
@@ -22,6 +27,7 @@ public class Utils {
       return null;
     }
     return lookupMethod;
+
   }
 
   public static MethodHandle getOpsStaticMethod(final String name, Class<?> ...types){
@@ -109,6 +115,7 @@ public class Utils {
   }
 
   public static VmyType get_obj_type(Object obj){
+
     if(obj instanceof Runtime.VariableWithName obj_variable)
       return obj_variable.getType();
     else if(obj instanceof String)
@@ -123,17 +130,24 @@ public class Utils {
       return VmyTypes.BuiltinType.Double;
     else
       throw new VmyRuntimeException("current version not support this type");
+
   }
 
   public static boolean is_mutable(String string){
+
     return switch (string) {
       case Identifiers.ConstDeclaration -> false;
       case Identifiers.VarDeclaration -> true;
       default -> throw new RuntimeException(string + " is not valid declaration identifier!");
     };
+
   }
 
-  public static Runtime.VariableWithName variable_with_name(String name, Runtime.Variable variable){
+  public static 
+  Runtime.VariableWithName variable_with_name(
+    String name, 
+    Runtime.Variable variable
+  ){
     return new Runtime.VariableWithName() {
 
       @Override
@@ -161,14 +175,21 @@ public class Utils {
         return variable.mutable();
       }
     };
+
   }
 
   // compare two function type
-  public static int function_type_compare(FunctionSupport.FunctionType a, FunctionSupport.FunctionType b){
+  public static int function_type_compare(
+    FunctionSupport.FunctionType a, 
+    FunctionSupport.FunctionType b
+  ){
+
     return concat_type_to_string(a.types()).compareTo(concat_type_to_string(b.types()));
+
   }
 
   private static String concat_type_to_string(List<VmyType> types){
+
     return types.stream()
         .map(VmyType::toString)
         .reduce(String::concat)
@@ -176,12 +197,20 @@ public class Utils {
   }
 
   public static String function_to_string(String name, FunctionSupport.FunctionType type){
+
     String params = "";
     List<VmyType> types = type.types();
     for(int i=1; i<types.size(); i++){
       params += type.param_type(i).toString();
     }
-    return String.format("%s(%s) : %s",name, params, type.types().size() > 0 ? type.param_type(0) : "any");
+
+    return String.format(
+      "%s(%s) : %s",
+      name, 
+      params, 
+      type.types().size() > 0 ? type.param_type(0) : "any"
+    );
+
   }
 
   public static void log(String msg){
@@ -202,20 +231,28 @@ public class Utils {
    * @return
    */
   public static String display_newline(String string) {
-    return string.replace("\n", "\\n").replace("\r", "\\r");
+    return string
+      .replace("\n", "\\n")
+      .replace("\r", "\\r");
   }
 
-  public static BiPredicate<Token, Token> next_two_token_should_not_be_empty_parenthesis_for_token(
+  public static 
+  BiPredicate<Token, Token> next_two_token_should_not_be_empty_parenthesis_for_token(
       Token token,
       String error_msg
   ){
+
     return (n, nn) -> {
       if(/* check it is not "while()"*/
           Objects.equals(Identifiers.OpenParenthesis, n.value) &&
           !Objects.equals(Identifiers.ClosingParenthesis, nn.value)
       ) return true;
-      throw new ASTProcessingException(String.format( error_msg + " (token start position %d)", token.pos));
+      throw new ASTProcessingException(String.format( 
+        error_msg + " (token start position %d)", 
+        token.pos
+      ));
     };
+
   }
 
 }

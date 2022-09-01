@@ -26,7 +26,10 @@ public class FunctionSupport {
   private static Callable lookup_function(String name, List<Object> params){
     FunctionType function_type = functionType(
             Unknown ,
-            params.stream().map(Utils::get_obj_type).collect(Collectors.toList()).toArray(new VmyType[0])
+            /* params' types */params.stream()
+              .map(Utils::get_obj_type)
+              .collect(Collectors.toList())
+              .toArray(new VmyType[0])
     );
     Callable func = BuiltinOps.builtinOps().get_function(
         name,
@@ -89,11 +92,14 @@ public class FunctionSupport {
     return new DefaultFuncTypeImpl(new ArrayList<>(List.of(types)), _tag);
   }
 
-  private record DefaultFuncTypeImpl(List<VmyType> types, int tag) implements FunctionType {
+  private record DefaultFuncTypeImpl(
+    List<VmyType> types, 
+    int tag
+  ) implements FunctionType {
 
     @Override
-      public VmyType param_type(int i) {
-        return i < types.size() ? types.get(i) : null;
-      }
+    public VmyType param_type(int i) {
+      return i < types.size() ? types.get(i) : null;
     }
+  }
 }

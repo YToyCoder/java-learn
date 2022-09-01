@@ -244,7 +244,12 @@ public class AST {
   }
 
 
-  private static abstract class BaseHandler implements TokenHandler, Utils.Recursive, TokenHistoryRecorderGetter{
+  private static 
+  abstract class BaseHandler 
+    implements TokenHandler, 
+    Utils.Recursive, 
+    TokenHistoryRecorderGetter
+  {
     private BaseHandler next;
 
     private BaseHandler head;
@@ -259,7 +264,12 @@ public class AST {
       head = _head;
     }
 
-    final protected void recall(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
+    final protected void recall(
+      Token token, 
+      Scanner remains, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    ){
       if(Objects.isNull(head))
         throw new Utils.RecursiveException("can't do recall head is not exists!");
       head.handle(token, remains, operatorStack, nodesStack);
@@ -275,15 +285,30 @@ public class AST {
     }
 
     @Override
-    final public void handle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack){
+    final public void handle(
+      Token token, 
+      Scanner remains, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    ){
       if(canHandle(token, operatorStack, nodesStack))
         doHandle(token, remains, operatorStack, nodesStack);
       else if(Objects.nonNull(next))
         next.handle(token, remains, operatorStack, nodesStack);
     }
 
-    public abstract boolean canHandle(Token token, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
-    public abstract void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack);
+    public abstract boolean canHandle(
+      Token token, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    );
+
+    public abstract void doHandle(
+      Token token, 
+      Scanner remains, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    );
 
   }
 
@@ -295,8 +320,19 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
-      nodesStack.add(token.tag == Token.DOUBLE_V ? new ValNode( Double.parseDouble(token.value) ) : new ValNode(Integer.parseInt(token.value)));
+    public void doHandle(
+      Token token, 
+      Scanner remains, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    ) {
+
+      nodesStack.add(
+        token.tag == Token.DOUBLE_V ? 
+        new ValNode( Double.parseDouble(token.value) ) : 
+        new ValNode( Integer.parseInt(token.value) )
+      );
+
     }
 
   }
@@ -318,6 +354,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       if(
           /* + */
           operatorEquals(Identifiers.ADD, token)||
@@ -326,6 +363,7 @@ public class AST {
           /* ++ */
           operatorEquals(Identifiers.Concat, token)
       ) {
+
         switch(token.value){
           case Identifiers.SUB:
             TokenHistoryRecorder recorder = getTokenRecorder();
@@ -341,7 +379,9 @@ public class AST {
                 throw new ASTProcessingException("went error when process negative number");
               String negative_value = token.value + should_be_number.value;
               nodesStack.add(
-                flag == 1 ? new NumberLiteral(Integer.parseInt(negative_value) ) : new NumberLiteral( Double.parseDouble(negative_value) )
+                flag == 1 ? 
+                new NumberLiteral(Integer.parseInt(negative_value) ) : 
+                new NumberLiteral( Double.parseDouble(negative_value) )
               );
               break;
             }
@@ -349,7 +389,9 @@ public class AST {
             operatorStack.add(token.value);
             break;
         }
+
       } else if(/* >, <, <= , >=, == */ Identifiers.BoolOperators.contains(token.value)){
+
         /**
          * <p>
          *   BoolOperators must be like this:
@@ -381,7 +423,9 @@ public class AST {
                 right
             )
         );
+
       } else if(/* a call like : print(1) */token.tag == Token.BuiltinCall){
+
         Token should_be_open_parenthesis;
         if(!remains.hasNext() || !operatorEquals(Identifiers.OpenParenthesis, (should_be_open_parenthesis = remains.next())))
           throw new ASTProcessingException("builtin call " + token.value + " should be followed with open parenthesis '('");
@@ -426,8 +470,8 @@ public class AST {
         operatorStack.pop(); // pop the "("
         params.addFirst(nodesStack.pop());
         nodesStack.add(new CallNode(token.value, new ListExpression(params)));
-      }
-      else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
+
+      } else if(operatorEquals(Identifiers.MULTI, token) || operatorEquals(Identifiers.DIVIDE, token) ){
 
         if(!remains.hasNext())
           throw new ASTProcessingException("*(multiply) doesn't have right side");
@@ -606,13 +650,6 @@ public class AST {
       // @see BlockHandler
       recall(remains.next(), remains, operator_stack, nodes_stack);
 
-      // after operations, nodesStack should have at least two elements ( condition and block )
-//      ASTNode should_be_block = nodes_stack.pop();
-//      if(!(should_be_block instanceof BlockNode))
-//        throw new ASTProcessingException("while should followed by block");
-//      if(nodes_stack.isEmpty())
-//        throw new ASTProcessingException("while loop has no condition");
-//      nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
     }
 
     /**
@@ -640,8 +677,15 @@ public class AST {
     }
 
     @Override
-    public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+    public void doHandle(
+      Token token, 
+      Scanner remains, 
+      Stack<String> operatorStack, 
+      Stack<ASTNode> nodesStack
+    ) {
+
       nodesStack.add(new IdentifierNode(token.value));
+
     }
   }
 
@@ -653,6 +697,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       // currently, it only needs to handle the string literal and bool literal
       // the Int and Double literal it handled by ValHandler
       int digit_flag;
@@ -669,6 +714,7 @@ public class AST {
         );
       } else /* string literal : "..." */
         nodesStack.add(new StringLiteral(token.value.substring(1, token.value.length() - 1)));
+
     }
 
   }
@@ -684,6 +730,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       // 1 get the variable name or a declaration
       ASTNode variable;
       if(
@@ -709,6 +756,7 @@ public class AST {
       }
       nodesStack.add(new AssignNode(variable, the_value));
       operatorStack.pop();
+
     }
   }
 
@@ -725,6 +773,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       Token identifier;
       if((identifier = remains.next()).tag != Token.Identifier)
         throw new ASTProcessingException("declaration has no right identifier " + identifier.value);
@@ -736,6 +785,7 @@ public class AST {
         nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value) , type.value));
       }else
         nodesStack.add(new DeclareNode(token.value, new IdentifierNode(identifier.value)));
+
     }
   }
 
@@ -815,6 +865,7 @@ public class AST {
 
     @Override
     public void doHandle(Token token, Scanner remains, Stack<String> operatorStack, Stack<ASTNode> nodesStack) {
+
       handle_name_params_and_block(
           token,
           remains,
@@ -827,13 +878,14 @@ public class AST {
       );
 
       // after operations, nodesStack should have at least two elements ( condition and block )
-      ASTNode should_be_block = get_next_node_as_block_node_or_throw(
+      BlockNode should_be_block = get_next_node_as_block_node_or_throw(
           nodesStack,
           () -> new ASTProcessingException("while should followed by block")
       );
       if(nodesStack.isEmpty())
         throw new ASTProcessingException("while loop has no condition");
-      nodesStack.add(new WhileLoop(nodesStack.pop(),(BlockNode) should_be_block));
+      nodesStack.add(new WhileLoop(nodesStack.pop(), should_be_block));
+
     }
   }
 

@@ -17,8 +17,15 @@ public class Global implements Frame {
 
   @Deprecated
   public void put(String _name, Object _value){
-    if( Objects.isNull(_value) || _value instanceof Number || _value instanceof Boolean || _value instanceof Character){
+    if( 
+      Objects.isNull(_value) || 
+      _value instanceof Number || 
+      _value instanceof Boolean || 
+      _value instanceof Character
+    ){
+
       primitives.put(_name, _value);
+
     }
   }
 
@@ -39,13 +46,20 @@ public class Global implements Frame {
 
   @Override
   public void put(String name, Runtime.Variable head, Object value) {
+
     long hash_code;
+
     if(Objects.nonNull(value))
-    if(Utils.isType(head, VmyTypes.BuiltinType.Table) && !objPool.exists(hash_code = value.hashCode())){
-      objPool.put(hash_code, value);
-      head.setValue(hash_code);
-    }else head.setValue(value);
+      if(
+        Utils.isType(head, VmyTypes.BuiltinType.Table) && 
+        !objPool.exists(hash_code = value.hashCode())
+      ){
+        objPool.put(hash_code, value);
+        head.setValue(hash_code);
+      }else head.setValue(value);
+
     variables.putIfAbsent(name, head);
+
   }
 
   @Override

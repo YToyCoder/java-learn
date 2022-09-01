@@ -36,11 +36,11 @@ public class Scripts {
       );
   }
 
-  private static void one_line_handle_support(String file){
-    do_with_file_input_scanner(file,eval_with_scanner());
-  }
+  public static void do_with_file_input_scanner(
+    String file, 
+    Consumer<FileInputScanner> scanner_consumer
+  ){
 
-  public static void do_with_file_input_scanner(String file, Consumer<FileInputScanner> scanner_consumer){
     try(Scripts.FileInputScanner scanner = new Scripts.FileInputScanner(file)) {
       scanner_consumer.accept(scanner);
     } catch (FileNotFoundException e) {
@@ -50,8 +50,13 @@ public class Scripts {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
+
   }
 
+  /**
+   * get a function that input is scanner, evaluate scanner content
+   * @return {@link Consumer }
+   */
   public static Consumer<Scripts.FileInputScanner> eval_with_scanner() {
     return scanner -> AST.evaluator(true).eval(AST.build(scanner));
   }
@@ -62,7 +67,12 @@ public class Scripts {
    * @param is_file
    * @param run_with_scanner
    */
-  public static Object run_with_file_input_scanner(String file_or_pure_string, boolean is_file, Function<FileInputScanner, Object> run_with_scanner){
+  public static Object run_with_file_input_scanner(
+    String file_or_pure_string, 
+    boolean is_file, 
+    Function<FileInputScanner, Object> run_with_scanner
+  ){
+
     try(FileInputScanner scanner = new FileInputScanner(file_or_pure_string, is_file)){
       return run_with_scanner.apply(scanner);
     } catch (FileNotFoundException e) {
@@ -70,6 +80,7 @@ public class Scripts {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
   }
 
   /**
@@ -77,7 +88,10 @@ public class Scripts {
    * @param file_or_pure_string
    * @param run_with_scanner
    */
-  public static Object run_with_file_input_scanner(String file_or_pure_string, Function<FileInputScanner, Object> run_with_scanner){
+  public static Object run_with_file_input_scanner(
+    String file_or_pure_string, 
+    Function<FileInputScanner, Object> run_with_scanner
+  ){
     return run_with_file_input_scanner(file_or_pure_string, true, run_with_scanner);
   }
 
@@ -90,13 +104,22 @@ public class Scripts {
    */
   public static class FileInputScanner implements Scanner, AutoCloseable {
 
-    public FileInputScanner(String file_path) throws FileNotFoundException {
+    public FileInputScanner(
+      String file_path
+    ) throws FileNotFoundException {
+
       this(file_path, true);
+
     }
 
-    public FileInputScanner(String file_path_or_pure_string, boolean is_file_path) throws FileNotFoundException {
+    public FileInputScanner(
+      String file_path_or_pure_string, 
+      boolean is_file_path
+    ) throws FileNotFoundException {
+
       this.file_path = file_path_or_pure_string;
       init(file_path_or_pure_string, is_file_path);
+
     }
 
     /**
@@ -104,16 +127,32 @@ public class Scripts {
      * @param filename_or_string_expression
      * @throws FileNotFoundException
      */
-    private void init(String filename_or_string_expression, boolean is_file_name) throws FileNotFoundException {
+    private void init(
+      String filename_or_string_expression, 
+      boolean is_file_name
+    ) throws FileNotFoundException {
+
       channel = getChannel(filename_or_string_expression, is_file_name);
       buffer = ByteBuffer.wrap(new byte[1028]);
       buffer.flip();
       pos = 0;
       cs = new LinkedList<>();
       tokens = new LinkedList<>();
+
     }
 
-    private ReadableByteChannel getChannel(String filename_or_string_expression, boolean is_name) throws FileNotFoundException {
+    /**
+     * get {@link ReadableByteChannel} from file or pure string
+     * @param filename_or_string_expression
+     * @param is_name
+     * @return {@link ReadableByteChannel }
+     * @throws FileNotFoundException
+     */
+    private ReadableByteChannel getChannel(
+      String filename_or_string_expression, 
+      boolean is_name
+    ) throws FileNotFoundException {
+
       if(is_name){
         origin = new RandomAccessFile(filename_or_string_expression, "rw");
         return origin.getChannel();
@@ -121,6 +160,7 @@ public class Scripts {
         arr_origin = new ByteArrayInputStream(filename_or_string_expression.getBytes());
         return Channels.newChannel(arr_origin);
       }
+
     }
 
     private ReadableByteChannel channel;
@@ -218,7 +258,11 @@ public class Scripts {
               Identifiers.commonIdentifiers.contains(peek_char())
             ) handle_operator();
             else
-              throw new LexicalException(pos(), file_path, "can't handle char : " + peek_char() + " at position " + pos);
+              throw new LexicalException(
+                /* position */pos(), 
+                /* file */file_path, 
+                "can't handle char : " + peek_char() + " at position " + pos
+              );
         }
       }
     }
@@ -243,8 +287,10 @@ public class Scripts {
      * handle the string literal , like : "string literal"
      */
     private void handle_string_literal() {
+
       record_position();
       next_char(); // remove "
+
       StringBuilder builder = new StringBuilder().append('"');
       while(
         has_char() &&
@@ -253,13 +299,25 @@ public class Scripts {
         // not end of line
         !is_end_of_line()
       ) builder.append(next_char());
-      if(!has_char() || !Utils.equal(next_char(), Identifiers.Quote)) /* try to remove " */
+
+      if(
+        !has_char() || 
+        !Utils.equal(next_char(), Identifiers.Quote)
+      ) /* try to remove " */
         throw new LexicalException(
           get_record(),
           file_path,
           "string literal has no closing quote"
         );
-      tokens.add(new Token(Token.Literal, builder.append('"').toString(), get_record()));
+
+      tokens.add(
+        new Token(
+          Token.Literal, 
+          builder.append('"').toString(), 
+          get_record()
+        )
+      );
+
     }
 
     /**
@@ -267,17 +325,27 @@ public class Scripts {
      *    1 , 2.0, 100
      */
     private void handle_digit_literal() {
-      final StringBuilder builder = new StringBuilder();
       record_position();
+
+      final StringBuilder builder = new StringBuilder();
       while( has_char() && Character.isDigit(peek_char()) )
         builder.append(next_char());
+
       if( has_char() && Utils.equal(peek_char(), Identifiers.Dot)){
         // double
         builder.append(next_char());
         while( has_char() && Character.isDigit(peek_char()) )
           builder.append(next_char());
       }
-      tokens.add(new Token(Token.Literal, builder.toString(), get_record()));
+
+      tokens.add(
+        new Token(
+          Token.Literal, 
+          builder.toString(), 
+          get_record()
+        )
+      );
+
     }
 
     /**
@@ -285,9 +353,13 @@ public class Scripts {
      */
     private void handle_identifier_kind() {
       record_position();
+
       final StringBuilder builder = new StringBuilder();
-      while(has_char() && Identifiers.identifiers.contains(peek_char()))
-        builder.append(next_char());
+      while(
+        has_char() && 
+        Identifiers.identifiers.contains(peek_char())
+      ) builder.append(next_char());
+
       final String identifier = builder.toString();
       tokens.add(
         new Token(
@@ -296,10 +368,12 @@ public class Scripts {
           get_record()
         )
       );
+
     }
 
     private void handle_operator() {
       record_position();
+
       final StringBuilder builder = new StringBuilder();
       while (
         has_char() &&
@@ -308,32 +382,58 @@ public class Scripts {
           Identifiers.commonIdentifiers.contains(peek_char())
         )
       ) builder.append(next_char());
+
       final String operator = builder.toString();
-      tokens.add(new Token(get_identifier_kind(operator), operator, get_record()));
+      tokens.add(
+        new Token(
+          get_identifier_kind(operator), 
+          operator, 
+          get_record()
+        )
+      );
+
     }
 
     private int get_identifier_kind(String identifier){
+
       return switch (identifier){
-        case /* let , val */Identifiers.ConstDeclaration, Identifiers.VarDeclaration -> Token.Declaration;
+        case /* let , val */
+          Identifiers.ConstDeclaration, 
+          Identifiers.VarDeclaration -> Token.Declaration;
+
         case /* = */ Identifiers.Assignment -> Token.Assignment;
+
         case /* while, if, elif, else */ 
-        Identifiers.While, 
-        Identifiers.If, 
-        Identifiers.Elif, 
-        Identifiers.Else -> Token.Builtin;
-        case /* true false */ Identifiers.True, Identifiers.False -> Token.Literal;
+          Identifiers.While, 
+          Identifiers.If, 
+          Identifiers.Elif, 
+          Identifiers.Else -> Token.Builtin;
+
+        case /* true false */ 
+          Identifiers.True, 
+          Identifiers.False -> Token.Literal;
+
         default -> {
           if(Identifiers.builtinCall.contains(identifier)) yield Token.BuiltinCall;
           yield Token.Identifier;
         }
       };
+
     }
 
     /**
      * handle builtin character which is single character
      */
     private void handle_single_char_identifier(){
-      tokens.add(new Token(Token.Identifier, Character.toString(next_char()), pos()));
+
+      tokens.add(
+        new Token(
+          Token.Identifier, 
+          Character.toString(next_char()), 
+          pos()
+        )
+      );
+
     }
 
     /**
@@ -356,31 +456,48 @@ public class Scripts {
      * remove the black between two token
      */
     private void handle_black() {
-      while(has_char() && Utils.equal(peek_char(), ' ')  ){
-        next_char();
-      }
+
+      while(
+        has_char() && 
+        Utils.equal(peek_char(), ' ')  
+      ) next_char();
+
     }
 
     private boolean is_end_of_line(){
-      if(has_char() && Utils.equal( cs.peek() , '\n'))
-        return true;
+
+      if(
+        has_char() && 
+        Utils.equal( cs.peek() , '\n')
+      ) return true;
+
       // check if next two char is "\r\n"
       char next_char = next_char(); // move out
       boolean end_of_line = (Utils.equal(next_char, '\r') && Utils.equal(peek_char(), '\n'));
       cs.addFirst(next_char); // set back
       return end_of_line;
+
     }
 
     private void handle_end_of_line(){
       record_position();
+
       StringBuilder builder = new StringBuilder();
       if(!Utils.equal(peek_char() /* may be '\n' or '\r\n'*/, '\n')){
         builder.append(next_char()).append(next_char());
       }else builder.append(next_char());
-      tokens.add(new Token(Token.NewLine, builder.toString(), pos()));
+
+      tokens.add(
+        new Token(
+          Token.NewLine, 
+          builder.toString(), 
+          pos()
+        )
+      );
     }
 
     private boolean has_char() {
+
       if(!cs.isEmpty() || buffer.hasRemaining())
         return true;
       if(end_of_file) /* already at end_of_file */
@@ -392,10 +509,15 @@ public class Scripts {
         end_of_file = channel.read(buffer) == 0;
       }catch (IOException e){
         e.printStackTrace();
-        throw new LexicalException(pos(), file_path, e.getMessage());
+        throw new LexicalException(
+          pos(), 
+          file_path, 
+          e.getMessage()
+        );
       }
       buffer.flip();
       return buffer.hasRemaining();
+
     }
 
     private char peek_char(){
@@ -418,7 +540,11 @@ public class Scripts {
     }
 
     @Override
-    public boolean register(TokenHistoryRecorder recorder, boolean force){
+    public boolean register(
+      TokenHistoryRecorder recorder, 
+      boolean force
+    ){
+
       if(force){
         this.token_history_recorder = recorder;
         return true;
@@ -429,14 +555,17 @@ public class Scripts {
 
       token_history_recorder = recorder;
       return true;
+
     }
 
     @Override
     public void close() throws Exception {
+
       if(Objects.nonNull(origin))
         origin.close();
       if(Objects.nonNull(arr_origin))
         arr_origin.close();
+
     }
   }
 }
