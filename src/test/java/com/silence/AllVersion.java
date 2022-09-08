@@ -46,5 +46,20 @@ public class AllVersion {
     return 4;
   }
 
+  @Test
+  public void primitive_test(){
+    int_param(1);
+    // int_param(Integer.valueOf(1));
+  }
+
+
+  private void int_param(int i){
+    System.out.println("int");
+  }
+
+  private void int_param(Integer i){
+    System.out.println("Integer");
+  }
+
 
 }
