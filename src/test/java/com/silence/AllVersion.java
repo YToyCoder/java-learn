@@ -61,5 +61,11 @@ public class AllVersion {
     System.out.println("Integer");
   }
 
+  private void primitive_value(){
+    byte a = 1 + 1;
+    int b = 129;
+    byte c = 127;
+    byte k = (byte)(a + c);
+  }
 
 }
