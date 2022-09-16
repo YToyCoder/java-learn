@@ -1,10 +1,12 @@
 package com.silence;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -101,6 +103,24 @@ public class AllVersion {
     public Exts(String _String){
       super();
       System.out.println("Exts-constructor");
+    }
+  }
+
+  @Test
+  public void list_test(){
+    List<Integer> lt = new ArrayList<>(
+      IntStream
+      .range(0, 10)
+      .mapToObj(Integer::valueOf)
+      .toList()
+    );
+    var iter = lt.iterator();
+    while(iter.hasNext()){
+      Integer el = iter.next();
+      if(el % 3 == 0){
+        iter.remove();
+        // lt.remove(el) 将会报错,由于modCount
+      }
     }
   }
 }
