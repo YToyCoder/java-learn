@@ -68,4 +68,39 @@ public class AllVersion {
     byte k = (byte)(a + c);
   }
 
+  @Test
+  public void static_code_run_order(){
+    new Exts("");
+  }
+
+
+  static class Base {
+    static {
+      System.out.println("base");
+    }
+
+    public Base(){
+      System.out.println("base-constructor");
+    }
+
+    public Base(String _String){
+      super();
+      System.out.println("base-constructor");
+    }
+  }
+
+  static class Exts extends Base {
+    static {
+      System.out.println("Exts");
+    }
+
+    public Exts() {
+      System.out.println("Exts-constructor");
+    }
+
+    public Exts(String _String){
+      super();
+      System.out.println("Exts-constructor");
+    }
+  }
 }
