@@ -28,7 +28,7 @@ public class TestForLoop {
 		// for(var v : ls) System.out.println(v);
 	}
 	
-	public static class AIterable implements Iterable {
+	public static class AIterable implements Iterable<Integer> {
 		
 		private final int max;
 		
@@ -37,11 +37,11 @@ public class TestForLoop {
 		}
 
 		@Override
-		public Iterator iterator() {
+		public Iterator<Integer> iterator() {
 			return new Iter(max);
 		}
 		
-		static class Iter implements Iterator {
+		static class Iter implements Iterator<Integer> {
 			
 			private int val;
 
@@ -55,7 +55,7 @@ public class TestForLoop {
 			}
 
 			@Override
-			public Object next() {
+			public Integer next() {
 				val--;
 				return val;
 			}
