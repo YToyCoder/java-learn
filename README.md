@@ -229,45 +229,44 @@ Java将引用分为`强引用`、`软引用`、`弱引用`、`虚引用`.
 - 弱引用是用来描述那些非必要的对象，它的强度比软引用更弱一些。如果垃圾收集器在某个时间点上确定一个对象是若可达(只存在弱引用)，垃圾回收器就会回收该对象。
 
 ```java
-
-@Test
-public void test(){
-  System.out.println("start creating reference ...");
-  WeakReference<Object> weakReference = new WeakReference<Object>(new Object());
-  Object strongReference = new Object();
-  System.out.println("ending creating reference");
-  System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
-  System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
-  System.out.println("starting call gc");
-  System.gc();
-  try {
-    Thread.sleep(100);
-  } catch (InterruptedException e) {
-    log.error("sleep error", e);
+public class Main {
+  @Test
+  public void test() {
+    System.out.println("start creating reference ...");
+    WeakReference<Object> weakReference = new WeakReference<Object>(new Object());
+    Object strongReference = new Object();
+    System.out.println("ending creating reference");
+    System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+    System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
+    System.out.println("starting call gc");
+    System.gc();
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException e) {
+      log.error("sleep error", e);
+    }
+    System.out.println("gc finish");
+    System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
+    System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
   }
-  System.out.println("gc finish");
-  System.out.println(String.format("weak-reference is null ? %b", Objects.isNull(weakReference.get())));
-  System.out.println(String.format("strong-reference is null ? %b", Objects.isNull(strongReference)));
 }
-
 ```
 
 *运行打印结果*:
 
 > start creating reference ...
-
+>
 > ending creating reference
-
+>
 > weak-reference is null ? false
-
 > strong-reference is null ? false
-
+>
 > starting call gc
-
+>
 > gc finish
-
+>
 > weak-reference is null ? true
-
+>
 > strong-reference is null ? false
 
 **WeakHashMap**
@@ -281,37 +280,40 @@ WeakHashMap的弱键特性利用了`WeakReference`的特性，`WeakHashMap`的`E
 在WeakHashMap里有一个函数叫`expungeStaleEntries`
 
 ```java
-// WeakHashMap#expungeStaleEntries
-/**
- * Expunges stale entries from the table.
- */
-private void expungeStaleEntries() {
-  for (Object x; (x = queue.poll()) != null; ) {
-    synchronized (queue) {
-      @SuppressWarnings("unchecked")
-        Entry<K,V> e = (Entry<K,V>) x;
-      int i = indexFor(e.hash, table.length);
+public class Main {
+  
+    // WeakHashMap#expungeStaleEntries
+    /**
+     * Expunges stale entries from the table.
+     */
+    private void expungeStaleEntries() {
+      for (Object x; (x = queue.poll()) != null; ) {
+        synchronized (queue) {
+          @SuppressWarnings("unchecked")
+            Entry<K,V> e = (Entry<K,V>) x;
+          int i = indexFor(e.hash, table.length);
 
-      Entry<K,V> prev = table[i];
-      Entry<K,V> p = prev;
-      while (p != null) {
-        Entry<K,V> next = p.next;
-        if (p == e) {
-          if (prev == e)
-            table[i] = next;
-          else
-            prev.next = next;
-          // Must not null out e.next;
-          // stale entries may be in use by a HashIterator
-          e.value = null; // Help GC
-          size--;
-          break;
+          Entry<K,V> prev = table[i];
+          Entry<K,V> p = prev;
+          while (p != null) {
+            Entry<K,V> next = p.next;
+            if (p == e) {
+              if (prev == e)
+                table[i] = next;
+              else
+                prev.next = next;
+              // Must not null out e.next;
+              // stale entries may be in use by a HashIterator
+              e.value = null; // Help GC
+              size--;
+              break;
+            }
+            prev = p;
+            p = next;
+          }
         }
-        prev = p;
-        p = next;
       }
     }
-  }
 }
 ```
 
@@ -446,7 +448,7 @@ for-in 循环语句是Java 1.5的新特征之一，在遍历数组、集合方�
 
 `for (type var : collection) {`
 
-`  block;`
+`block;`
 
 `}`
 

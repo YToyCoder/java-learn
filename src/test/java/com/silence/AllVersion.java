@@ -1,5 +1,7 @@
 package com.silence;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,6 +123,34 @@ public class AllVersion {
         iter.remove();
         // lt.remove(el) 将会报错,由于modCount
       }
+    }
+  }
+
+  /**
+   * 测试通过反射获取构造函数
+   */
+  @Test
+  public void constructors() {
+    Class<Constructors> constructors_class = Constructors.class;
+    try {
+      Constructor<Constructors> constructor =  constructors_class.getConstructor();
+      constructor.newInstance();
+    } catch (
+        NoSuchMethodException |
+        InvocationTargetException |
+        InstantiationException |
+        IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static class Constructors {
+    public Constructors(){
+      System.out.println("No args constructor");
+    }
+
+    public Constructors(String str){
+      System.out.println("str arg constructor");
     }
   }
 }
