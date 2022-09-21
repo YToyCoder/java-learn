@@ -4,8 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 
+import java.sql.Array;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -365,6 +369,48 @@ public class ThreadTest {
       System.out.println(ie.getMessage());
       ie.printStackTrace();
     }
+  }
+
+  @Test
+  public void thread_pool_Executor(){
+    Executor executor = new ThreadPoolExecutor(6, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), (run, pool) -> System.out.println("reject"));
+    IntStream.range(0, 10).forEach(i -> {
+      executor.execute(() -> {
+        System.out.println("run : " + i);
+      });
+    });
+    sleep(1000);
+  }
+
+  @Test
+  public void thread_pool_ExecutorService(){
+    ExecutorService executor = new ThreadPoolExecutor(6, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), (run, pool) -> System.out.println("reject"));
+    IntStream.range(0, 10).forEach(i -> {
+      Holder<String> holder = new Holder<>();
+      try {
+        print_current_time("start");
+        Holder<String> res = executor.submit(() -> {
+          print_current_time("start-in");
+          sleep(100);
+          holder.val = "Hello";
+          sleep(50);
+          print_current_time("end-in");
+        }, holder).get();
+        System.out.println(">> get result is : " + res.val);
+        print_current_time("end");
+        System.out.println();
+      } catch (InterruptedException | ExecutionException e) {
+        throw new RuntimeException(e);
+      }
+    });
+  }
+
+  static void print_current_time(String tail){
+    System.out.printf("%-20d -- %s\n", System.currentTimeMillis(), tail);
+  }
+
+  static class Holder<T> {
+    T val;
   }
 
 }
